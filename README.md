@@ -15,8 +15,8 @@ On one 64 GiB Apple M1 Max system, the pinned artifact:
 
 - executed the complete 63.4 GB GPT-OSS 120B MXFP4 checkpoint while avoiding
   catastrophic swap;
-- preserved a targeted 3/3 hidden coding gate against hosted and copied local
-  controls;
+- preserved a targeted 3/3 coding gate that was held out during the original
+  run and is now disclosed with the artifact;
 - exposed only selected expert ranges to Metal through page-aligned direct
   host-memory views;
 - produced a bit-exact 1,128-token trajectory with grouped dispatch and async
@@ -27,8 +27,11 @@ On one 64 GiB Apple M1 Max system, the pinned artifact:
 These are bounded results from one machine and one model. They do **not** show
 frontier parity, general production readiness, universal model quality, or a
 counterbalanced publication-grade performance result. Decode remained near
-three tokens/second in the final gate and the full qualification suite has not
-yet been rerun on the final milestone.
+three tokens/second in the final gate. The full qualification suite has been
+rerun on the final runtime at low and medium reasoning effort, but those
+single warm-state runs are diagnostic evidence rather than a publication-grade
+quality or performance estimate; see the
+[governed qualification boundary](docs/GOVERNED_MODEL_HARNESS.md).
 
 Read [the direct-view result](docs/EXPERT_CACHE_ZERO_COPY_RESULTS.md),
 [latency ceilings and prefetch result](docs/EXPERT_CACHE_CEILING_RESULTS.md),
@@ -46,6 +49,11 @@ the work.
 - `test/` — deterministic unit and replay tests.
 - `evidence/` — committed, machine-readable decision-grade result bundles.
 - `docs/REPRODUCIBILITY.md` — end-to-end experimental workflow.
+- `docs/GOVERNED_MODEL_HARNESS.md` — raw-model, evaluator-audit, and
+  product-harness result boundaries.
+- `docs/HOSTED_CONTROL.md` — matched Bedrock GPT-OSS qualification control.
+- `docs/SECOND_CHECKPOINT_20B_RESULTS.md` — partial same-family portability
+  result and unresolved stock/direct boundary.
 - `paper/` — manuscript, claim ledger, registered protocol, and result macros.
 - `artifact/` — machine-readable experiment matrix and publication manifest.
 - `ROADMAP.md` — publication gates, production architecture, and retained
@@ -62,19 +70,35 @@ second-checkpoint portability study close.
 npm run paper:check
 npm run artifact:validate
 npm run experiment:publication
+npm run experiment:second-checkpoint
 ```
 
-The last command prints the registered blocks without starting inference. A
+The publication command prints the registered blocks without starting
+inference. The second-checkpoint command prints the pinned official GPT-OSS
+20B MXFP4 artifact, download command, four correctness arms, and explicit
+claim boundary without downloading or running anything. A
 live block requires explicit execution and clean-boot confirmations; see
 [`paper/EXPERIMENT_PROTOCOL.md`](paper/EXPERIMENT_PROTOCOL.md). A 32 GiB Mac is
 an optional physical-hardware replication, not something this 64 GiB host can
 legitimately emulate for a hardware claim.
+
+The 2026-07-31 20B gate completed all four arms. Direct, grouped, and
+prefetch-6 are canonical-response equivalent, but stock differs from the
+custom path; the gate therefore remains active. See the
+[20B result boundary](docs/SECOND_CHECKPOINT_20B_RESULTS.md).
 
 For a physical 16 GiB Apple Silicon host, `experiment:low-memory` provides a
 separate, protected one-token feasibility gate. It aborts on bounded swap,
 memory-pressure, or wall-time limits and must not be used as a 32 GiB claim.
 Follow the [physical 16 GiB M1 Pro runbook](docs/LOW_MEMORY_16G_RUNBOOK.md)
 without skipping directly to quality or throughput testing.
+
+The 2026-07-31 single-host experimental arm passed protected one-token,
+eight-token, and natural 50-token completion gates after disabling automatic
+fit and selecting all GPU layers explicitly. Peak session swap was 256 KiB.
+This is a combined experimental-configuration result, not a stock-runtime or
+multi-boot reproducibility claim; see the
+[16 GB results and evidence boundary](docs/LOW_MEMORY_16G_RESULTS.md).
 
 ## Quick validation
 
@@ -117,7 +141,9 @@ published evidence remains compatible with the original artifact.
 
 ## License and attribution
 
-ExpertCache-authored code is Apache-2.0. The runtime patch applies to the
+ExpertCache-authored code is Apache-2.0. The manuscript source and compiled
+paper are separately licensed CC BY 4.0; see
+[`paper/LICENSE.md`](paper/LICENSE.md). The runtime patch applies to the
 MIT-licensed `llama.cpp`; its license is preserved in
 [`third_party/llama.cpp-LICENSE.txt`](third_party/llama.cpp-LICENSE.txt).
 See [`NOTICE`](NOTICE) and [`PROVENANCE.md`](PROVENANCE.md).

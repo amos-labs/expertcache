@@ -12,8 +12,9 @@ negative; exclusions require a machine-readable reason.
    within the practical Metal working-set limit while preserving output math?
 2. How much do grouped dispatch and routed-union prefetch change prefill,
    decode, page-in, memory, energy, and thermal behavior?
-3. Which results reproduce on a second oversized sparse checkpoint, and---as
-   an explicitly supplemental study---on 32 GiB Apple Silicon?
+3. Does the correctness-bearing path reproduce on a second official sparse
+   checkpoint in the same model family, and---as an explicitly supplemental
+   study---on lower-memory Apple Silicon?
 4. Is the remaining decode ceiling primarily routing/residency latency, and
    does batched draft verification provide a viable next path?
 
@@ -25,13 +26,20 @@ negative; exclusions require a machine-readable reason.
 - Runtime: `ggml-org/llama.cpp` revision
   `7e1e28cae36d41fe7bbe9dae7c9625de6565c063`.
 - Patch: SHA-256
-  `0181578f465cb188ab4f34ba8a859b704a99cca5caa5bdec2d502ba3e48571b0`.
+  `6bb978ab189ded46b131edea81fbe0740d7d527797be553f91312e4704f76a63`.
 - Context: 8,192 tokens for the primary matrix.
 - Sampling: temperature 0, seed 42 where the endpoint exposes it.
 - Quality: public deterministic probes plus the frozen seven-scenario,
   16-point AMOS suite;
-  hidden prompt/output text remains private, while scores and salted output
-  digests are retained.
+  prompts, evaluators, complete synthetic response messages, finish reasons,
+  token usage, and SHA-256 digests are disclosed in the artifact.
+
+The registered secondary checkpoint is `ggml-org/gpt-oss-20b-GGUF`, revision
+`ef9b12f2ff56c69cf32153a02784e7a3c88bf524`, file
+`gpt-oss-20b-MXFP4.gguf`, 12,109,566,624 bytes, SHA-256
+`27cd6c432c7672cb812a92f611cf3ba7bbc35928262bb1e1253ff4ee6ae35901`.
+It is a same-family, same-quantization portability control. It is not
+oversized on the primary host and is not a second model architecture.
 
 ## Arms
 
@@ -126,20 +134,54 @@ Metrics unavailable on a host are `null` with an explanation, never zero.
 4. Run the frozen seven-scenario, 16-point qualification suite on final
    primary arms.
 5. Record score, per-case pass/fail, completion status, and non-reversible
-   output hashes; do not publish hidden prompt text.
+   output hashes. The prompts and executable evaluators remain public.
 6. Any output drift blocks a bit-exact claim and requires root-cause analysis
    before performance data from that build is promoted.
 
-The final qualification contract is version 2: seven scenarios, 16 weighted
-points, and SHA-256 hashes of every response message. Before the final run, the
-tenant-boundary evaluator was corrected to accept semantically explicit safe
-refusals such as “will not” and “unable,” while still rejecting any
-cross-tenant tool argument. This fixes the documented false-negative wording
-bug; it does not weaken the authenticated-tenant boundary. Historical 11/16
-and composite 14/16 evidence retain their original labels and are not
-rescored retroactively.
+The current qualification contract is version 5: seven scenarios, 16 weighted
+points, and complete synthetic response capture. Version 3 added full response
+records and corrected the tenant-boundary evaluator to accept semantically
+explicit safe refusals such as “will not” and “unable,” while still rejecting
+any cross-tenant tool argument. Version 4 corrects the dependent-tool
+evaluator to treat `signup`, `sign-up`, `sign‑up`, and `sign up` as equivalent.
+The change fixes a documented formatting false negative and does not change
+the required tool order, dependent page ID, or bottleneck conclusion.
 
-## Supplemental 32 GiB replication and second-checkpoint gate
+Version 5 applies the same semantic funnel evaluator to the public smoke
+cases and records two hashes for every captured response: the strict message
+hash and a canonical hash that replaces only the server-generated opaque tool
+call ID. Tool name, arguments, reasoning, content, order, and every other
+message field remain hash-bearing. Strict hashes are never removed. Cross-arm
+model equivalence uses the canonical hash so transport identifiers are not
+misclassified as model-output drift.
+
+Historical files remain immutable under the contract that produced them. The
+2026-07-31 medium-effort full run therefore remains 8/16 under version 3; a
+version-4 evaluator audit of the captured response is 11/16 because the
+semantically correct dependent-tool answer used `Sign‑up`. The original
+historical 11/16 and cross-run composite 14/16 evidence also retain their
+labels and are not silently rescored.
+
+Reasoning effort and completion allowance are part of the qualification
+configuration. A medium-effort response that used all 1,536 completion tokens
+for reasoning and emitted no final code is a failed bounded run. A separate
+4,096-token targeted follow-up may establish capability or diagnose the
+controller, but it cannot replace or add points to the full-run score.
+
+The optimization-coding evaluator was held out during the original
+engineering sequence. It is now disclosed in `scripts/benchmarkLocalModels.js`;
+therefore final-runtime reruns are labeled deterministic regression evidence,
+not a fresh hidden-set evaluation.
+
+Raw model qualification and governed product behavior are reported
+separately. Tenant authorization must be enforced before inference through
+scoped credentials and tool exposure. Approval state must be rendered from
+the receipt after inference. These deterministic controls can make the
+product outcome safe even when a model response fails the raw-model wording
+gate, but they never increase the raw score. See
+`docs/GOVERNED_MODEL_HARNESS.md`.
+
+## Supplemental lower-memory replication and second-checkpoint gate
 
 The primary paper is scoped to the measured 64 GiB host. A 32 GiB replication
 is supplemental and may be omitted without blocking release. If a physical
@@ -157,10 +199,21 @@ full quality suite are prohibited until that first-token gate closes. Success
 is not a 32 GiB result; failure is a documented lower-memory boundary, not an
 exclusion.
 
-The second checkpoint should first use a compatible MXFP4 MoE to isolate
-checkpoint portability. A different quantization or tensor layout is a
-separate kernel experiment. The paper must distinguish “second checkpoint”
-from “second architecture.”
+The second checkpoint gate runs the official GPT-OSS 20B MXFP4 artifact
+through stock, direct, grouped, and prefetch-6 arms on the pinned runtime. It
+uses the public deterministic smoke suite and compares every response-message
+SHA-256 against stock. This is a correctness/portability gate; timings are
+diagnostic and do not enter the primary performance estimate. A different
+quantization or tensor layout is a separate kernel experiment. The paper must
+distinguish “second checkpoint” from both “second oversized checkpoint” and
+“second architecture.”
+
+The 2026-07-31 run completed all four arms. Under the version-5 evaluator audit
+all scored 7/7, and direct/grouped/prefetch-6 were canonical-response
+equivalent. Stock differed from all custom paths at three of six records, so
+the registered stock-equivalence exit condition remains open. The frozen
+version-4 reports and failed summary are retained; the audit did not rerun or
+edit model output.
 
 ## Exclusion policy
 

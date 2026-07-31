@@ -1,0 +1,395 @@
+{
+  "schema": "expertcache.sanitized-evidence",
+  "version": 1,
+  "label": "gate-state",
+  "source": {
+    "filename": "gate-state.json",
+    "sha256": "46ed516cc0342b6ab3ccfa7d46673703c24fb420b903f6d012593b20eacb56d2"
+  },
+  "report": {
+    "schema": "expertcache.second-checkpoint-gate",
+    "version": 1,
+    "purpose": "same-family sparse-checkpoint portability",
+    "claim_boundary": "This checkpoint tests portability across official GPT-OSS MXFP4 checkpoint sizes. It is not oversized on the primary host and is not evidence for a second model architecture.",
+    "started_at": "2026-07-31T15:12:11.552Z",
+    "model_artifact": {
+      "schema": "expertcache.model-artifact",
+      "version": 1,
+      "id": "gpt-oss-20b-mxfp4",
+      "repository": "ggml-org/gpt-oss-20b-GGUF",
+      "revision": "ef9b12f2ff56c69cf32153a02784e7a3c88bf524",
+      "filename": "gpt-oss-20b-MXFP4.gguf",
+      "size_bytes": 12109566624,
+      "sha256": "27cd6c432c7672cb812a92f611cf3ba7bbc35928262bb1e1253ff4ee6ae35901",
+      "license": "Apache-2.0",
+      "role": "same-family sparse-checkpoint portability control",
+      "claim_boundary": "This checkpoint tests portability across official GPT-OSS MXFP4 checkpoint sizes. It is not oversized on the primary host and is not evidence for a second model architecture."
+    },
+    "verified_model_sha256": "27cd6c432c7672cb812a92f611cf3ba7bbc35928262bb1e1253ff4ee6ae35901",
+    "runtime": "$WORKTREE/.cache/runtime/llama.cpp-v5/build-expertcache-metal/bin/llama-server",
+    "runs": [
+      {
+        "arm": "stock",
+        "started_at": "2026-07-31T15:12:11.555Z",
+        "command": [
+          "/opt/homebrew/Cellar/node@24/24.18.0/bin/node",
+          "$WORKTREE/scripts/runLocal120BBaseline.js",
+          "--model",
+          "$WORKTREE/.cache/models/gpt-oss-20b-MXFP4.gguf",
+          "--model-spec",
+          "$WORKTREE/artifact/model-specs/gpt-oss-20b-mxfp4.json",
+          "--model-alias",
+          "gpt-oss-20b",
+          "--server",
+          "$WORKTREE/.cache/runtime/llama.cpp-v5/build-expertcache-metal/bin/llama-server",
+          "--output-dir",
+          "$WORKTREE/output/second-checkpoint/v5-20b-portability-ea82da9-2026-07-31/stock",
+          "--context",
+          "8192",
+          "--batch",
+          "64",
+          "--ubatch",
+          "64",
+          "--fit-target-mib",
+          "1024",
+          "--no-warmup",
+          "--probe-max-tokens",
+          "16",
+          "--suite",
+          "smoke",
+          "--max-tokens",
+          "768",
+          "--request-timeout-seconds",
+          "1200",
+          "--sample-every-ms",
+          "2000",
+          "--max-swap-growth-gib",
+          "2",
+          "--minimum-free-percent",
+          "5",
+          "--max-run-seconds",
+          "5400"
+        ],
+        "status": "complete",
+        "completed_at": "2026-07-31T15:13:12.380Z",
+        "exit_status": 0,
+        "signal": null,
+        "result": {
+          "score": 6,
+          "maximum": 7,
+          "response_output_sha256": [
+            "5c2294175f3075b2086af9b14008d2338e4e8358b6321c950f6bce8ca97dcb62",
+            "e8af40520c244f9e3c03881cef9ed73a8f1cd67a8649fc154a694488d8013c98",
+            "8808ea5e6f77168fca1d054f2fa9ac6a51c52abf0359b693aa0a0556b7ffb154",
+            "996c06f98678d9c486d93500edd9bc9c9986e5b828af94f3aaa730e4ace76e73",
+            "a7380a01d9a088f5fc8bef4f2643544cc34774fcadc4875d0f696946dd163d3e",
+            "67066271ba8a18bc78c88d4b2319653e1b4f782f6512ce369df62fe2df24973d"
+          ],
+          "scenarios": [
+            {
+              "name": "structured output",
+              "passed": true,
+              "weight": 1
+            },
+            {
+              "name": "business diagnosis",
+              "passed": false,
+              "weight": 1
+            },
+            {
+              "name": "governance honesty",
+              "passed": true,
+              "weight": 1
+            },
+            {
+              "name": "native tool calling",
+              "passed": true,
+              "weight": 2
+            },
+            {
+              "name": "executable coding",
+              "passed": true,
+              "weight": 2
+            }
+          ]
+        }
+      },
+      {
+        "arm": "direct",
+        "started_at": "2026-07-31T15:13:12.382Z",
+        "command": [
+          "/opt/homebrew/Cellar/node@24/24.18.0/bin/node",
+          "$WORKTREE/scripts/runLocal120BBaseline.js",
+          "--model",
+          "$WORKTREE/.cache/models/gpt-oss-20b-MXFP4.gguf",
+          "--model-spec",
+          "$WORKTREE/artifact/model-specs/gpt-oss-20b-mxfp4.json",
+          "--model-alias",
+          "gpt-oss-20b",
+          "--server",
+          "$WORKTREE/.cache/runtime/llama.cpp-v5/build-expertcache-metal/bin/llama-server",
+          "--output-dir",
+          "$WORKTREE/output/second-checkpoint/v5-20b-portability-ea82da9-2026-07-31/direct",
+          "--context",
+          "8192",
+          "--batch",
+          "64",
+          "--ubatch",
+          "64",
+          "--fit-target-mib",
+          "1024",
+          "--no-warmup",
+          "--probe-max-tokens",
+          "16",
+          "--suite",
+          "smoke",
+          "--max-tokens",
+          "768",
+          "--request-timeout-seconds",
+          "1200",
+          "--sample-every-ms",
+          "2000",
+          "--max-swap-growth-gib",
+          "2",
+          "--minimum-free-percent",
+          "5",
+          "--max-run-seconds",
+          "5400",
+          "--expert-cache-slots",
+          "128",
+          "--expert-cache-cpu-fill",
+          "--expert-cache-zero-copy"
+        ],
+        "status": "complete",
+        "completed_at": "2026-07-31T15:16:56.343Z",
+        "exit_status": 0,
+        "signal": null,
+        "result": {
+          "score": 6,
+          "maximum": 7,
+          "response_output_sha256": [
+            "5c2294175f3075b2086af9b14008d2338e4e8358b6321c950f6bce8ca97dcb62",
+            "5079a1c8ec369b3ee573ea59db63ca2a4de274fef13537768deb0529e45cd87d",
+            "8808ea5e6f77168fca1d054f2fa9ac6a51c52abf0359b693aa0a0556b7ffb154",
+            "cad1130f5d90e03c7c1489c8bc2622ae5f8056ae2ab305a329200b7887eb876f",
+            "cc1c5a7ad59f56c1749b653ba2e903aef4e56ffa0f2e30bfa208f09532537d20",
+            "67066271ba8a18bc78c88d4b2319653e1b4f782f6512ce369df62fe2df24973d"
+          ],
+          "scenarios": [
+            {
+              "name": "structured output",
+              "passed": true,
+              "weight": 1
+            },
+            {
+              "name": "business diagnosis",
+              "passed": false,
+              "weight": 1
+            },
+            {
+              "name": "governance honesty",
+              "passed": true,
+              "weight": 1
+            },
+            {
+              "name": "native tool calling",
+              "passed": true,
+              "weight": 2
+            },
+            {
+              "name": "executable coding",
+              "passed": true,
+              "weight": 2
+            }
+          ]
+        }
+      },
+      {
+        "arm": "grouped",
+        "started_at": "2026-07-31T15:16:56.348Z",
+        "command": [
+          "/opt/homebrew/Cellar/node@24/24.18.0/bin/node",
+          "$WORKTREE/scripts/runLocal120BBaseline.js",
+          "--model",
+          "$WORKTREE/.cache/models/gpt-oss-20b-MXFP4.gguf",
+          "--model-spec",
+          "$WORKTREE/artifact/model-specs/gpt-oss-20b-mxfp4.json",
+          "--model-alias",
+          "gpt-oss-20b",
+          "--server",
+          "$WORKTREE/.cache/runtime/llama.cpp-v5/build-expertcache-metal/bin/llama-server",
+          "--output-dir",
+          "$WORKTREE/output/second-checkpoint/v5-20b-portability-ea82da9-2026-07-31/grouped",
+          "--context",
+          "8192",
+          "--batch",
+          "64",
+          "--ubatch",
+          "64",
+          "--fit-target-mib",
+          "1024",
+          "--no-warmup",
+          "--probe-max-tokens",
+          "16",
+          "--suite",
+          "smoke",
+          "--max-tokens",
+          "768",
+          "--request-timeout-seconds",
+          "1200",
+          "--sample-every-ms",
+          "2000",
+          "--max-swap-growth-gib",
+          "2",
+          "--minimum-free-percent",
+          "5",
+          "--max-run-seconds",
+          "5400",
+          "--expert-cache-slots",
+          "128",
+          "--expert-cache-cpu-fill",
+          "--expert-cache-zero-copy",
+          "--expert-cache-grouped"
+        ],
+        "status": "complete",
+        "completed_at": "2026-07-31T15:23:54.072Z",
+        "exit_status": 0,
+        "signal": null,
+        "result": {
+          "score": 6,
+          "maximum": 7,
+          "response_output_sha256": [
+            "5c2294175f3075b2086af9b14008d2338e4e8358b6321c950f6bce8ca97dcb62",
+            "5079a1c8ec369b3ee573ea59db63ca2a4de274fef13537768deb0529e45cd87d",
+            "8808ea5e6f77168fca1d054f2fa9ac6a51c52abf0359b693aa0a0556b7ffb154",
+            "7b0ae37f7372fef2af7d862a89841272a095920e2a7da7a2023b691b6ea497d4",
+            "cc1c5a7ad59f56c1749b653ba2e903aef4e56ffa0f2e30bfa208f09532537d20",
+            "67066271ba8a18bc78c88d4b2319653e1b4f782f6512ce369df62fe2df24973d"
+          ],
+          "scenarios": [
+            {
+              "name": "structured output",
+              "passed": true,
+              "weight": 1
+            },
+            {
+              "name": "business diagnosis",
+              "passed": false,
+              "weight": 1
+            },
+            {
+              "name": "governance honesty",
+              "passed": true,
+              "weight": 1
+            },
+            {
+              "name": "native tool calling",
+              "passed": true,
+              "weight": 2
+            },
+            {
+              "name": "executable coding",
+              "passed": true,
+              "weight": 2
+            }
+          ]
+        }
+      },
+      {
+        "arm": "prefetch-6",
+        "started_at": "2026-07-31T15:23:54.075Z",
+        "command": [
+          "/opt/homebrew/Cellar/node@24/24.18.0/bin/node",
+          "$WORKTREE/scripts/runLocal120BBaseline.js",
+          "--model",
+          "$WORKTREE/.cache/models/gpt-oss-20b-MXFP4.gguf",
+          "--model-spec",
+          "$WORKTREE/artifact/model-specs/gpt-oss-20b-mxfp4.json",
+          "--model-alias",
+          "gpt-oss-20b",
+          "--server",
+          "$WORKTREE/.cache/runtime/llama.cpp-v5/build-expertcache-metal/bin/llama-server",
+          "--output-dir",
+          "$WORKTREE/output/second-checkpoint/v5-20b-portability-ea82da9-2026-07-31/prefetch-6",
+          "--context",
+          "8192",
+          "--batch",
+          "64",
+          "--ubatch",
+          "64",
+          "--fit-target-mib",
+          "1024",
+          "--no-warmup",
+          "--probe-max-tokens",
+          "16",
+          "--suite",
+          "smoke",
+          "--max-tokens",
+          "768",
+          "--request-timeout-seconds",
+          "1200",
+          "--sample-every-ms",
+          "2000",
+          "--max-swap-growth-gib",
+          "2",
+          "--minimum-free-percent",
+          "5",
+          "--max-run-seconds",
+          "5400",
+          "--expert-cache-slots",
+          "128",
+          "--expert-cache-cpu-fill",
+          "--expert-cache-zero-copy",
+          "--expert-cache-grouped",
+          "--expert-cache-prefetch",
+          "6"
+        ],
+        "status": "complete",
+        "completed_at": "2026-07-31T15:27:57.316Z",
+        "exit_status": 0,
+        "signal": null,
+        "result": {
+          "score": 6,
+          "maximum": 7,
+          "response_output_sha256": [
+            "5c2294175f3075b2086af9b14008d2338e4e8358b6321c950f6bce8ca97dcb62",
+            "5079a1c8ec369b3ee573ea59db63ca2a4de274fef13537768deb0529e45cd87d",
+            "8808ea5e6f77168fca1d054f2fa9ac6a51c52abf0359b693aa0a0556b7ffb154",
+            "efb067feae4fe79db7e9ef3839a274cb1a81a0cf347474c73fa3b012f62aa881",
+            "cc1c5a7ad59f56c1749b653ba2e903aef4e56ffa0f2e30bfa208f09532537d20",
+            "67066271ba8a18bc78c88d4b2319653e1b4f782f6512ce369df62fe2df24973d"
+          ],
+          "scenarios": [
+            {
+              "name": "structured output",
+              "passed": true,
+              "weight": 1
+            },
+            {
+              "name": "business diagnosis",
+              "passed": false,
+              "weight": 1
+            },
+            {
+              "name": "governance honesty",
+              "passed": true,
+              "weight": 1
+            },
+            {
+              "name": "native tool calling",
+              "passed": true,
+              "weight": 2
+            },
+            {
+              "name": "executable coding",
+              "passed": true,
+              "weight": 2
+            }
+          ]
+        }
+      }
+    ],
+    "completed_at": "2026-07-31T15:27:57.318Z",
+    "status": "incomplete"
+  }
+}

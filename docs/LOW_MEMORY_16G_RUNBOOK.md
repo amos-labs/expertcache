@@ -106,3 +106,76 @@ After human review, and only if both stages remain bounded:
 The paper may claim execution on 16 GiB only after a reproducible run on this
 physical host. A successful 16 GiB result makes 32 GiB promising, but it does
 not replace a physical 32 GiB measurement.
+
+## Distinct explicit-placement recovery arm
+
+If the registered automatic-fit Stage 1 is preserved as a no-go, a separate
+clean-boot engineering arm may test explicit placement. Do not overwrite or
+reclassify the registered result. Use the same watchdogs and add both flags:
+
+```bash
+npm run experiment:low-memory -- \
+  --execute \
+  --confirm-low-memory-host \
+  --probe-tokens 1 \
+  --no-fit \
+  --gpu-layers all
+```
+
+Review and preserve that result before running the corresponding eight-token
+arm. The runtime patch skips whole-file mmap prefetch only while lazy
+ExpertCache tensor mapping is active. Because the 2026-07-31 configuration
+search did not isolate mmap-prefetch removal from automatic-fit removal, any
+claim from this arm applies to the combined configuration.
+
+The 2026-07-31 physical M1 Pro arm began with zero swap and passed one-token,
+eight-token, and natural 50-token completion gates with a session peak of only
+256 KiB swap. This supports a single-host execution claim for the combined
+experimental configuration, not a stock-runtime or reproducibility claim. See
+`docs/LOW_MEMORY_16G_RESULTS.md` and the machine-readable evidence summary for
+the complete boundary and hashes.
+
+## Long-context engineering qualification
+
+After the protected probes have passed and been preserved, quality scenarios
+may be run one at a time with `scripts/runLocal120BBaseline.js`, an 8,192-token
+context, and the same explicit-placement flags. Keep separate output
+directories so every completed scenario is a checkpoint.
+
+For any request expected to outlast the host's idle-sleep timer, wrap the
+entire runner in `caffeinate` from the outset:
+
+```bash
+caffeinate -i -s node scripts/runLocal120BBaseline.js \
+  --model .cache/models/gpt-oss-120b-MXFP4.gguf \
+  --server .cache/runtime/llama.cpp/build-expertcache-metal/bin/llama-server \
+  --output-dir output/low-memory-quality/<run-id> \
+  --port 11436 \
+  --context 8192 \
+  --batch 4 \
+  --ubatch 1 \
+  --fit-target-mib 1024 \
+  --no-fit \
+  --gpu-layers all \
+  --no-warmup \
+  --skip-probe \
+  --suite qualification \
+  --only '<scenario name>' \
+  --max-tokens 1536 \
+  --reasoning-effort low \
+  --seed 42 \
+  --request-timeout-seconds 7200 \
+  --sample-every-ms 1000 \
+  --max-swap-growth-gib 2 \
+  --minimum-free-percent 3 \
+  --max-run-seconds 10800 \
+  --expert-cache-slots 128 \
+  --expert-cache-cpu-fill \
+  --expert-cache-zero-copy
+```
+
+`-i` prevents idle system sleep; `-s` prevents system sleep while on AC. This
+does not override macOS thermal safety. Record power transitions, and do not
+treat mixed-power timings as controlled performance measurements. If an
+attempt slept before `caffeinate` was attached, preserve it as a diagnostic
+and restart with a fresh request timeout rather than hiding the interruption.

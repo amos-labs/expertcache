@@ -4,7 +4,14 @@ import { writeFile } from "node:fs/promises";
 import http from "node:http";
 import https from "node:https";
 import vm from "node:vm";
-import { evaluateTenantBoundary } from "../src/qualificationEvaluators.js";
+import {
+  evaluateContradictoryEvidence,
+  evaluateFunnelBottleneck,
+  evaluateTenantBoundary
+} from "../src/qualificationEvaluators.js";
+import {
+  canonicalQualificationMessageSha256
+} from "../src/qualificationEvidence.js";
 import { performance } from "node:perf_hooks";
 
 const args = process.argv.slice(2);
@@ -44,6 +51,12 @@ const reasoningEffort = normalizeReasoningEffort(
   readOption(args, "--reasoning-effort") ||
     process.env.EXPERTCACHE_BENCHMARK_REASONING_EFFORT
 );
+const seed = boundedInteger(
+  readOption(args, "--seed") || process.env.EXPERTCACHE_BENCHMARK_SEED,
+  0,
+  2_147_483_647,
+  42
+);
 const onlyScenarios = new Set(
   (readOption(args, "--only") || process.env.EXPERTCACHE_BENCHMARK_ONLY || "")
     .split(",")
@@ -57,6 +70,7 @@ if (models.length === 0) {
     "[--suite smoke|qualification|all] [--url URL] [--context TOKENS] " +
     "[--request-timeout-seconds SECONDS] [--max-tokens TOKENS] " +
     "[--reasoning-effort low|medium|high] " +
+    "[--seed INTEGER] " +
     "[--protocol ollama|openai] [--only SCENARIO,...] [--output REPORT.json]"
   );
   process.exit(2);
@@ -85,12 +99,17 @@ for (const result of results) {
 if (output) {
   await writeFile(output, `${JSON.stringify({
     schema: "amos.local-model-qualification",
-    version: 2,
+    version: 5,
     qualification_contract: {
-      version: 2,
+      version: 5,
       scenarios: 7,
       maximum_points: 16,
-      tenant_boundary_evaluator: "safe-refusal-v2"
+      contradictory_evidence_evaluator: "semantic-format-v3",
+      tenant_boundary_evaluator: "safe-refusal-v3",
+      dependent_tool_evaluator: "semantic-signup-format-v4",
+      smoke_funnel_evaluator: "semantic-signup-format-v5",
+      canonical_response_hash: "opaque-tool-call-id-v1",
+      response_capture: "full-synthetic-message-v1"
     },
     created_at: new Date().toISOString(),
     endpoint: baseUrl,
@@ -99,6 +118,7 @@ if (output) {
     context_length: contextLength,
     max_tokens: maxTokens,
     reasoning_effort: reasoningEffort,
+    seed,
     only_scenarios: onlyScenarios.size > 0 ? [...onlyScenarios] : null,
     results
   }, null, 2)}\n`);
@@ -135,8 +155,7 @@ async function benchmarkModel(model) {
     }]);
     stats.push(response);
     const content = normalizedText(response.message?.content);
-    const passed = content.includes("playground") &&
-      (content.includes("signup") || content.includes("conversion")) &&
+    const passed = evaluateFunnelBottleneck(response.message?.content) &&
       !content.includes("no traffic");
     return [passed, summarize(response.message?.content)];
   }));
@@ -200,9 +219,7 @@ async function benchmarkModel(model) {
     });
     const second = await chat(model, messages, tools);
     stats.push(second);
-    const content = normalizedText(second.message?.content);
-    const passed = content.includes("playground") &&
-      (content.includes("signup") || content.includes("conversion"));
+    const passed = evaluateFunnelBottleneck(second.message?.content);
     return [passed, summarize(second.message?.content)];
   }));
 
@@ -272,6 +289,10 @@ async function benchmarkModel(model) {
     tokensPerSecond: evalDuration > 0 ? evalCount / (evalDuration / 1_000_000_000) : 0,
     timings,
     response_output_sha256: stats.map((item) => item.output_sha256),
+    canonical_response_output_sha256: stats.map(
+      (item) => canonicalQualificationMessageSha256(item.message)
+    ),
+    response_records: stats.map(responseRecord),
     scenarios
   };
 }
@@ -323,11 +344,7 @@ async function qualificationContradictoryEvidence(model, stats) {
         "target is 18%. This supersedes the May board draft."
     }]);
     stats.push(response);
-    const content = normalizedText(response.message?.content);
-    const passed = content.includes("18%") &&
-      content.includes("cfo") &&
-      content.includes("12%") &&
-      (content.includes("supersed") || content.includes("older") || content.includes("draft"));
+    const passed = evaluateContradictoryEvidence(response.message?.content);
     return [passed, summarize(response.message?.content)];
   });
 }
@@ -451,10 +468,7 @@ async function qualificationToolSequence(model, stats) {
     }));
     const third = await chat(model, messages, tools);
     stats.push(third);
-    const content = normalizedText(third.message?.content);
-    const passed = content.includes("playground") &&
-      content.includes("signup") &&
-      (content.includes("bottleneck") || content.includes("largest"));
+    const passed = evaluateFunnelBottleneck(third.message?.content);
     return [passed, summarize(third.message?.content)];
   });
 }
@@ -581,7 +595,7 @@ async function qualificationCoding(model, stats) {
     return [
       passed,
       passed
-        ? "passed hidden optimum, tie-break, and immutability tests"
+        ? "passed disclosed optimum, tie-break, and immutability tests"
         : `returned ${JSON.stringify({ resultA, resultB, resultC })}`
     ];
   });
@@ -597,6 +611,7 @@ async function chat(model, messages, tools = []) {
     stream: false,
     temperature: 0,
     max_tokens: maxTokens,
+    seed,
     reasoning_effort: reasoningEffort || undefined,
     chat_template_kwargs: reasoningEffort
       ? { reasoning_effort: reasoningEffort }
@@ -609,6 +624,7 @@ async function chat(model, messages, tools = []) {
     think: false,
     options: {
       temperature: 0,
+      seed,
       num_ctx: contextLength,
       num_predict: maxTokens
     }
@@ -616,6 +632,7 @@ async function chat(model, messages, tools = []) {
   if (protocol === "ollama") {
     return {
       ...payload,
+      finish_reason: payload?.done_reason || null,
       output_sha256: sha256Message(payload?.message)
     };
   }
@@ -628,6 +645,7 @@ async function chat(model, messages, tools = []) {
     : elapsedNanoseconds;
   return {
     message: payload?.choices?.[0]?.message,
+    finish_reason: payload?.choices?.[0]?.finish_reason || null,
     eval_count: completionTokens,
     eval_duration: generationNanoseconds,
     usage: payload?.usage,
@@ -689,6 +707,7 @@ function isOptionWithValue(value) {
     "--protocol",
     "--only",
     "--max-tokens",
+    "--seed",
     "--reasoning-effort",
     "--request-timeout-seconds",
     "--output"
@@ -830,6 +849,19 @@ function sha256Message(message) {
   return createHash("sha256")
     .update(JSON.stringify(message || null))
     .digest("hex");
+}
+
+function responseRecord(item, index) {
+  return {
+    index,
+    output_sha256: item?.output_sha256 || null,
+    canonical_output_sha256:
+      canonicalQualificationMessageSha256(item?.message),
+    finish_reason: item?.finish_reason || null,
+    usage: item?.usage || null,
+    timings: item?.timings || null,
+    message: item?.message || null
+  };
 }
 
 function aggregateTimings(stats) {

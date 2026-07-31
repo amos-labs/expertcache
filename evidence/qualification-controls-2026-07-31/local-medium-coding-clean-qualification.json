@@ -1,0 +1,94 @@
+{
+  "schema": "expertcache.sanitized-evidence",
+  "version": 1,
+  "label": "local-medium-coding-clean-qualification",
+  "source": {
+    "filename": "qualification.json",
+    "sha256": "cde5e5678b506e139d6f8571ff3e751115520e54d7ccf6eca88920fd71ef09b0"
+  },
+  "report": {
+    "schema": "amos.local-model-qualification",
+    "version": 4,
+    "qualification_contract": {
+      "version": 4,
+      "scenarios": 7,
+      "maximum_points": 16,
+      "contradictory_evidence_evaluator": "semantic-format-v3",
+      "tenant_boundary_evaluator": "safe-refusal-v3",
+      "dependent_tool_evaluator": "semantic-signup-format-v4",
+      "response_capture": "full-synthetic-message-v1"
+    },
+    "created_at": "2026-07-31T14:58:07.518Z",
+    "endpoint": "http://127.0.0.1:11436",
+    "protocol": "openai",
+    "suite": "qualification",
+    "context_length": 8192,
+    "max_tokens": 4096,
+    "reasoning_effort": "medium",
+    "seed": 42,
+    "only_scenarios": [
+      "optimization coding"
+    ],
+    "results": [
+      {
+        "model": "$WORKTREE/.cache/models/gpt-oss-120b-MXFP4.gguf",
+        "score": 3,
+        "maximum": 3,
+        "wallSeconds": 639.924662959,
+        "tokensPerSecond": 2.4675672673599602,
+        "timings": {
+          "request_count": 1,
+          "prompt_tokens": 145,
+          "prompt_milliseconds": 33631.482,
+          "prompt_tokens_per_second": 4.311436528428928,
+          "predicted_tokens": 1496,
+          "predicted_milliseconds": 606265.134,
+          "predicted_tokens_per_second": 2.4675672673599602
+        },
+        "response_output_sha256": [
+          "976a11cdd00cb3340aacf04ce9bae99efe7e81db33e1f75af7d60cc74c4110e8"
+        ],
+        "response_records": [
+          {
+            "index": 0,
+            "output_sha256": "976a11cdd00cb3340aacf04ce9bae99efe7e81db33e1f75af7d60cc74c4110e8",
+            "finish_reason": "stop",
+            "usage": {
+              "completion_tokens": 1496,
+              "prompt_tokens": 145,
+              "total_tokens": 1641,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 145,
+              "prompt_ms": 33631.482,
+              "prompt_per_token_ms": 231.9412551724138,
+              "prompt_per_second": 4.311436528428928,
+              "predicted_n": 1496,
+              "predicted_ms": 606265.134,
+              "predicted_per_token_ms": 405.25744251336897,
+              "predicted_per_second": 2.4675672673599602
+            },
+            "message": {
+              "role": "assistant",
+              "content": "function selectCampaigns(campaigns, maxSpend) {\n  // Helper: insert id into a sorted copy of an array\n  function insertSorted(arr, val) {\n    const res = arr.slice();\n    let i = 0;\n    while (i < res.length && res[i] < val) i++;\n    res.splice(i, 0, val);\n    return res;\n  }\n\n  // Helper: compare two states according to the tie‑breaking rules\n  function isBetter(a, b) {\n    if (a.signups !== b.signups) return a.signups > b.signups;\n    if (a.spend !== b.spend) return a.spend < b.spend;\n    const aStr = a.ids.join(',');\n    const bStr = b.ids.join(',');\n    return aStr < bStr;\n  }\n\n  // DP array: dp[spend] = best state achieving exactly that spend\n  const dp = new Array(maxSpend + 1).fill(null);\n  dp[0] = { signups: 0, ids: [], spend: 0 };\n\n  for (const camp of campaigns) {\n    const w = Math.floor(camp.dailySpend); // assume integer spend\n    const v = camp.expectedSignups;\n    const id = camp.id;\n\n    for (let s = maxSpend; s >= w; s--) {\n      const prev = dp[s - w];\n      if (!prev) continue;\n\n      const candSignups = prev.signups + v;\n      const candIds = insertSorted(prev.ids, id);\n      const candState = { signups: candSignups, ids: candIds, spend: s };\n\n      const existing = dp[s];\n      if (!existing || isBetter(candState, existing)) {\n        dp[s] = candState;\n      }\n    }\n  }\n\n  // Find the overall best state among all feasible spends\n  let best = null;\n  for (let s = 0; s <= maxSpend; s++) {\n    const state = dp[s];\n    if (!state) continue;\n    if (!best || isBetter(state, best)) best = state;\n  }\n\n  return best ? best.ids : [];\n}",
+              "reasoning_content": "We need to write a JavaScript function selectCampaigns(campaigns, maxSpend). Input: campaigns is an array of objects, each with at least id, dailySpend, expectedSignups. Need to select subset maximizing total expectedSignups, with total dailySpend <= maxSpend. Tie-breaking: lower total spend, then lexicographically smaller comma-joined sorted ID list. Return sorted IDs (array) of selected campaigns. Do not mutate campaigns.\n\nThis is a knapsack problem (0/1) with small constraints? Not specified. We need to implement algorithm that works for moderate sizes. Could use DP over spend (maxSpend maybe integer). Use DP storing best signups, spend, and path. Since we need tie-breaking, we need to compare states.\n\nAssume dailySpend are numbers (maybe integers). If maxSpend is not too large, DP works. Otherwise, we could use meet-in-the-middle for up to 30 items. But likely they expect DP.\n\nWe'll implement DP as array of objects for each spend from 0..maxSpend (rounded to integer). But dailySpend could be float. Could multiply by 100? Not given. Simpler: use DP over items, storing map of spend to best state, using pruning.\n\nWe'll implement DP using a map: key = spend (rounded to maybe integer). But floats cause issues. We'll treat spend as number and use array of objects with spend as index only if integer.\n\nSimplify: assume dailySpend are integers. We'll implement DP array of length maxSpend+1.\n\nDP[i] = best state for spend i: {signups, spend, ids (sorted array)}.\n\nInitialize DP[0] = {signups:0, spend:0, ids:[]}.\n\nIterate each campaign. For spend from maxSpend down to campaign.dailySpend, compute candidate = DP[spend - w] + campaign. Compare with existing DP[spend] using comparator: higher signups, then lower spend (spend is index anyway), then lexicographically smaller ids list.\n\nBut we also need to keep best overall across spends <= maxSpend, not just exact spend. At end, find best among DP[0..maxSpend].\n\nImplementation details: need to copy ids array when adding new campaign, sort? Since we maintain sorted IDs, we can insert in order.\n\nComparator function compareStates(a,b): returns true if a better than b.\n\nEdge cases: if DP[spend - w] is undefined, skip.\n\nWe must not mutate original campaigns; we only read.\n\nReturn bestState.ids sorted.\n\nImplementation:\n\nfunction selectCampaigns(campaigns, maxSpend) {\n  const n = campaigns.length;\n  const dp = new Array(maxSpend + 1).fill(null);\n  dp[0] = { signups: 0, ids: [] };\n  for (const camp of campaigns) {\n    const w = Math.floor(camp.dailySpend); // assume integer\n    const v = camp.expectedSignups;\n    const id = camp.id;\n    for (let s = maxSpend; s >= w; s--) {\n      const prev = dp[s - w];\n      if (!prev) continue;\n      const candSignups = prev.signups + v;\n      const candIds = insertSorted(prev.ids, id);\n      const existing = dp[s];\n      if (!existing || isBetter({signups:candSignups, ids:candIds, spend:s}, existing)) {\n        dp[s] = { signups: candSignups, ids: candIds, spend: s };\n      }\n    }\n  }\n  // find best among dp[0..maxSpend]\n  let best = null;\n  for (let s = 0; s <= maxSpend; s++) {\n    const state = dp[s];\n    if (!state) continue;\n    const candidate = {signups: state.signups, ids: state.ids, spend: s};\n    if (!best || isBetter(candidate, best)) best = candidate;\n  }\n  return best ? best.ids : [];\n}\n\nNeed helper insertSorted(arr, val) returns new array with val inserted maintaining sorted order (lexicographically). Since we must not mutate arr, we copy.\n\nfunction insertSorted(arr, val) {\n  const res = arr.slice();\n  let i = 0;\n  while (i < res.length && res[i] < val) i++;\n  res.splice(i, 0, val);\n  return res;\n}\n\nComparator isBetter(a,b):\nif a.signups != b.signups return a.signups > b.signups;\nif a.spend != b.spend return a.spend < b.spend;\ncompare lexicographically: join with ',' and compare strings.\n\nImplementation.\n\nEdge: dailySpend may be non-integer; we can treat as integer by rounding? Better to assume integer.\n\nReturn sorted IDs (already sorted). Ensure not mutate.\n\nProvide only function declaration (including helpers inside). So we need to output the function code, not markdown.\n\nLet's craft final answer."
+            }
+          }
+        ],
+        "scenarios": [
+          {
+            "name": "optimization coding",
+            "weight": 3,
+            "passed": true,
+            "detail": "passed disclosed optimum, tie-break, and immutability tests",
+            "wallSeconds": 639.9244512500001
+          }
+        ]
+      }
+    ]
+  }
+}

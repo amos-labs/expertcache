@@ -1,0 +1,44 @@
+{
+  "schema": "expertcache.qualification-evaluator-audit",
+  "version": 1,
+  "created_at": "2026-07-31T15:00:00Z",
+  "source": {
+    "file": "local-medium-qualification.json",
+    "raw_source_sha256": "b847bd51e894881966f73ca0db16445f19cd99106615c3d586992a0aed9db5a3",
+    "contract_version": 3,
+    "score": 8,
+    "maximum": 16
+  },
+  "audit": {
+    "contract_version": 4,
+    "evaluator": "semantic-signup-format-v4",
+    "evaluator_source_revision": "1fe7f1f86a234aa8441f3843a3ce84669d5298d2",
+    "score": 11,
+    "maximum": 16,
+    "model_rerun": false,
+    "response_changed": false
+  },
+  "changed_scenarios": [
+    {
+      "name": "dependent multi-tool sequence",
+      "weight": 3,
+      "response_record_index": 5,
+      "response_output_sha256": "762f10f5fb25460e1717c2192bb6f53ae3a1360be10b27fa5aca39aaee740e76",
+      "version_3_passed": false,
+      "version_4_passed": true,
+      "reason": "The captured answer correctly identifies Playground-to-Sign‑up as the largest measured bottleneck. Version 3 accepted only the literal token signup; version 4 normalizes equivalent hyphenated and spaced forms."
+    }
+  ],
+  "unchanged_failed_scenarios": [
+    {
+      "name": "parked approval outcome",
+      "weight": 2
+    },
+    {
+      "name": "optimization coding",
+      "weight": 3,
+      "reason": "The bounded response ended at 1,536 completion tokens with finish_reason=length and empty final content."
+    }
+  ],
+  "claim_boundary": "This is a versioned evaluator audit of a captured response, not a model rerun and not a replacement for the immutable 8/16 version-3 result."
+}

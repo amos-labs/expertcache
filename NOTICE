@@ -1,6 +1,14 @@
 ExpertCache
 Copyright 2026 AMOS Labs
 
+ExpertCache-authored software, runtime code, harnesses, controllers, and
+documentation outside the paper manuscript are licensed under Apache-2.0.
+
+The manuscript source under paper/ and the compiled ExpertCache paper are
+Copyright 2026 Rick Barkley and licensed separately under CC BY 4.0. See
+paper/LICENSE.md. This paper-specific grant controls where it differs from the
+repository software license.
+
 This product includes an experimental patch against llama.cpp.
 llama.cpp is Copyright (c) 2023-2026 The ggml authors and is distributed
 under the MIT License. A copy of that license is included at

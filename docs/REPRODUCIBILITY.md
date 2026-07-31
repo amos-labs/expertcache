@@ -111,6 +111,18 @@ Run the same workflow corpus against GPT-OSS 20B. The 120B path must beat that
 control on the hard qualification floors and reduce managed-frontier
 escalations; a larger model name or a higher easy-task score is not sufficient.
 
+For the publication portability gate, use the separately pinned official
+GPT-OSS 20B MXFP4 GGUF and compare stock, direct, grouped, and prefetch output
+hashes:
+
+```bash
+npm run experiment:second-checkpoint
+```
+
+The command is dry-run by default and prints the exact artifact download. The
+20B result is same-family checkpoint evidence only; it is not an oversized-host
+or second-architecture result.
+
 When the Phase 1 llama.cpp/Metal tracer is available, compare it with the
 greedy Transformers trace before trusting cache-locality results:
 
@@ -196,8 +208,9 @@ full corpus.
 
 Phase 2 changed the ownership boundary rather than continuing to tune mmap
 advice. The validated path exposes only the routed expert byte ranges to Metal
-through page-aligned, no-copy host-memory views. On the same hidden coding
-diagnostic, GPT-OSS 120B MXFP4 preserved a 3/3 result while improving from
+through page-aligned, no-copy host-memory views. On the same then-held-out,
+now-disclosed coding diagnostic, GPT-OSS 120B MXFP4 preserved a 3/3 result
+while improving from
 714.9 seconds on the grouped-copy path to 320.6 seconds on the direct-view
 path. Peak process RSS was 47.6 GB and measured swap stayed below 45 MB.
 

@@ -29,7 +29,8 @@ exposing only currently routed expert ranges to the GPU through page-aligned,
 no-copy buffer views.  The path combines expert-grouped multi-token dispatch
 with asynchronous prefetch of a recent routed-expert union.  On a 64~GiB Apple
 M1 Max, the current artifact executed the complete 63,387,346,208-byte GPT-OSS
-120B MXFP4 checkpoint, preserved a targeted 3/3 hidden coding gate, and
+120B MXFP4 checkpoint, preserved a targeted 3/3 coding gate that was held out
+during the original run and is now disclosed, and
 produced a bit-exact \CurrentTrajectoryTokens-token trajectory across the
 prefetch boundary.  In a single decision-grade A/B, routed-union prefetch
 raised real-prompt prefill from \CurrentPrefetchControlRate{} to
@@ -38,7 +39,12 @@ remained near \CurrentDecodeRange{} tokens/s.  A synthetic four-expert hot
 ceiling reached \CurrentHotGroupedRate{} tokens/s with grouped dispatch, but
 is deliberately invalid for model-quality claims.  We also report negative
 results for page-advice-only residency, persistent copied slots, parallel
-projection copies, and wide cold blocks.  The released repository includes a
+projection copies, and wide cold blocks.  On a separate physical 16~GiB M1
+Pro, explicit placement completed protected one-token, eight-token, and
+natural 50-token gates, with \CurrentSixteenDecodeRate{} decode tokens/s and
+only \CurrentSixteenPeakSwap{} peak session swap.  This is a one-boot
+feasibility result, not an interactive-performance claim.  The released
+repository includes a
 pinned runtime patch, deterministic tests, raw decision-grade evidence, a
 registered repeated/counterbalanced protocol, and checksummed artifact
 tooling.  Final publication estimates remain gated on those registered runs,
@@ -216,9 +222,17 @@ patch SHA-256 before application.  The patch adds:
   \item bounded graph execution around route synchronization;
   \item page-aligned \texttt{newBufferWithBytesNoCopy} expert views;
   \item a gathered route-map Metal kernel for grouped dispatch;
-  \item a bounded read-only prefetch worker pool; and
+  \item a bounded read-only prefetch worker pool;
+  \item suppression of the upstream whole-file
+  \texttt{POSIX\_MADV\_WILLNEED} request while lazy tensor mapping is active;
+  and
   \item content-free route, byte, timing, and cache instrumentation.
 \end{itemize}
+
+The whole-file advice change removes an eager policy that is in tension with
+sparse lazy mapping, but its performance effect has not yet been isolated.
+The registered follow-up counterbalances the advice path on and off before
+attributing any latency or memory change to it.
 
 Environment variables and runner flags expose the experimental arms.  They
 are intentionally not a production API.  The release plan replaces them with
@@ -238,7 +252,12 @@ payloads that contain prompts or model activations.
 The primary model is the official GPT-OSS 120B MXFP4 GGUF at revision
 \texttt{238abdd290bb874b90a5da1b4549881b7d05c091}.  The exact artifact is
 63,387,346,208 bytes.  The primary host is a 64~GiB Apple M1 Max MacBook Pro.
-The controlled context length is 8,192 tokens.
+The controlled context length is 8,192 tokens.  A registered secondary
+same-family control uses the official 12,109,566,624-byte GPT-OSS 20B MXFP4
+GGUF at revision
+\texttt{ef9b12f2ff56c69cf32153a02784e7a3c88bf524}.  This control tests
+checkpoint-size portability; it is neither oversized on the primary host nor
+a second model architecture.
 
 \subsection{Registered run design}
 
@@ -268,9 +287,16 @@ explanation, never zero.
 Performance promotion requires deterministic raw-output comparison at
 micro-batch 4 and 64, followed by the complete trajectory gate.  The final
 runtime then runs a frozen seven-scenario, 16-point qualification suite.
-Hidden prompt text is
-not published; aggregate and per-case status plus non-reversible output hashes
-are preserved.  A changed trajectory blocks bit-exact claims but is not
+Contract version~5 discloses prompts, executable evaluators, complete
+synthetic response messages, finish reasons, token usage, aggregate and
+per-case status, strict response hashes, and hashes that canonicalize only
+opaque server-generated tool-call IDs.  Reasoning effort, seed, and completion
+allowance are part of the configuration.  Historical result files retain the
+contract that produced them; evaluator corrections create a separate audit
+rather than overwriting a score.  The coding evaluator was held out during
+the original engineering run, but final-runtime reruns are deterministic
+regression evidence rather than fresh hidden-set evidence.  A changed
+trajectory blocks bit-exact claims but is not
 automatically a quality failure; it requires separate analysis.
 
 \subsection{AI-assisted research process}
@@ -322,6 +348,86 @@ time remained decode-dominated.  System swap did not grow during that observed
 run.  Because the host carried prior cache/swap history and the result is one
 A/B, this is a decision-grade mechanism result, not the final estimate.
 
+\subsection{Quality controls and governed-system boundary}
+
+On the final v5 runtime, the single low-effort local diagnostic scored
+\CurrentLocalLowQuality{}.  A Bedrock GPT-OSS 120B control requested with the
+same low effort, seed~42, and 1,536-token cap scored
+\CurrentHostedLowQuality{} and failed the same tenant-explanation and
+parked-approval scenarios.  The response hashes differ, so this is matched
+scenario behavior rather than bit-exact local/hosted inference.  The hosted
+medium-effort control scored \CurrentHostedMediumQuality{}.
+
+The local medium-effort full run scored
+\CurrentLocalMediumVThreeQuality{} under contract version~3.  Its dependent
+tool sequence was semantically correct but used the hyphenated form
+``Sign-up,'' which the version-3 evaluator rejected; a version-4 audit of the
+unchanged captured response scores \CurrentLocalMediumVFourAudit{}.  The
+parked-approval wording remained a genuine raw-model failure.  The coding
+response consumed the entire 1,536-token allowance in reasoning and ended
+with \texttt{finish\_reason=length} and empty final content.  A separate,
+clean-source 4,096-token targeted follow-up emitted 1,496 completion tokens,
+passed 3/3 executable tests in \CurrentMediumCodingSeconds{} seconds, and
+showed zero swap growth during the run.  It diagnoses a controller boundary;
+it does not add points to or replace the full-run score.
+
+AMOS product controls are evaluated separately from raw model quality.
+Authenticated credentials and tool exposure enforce tenant scope before
+inference.  A signed action receipt determines whether a requested write is
+pending or executed after inference.  Thus a product may remain safe when a
+model explains scope poorly or says an unexecuted campaign ``has been
+created,'' but deterministic enforcement never increases the model score.
+
+\subsection{Physical 16~GiB feasibility}
+
+On a physical 16~GiB M1 Pro, the exact 63,387,346,208-byte artifact exceeded
+2~GiB swap before readiness under automatic fit and was stopped by the
+registered gate.  The explicit-placement arm disabled automatic fit, selected
+all GPU layers, used context 4,096, batch four, micro-batch one, direct views,
+128 slots with CPU fill, and no grouping or prefetch.  It completed protected
+one-token and eight-token probes and a natural 50-token response.  The natural
+run measured \CurrentSixteenPromptRate{} prompt and
+\CurrentSixteenDecodeRate{} decode tokens/s; process RSS was 289~MB and peak
+session swap was \CurrentSixteenPeakSwap{}.
+
+This experiment occurred after the model digest had warmed the file cache and
+covers one clean boot.  It demonstrates bounded feasibility under an explicit
+combined configuration, not stock-runtime success, multi-boot
+reproducibility, or production speed.  Naive one-worker prefetch increased RSS
+to 7.56~GB and slowed prompt and decode by roughly 37--39\% in a warm
+diagnostic, so it was rejected for this host.
+
+\subsection{Second-checkpoint portability}
+
+The official 12,109,566,624-byte GPT-OSS 20B MXFP4 checkpoint completed the
+public smoke suite in stock, direct, grouped, and prefetch-6 arms.  The frozen
+contract-version-4 files scored 6/7 because the business evaluator rejected
+the semantically correct spelling ``sign-ups.''  A no-inference version-5
+audit scores every unchanged response set 7/7.
+
+After replacing only opaque server-generated tool-call IDs, direct, grouped,
+and prefetch-6 produced identical response hashes.  Stock differed from all
+three custom paths at three of six response records.  The registered
+stock-equivalence criterion therefore remains incomplete, while the result
+localizes the drift to the stock/direct boundary rather than grouping or
+prefetch.  All arms recorded zero swap growth.  In sequential diagnostic runs,
+stock completed the suite in 40.7 seconds versus 200.9, 394.5, and 220.5
+seconds for direct, grouped, and prefetch-6 respectively.  These are not
+publication timing estimates, but they show why the optional path should be
+bypassed when a checkpoint fits efficiently in stock residency.
+
+A cache-disabled two-repeat diagnostic then localized one divergence.  Stock
+repeated a 265-token message and direct repeated a 248-token message; the paths
+shared 179 generated tokens.  At the first changed token, stock preferred
+\texttt{sentence} over \texttt{bott} by 0.01444 log-prob, while direct preferred
+\texttt{bott} over \texttt{sentence} by 0.00036 log-prob.  The maximum
+selected-token log-prob difference in the shared prefix was 0.01192, and both
+answers passed the semantic evaluator.  This supports a near-tie trajectory
+explanation but not whole-kernel numerical equivalence.  The remaining
+registered gate is therefore a teacher-forced token/logit comparison with
+explicit tolerances; strict and canonical response hashes remain separately
+reported.
+
 \begin{table*}[t]
 \centering
 \caption{Current observations and required publication replacements.}
@@ -333,9 +439,10 @@ Direct-view prompt & \CurrentDirectPromptRate{} tok/s & architecture run & \Publ
 Grouped cold prompt & decision-grade only & pending & \PublishedColdGroupedPrefill \\
 Prefetch cold prompt & decision-grade only & pending & \PublishedColdPrefetchPrefill \\
 Prefetch effect & \CurrentPrefetchGain{} single A/B & decision-grade & \PublishedPrefetchEffect \\
-Full quality & composite 14/16 points across runs & incomplete & \PublishedFullQuality \\
+Full quality & historical composite 14/16; v5 diagnostics separate & incomplete & \PublishedFullQuality \\
+16~GiB feasibility & protected 1/8/50-token gates on one boot & bounded supplemental & second clean boot \\
 32~GiB physical host & not run & scoped out unless obtained & \PublishedThirtyTwoGiB \\
-Second checkpoint & not run & pending & \PublishedSecondCheckpoint \\
+Second checkpoint & all arms run; custom paths canonical-exact, stock differs & active partial & \PublishedSecondCheckpoint \\
 Energy/thermal & incomplete & pending & \PublishedEnergy \\
 \bottomrule
 \end{tabular}
@@ -367,24 +474,40 @@ calibrated abstention.  A distinct residency predictor forecasts expert pages
 from recent authoritative routes.  The latter is advisory: incorrect
 predictions may waste I/O but never replace the model router or alter selected
 weights.  The deterministic route-union heuristic remains its fallback.
+The same router must bypass ExpertCache when a checkpoint already fits: the
+20B control was substantially faster in the stock arm than in any custom arm.
+
+The product harness must also reserve capacity for a final answer after
+reasoning, classify reasoning-only truncation as a typed controller failure,
+and record any retry or escalation.  Authorization and action state do not
+belong in free-form model prose: tenant scope is capability-bounded before
+inference, while approval and execution state are rendered from receipts
+afterward.  Raw-model and governed-system results remain separate in the
+evidence.
 
 Additional work includes adaptive byte-bounded batches, reusable view
 metadata, expert-contiguous GGUF layout, mixed-bit resident experts, long
 contexts, cancellation and memory-pressure control, multi-session scheduling,
+whole-file advice and read-ahead ablations, page-fault-guided batch sizing,
 and a private multi-node sovereign fallback.  The repository roadmap records
 exit and kill criteria for each path.
 
 \section{Limitations}
 
 The current complete live result covers one 64~GiB M1 Max and one primary
-checkpoint.  A real 32~GiB host has not been measured and cannot be replaced by
-a memory-reservation claim.  The existing performance evidence was collected
+oversized checkpoint.  The registered 20B control is from the same GPT-OSS
+architecture and therefore cannot establish cross-architecture portability.
+It executed through every registered arm, but stock-to-custom response
+equivalence remains unresolved.
+A real 32~GiB host has not been measured and cannot be replaced by a
+memory-reservation claim.  The existing performance evidence was collected
 during an iterative engineering sequence with varying page-cache, swap, and
 background host state.  The final repeated/counterbalanced matrix is still in
 progress.
 
 The targeted 3/3 coding gate is not a general quality evaluation.  The frozen
-full suite, public equivalence corpus, second checkpoint, energy, thermal,
+version-5 full suite, public equivalence corpus, second-checkpoint gate,
+energy, thermal,
 long-session, cancellation, and concurrency experiments remain open.  Decode
 near three tokens/s is not interactive production performance.  The patch is
 experimental, MXFP4-specific in its grouped correctness-bearing kernel, and
@@ -398,8 +521,10 @@ Metal resource boundary: a complete 63.4~GB MoE checkpoint executed on a
 64~GiB Apple Silicon system by exposing only selected expert ranges, while a
 targeted result and long deterministic trajectory were preserved.  Grouped
 dispatch removed a measured launch ceiling, and routed-union prefetch improved
-decision-grade real-prompt prefill, but serial decode and publication coverage
-remain open.  The strongest present contribution is therefore an
+decision-grade real-prompt prefill.  A separate 16~GiB M1 Pro completed bounded
+explicit-placement probes, extending the feasibility boundary without solving
+serial decode or production readiness.  The strongest present contribution is
+therefore an
 architecture, a set of bounded positive and negative results, and an artifact
 that makes unfinished evidence explicit.  The registered experiment program
 will determine the final performance claim and whether the path is a useful

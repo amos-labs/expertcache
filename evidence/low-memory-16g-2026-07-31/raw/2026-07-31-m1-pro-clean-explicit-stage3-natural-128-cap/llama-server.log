@@ -1,0 +1,42 @@
+0.00.155.421 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.00.155.715 W srv  llama_server: -----------------
+0.00.155.717 W srv  llama_server: CORS is set to allow all origins ('*') and no API key is set
+0.00.155.717 W srv  llama_server: this can be a security risk (cross-origin attacks)
+0.00.155.717 W srv  llama_server: more info: https://github.com/ggml-org/llama.cpp/pull/25655
+0.00.155.717 W srv  llama_server: -----------------
+0.00.157.135 I srv    load_model: loading model '$WORKTREE/.cache/models/gpt-oss-120b-MXFP4.gguf'
+0.00.587.944 W load: setting token '<|message|>' (200008) attribute to USER_DEFINED (16), old attributes: 8
+0.00.587.949 W load: setting token '<|constrain|>' (200003) attribute to USER_DEFINED (16), old attributes: 8
+0.00.588.095 W load: setting token '<|channel|>' (200005) attribute to USER_DEFINED (16), old attributes: 8
+0.00.588.487 W load: setting token '<|start|>' (200006) attribute to USER_DEFINED (16), old attributes: 8
+0.00.590.970 W load: special_eog_ids contains both '<|return|>' and '<|call|>', or '<|calls|>' and '<|flush|>' tokens, removing '<|end|>' token from EOG list
+0.04.328.893 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 4096, kv_unified = 'false'
+0.04.335.976 I srv  llama_server: model loaded
+0.04.335.998 I srv  llama_server: listening on http://127.0.0.1:11436
+0.06.015.555 I slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = -1
+0.06.015.625 I slot launch_slot_: id  0 | task 0 | processing task, is_child = 0
+0.11.122.622 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =      4, progress = 0.05, t =   5.11 s / 0.78 tokens per second
+0.16.373.078 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =      8, progress = 0.11, t =  10.36 s / 0.77 tokens per second
+0.21.317.024 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =     12, progress = 0.16, t =  15.30 s / 0.78 tokens per second
+0.26.835.184 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =     16, progress = 0.21, t =  20.82 s / 0.77 tokens per second
+0.32.119.334 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =     20, progress = 0.27, t =  26.10 s / 0.77 tokens per second
+0.37.670.146 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =     24, progress = 0.32, t =  31.65 s / 0.76 tokens per second
+0.43.235.935 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =     28, progress = 0.37, t =  37.22 s / 0.75 tokens per second
+0.48.769.257 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =     32, progress = 0.43, t =  42.75 s / 0.75 tokens per second
+0.54.069.221 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =     36, progress = 0.48, t =  48.05 s / 0.75 tokens per second
+0.59.336.186 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =     40, progress = 0.53, t =  53.32 s / 0.75 tokens per second
+1.04.675.135 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =     44, progress = 0.59, t =  58.66 s / 0.75 tokens per second
+1.10.359.066 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =     48, progress = 0.64, t =  64.34 s / 0.75 tokens per second
+1.15.090.325 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =     52, progress = 0.69, t =  69.07 s / 0.75 tokens per second
+1.20.468.609 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =     56, progress = 0.75, t =  74.45 s / 0.75 tokens per second
+1.26.438.012 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =     60, progress = 0.80, t =  80.42 s / 0.75 tokens per second
+1.27.701.955 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =     61, progress = 0.81, t =  81.69 s / 0.75 tokens per second
+1.32.569.535 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =     65, progress = 0.87, t =  86.55 s / 0.75 tokens per second
+1.37.223.390 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =     69, progress = 0.92, t =  91.21 s / 0.76 tokens per second
+1.40.085.482 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =     71, progress = 0.95, t =  94.07 s / 0.75 tokens per second
+2.54.942.807 I slot print_timing: id  0 | task 0 | prompt eval time =   99642.98 ms /    75 tokens ( 1328.57 ms per token,     0.75 tokens per second)
+2.54.942.810 I slot print_timing: id  0 | task 0 |        eval time =   69284.11 ms /    50 tokens ( 1385.68 ms per token,     0.72 tokens per second)
+2.54.942.811 I slot print_timing: id  0 | task 0 |       total time =  168927.09 ms /   125 tokens
+2.54.942.812 I slot print_timing: id  0 | task 0 |    graphs reused =        122
+2.54.943.119 I slot      release: id  0 | task 0 | stop processing: n_tokens = 124, truncated = 0
+2.54.976.110 I srv    operator(): operator(): cleaning up before exit...

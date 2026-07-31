@@ -45,7 +45,7 @@
     "--max-run-seconds", "21600"
   ],
   "external_gates": [
-    "second oversized sparse checkpoint"
+    "second official sparse checkpoint: GPT-OSS 20B MXFP4 same-family portability control"
   ],
   "supplemental_replications": [
     "32 GiB Apple Silicon host; publish only after measurement on physical hardware",

@@ -1,0 +1,92 @@
+{
+  "schema": "expertcache.low-memory-16g-stage1",
+  "version": 1,
+  "grade": "protected-feasibility-no-go",
+  "source_revision": "350677641c9f937d925adb77cc55c8286481fa45",
+  "started_at": "2026-07-31T11:57:15.479Z",
+  "completed_at": "2026-07-31T11:58:29.945Z",
+  "elapsed_ms": 74465,
+  "host": {
+    "model_identifier": "MacBookPro18,3",
+    "chip": "Apple M1 Pro",
+    "physical_memory": "16 GB",
+    "os_version": "26.5",
+    "os_build": "25F71",
+    "power_source": "AC Power",
+    "thermal_warning": false,
+    "performance_warning": false
+  },
+  "configuration": {
+    "sha256": "19bca68053a7fa156fda71cdd021e065e0e608e9cc58ad8576a9c2d5af6fec70",
+    "runtime_revision": "7e1e28cae36d41fe7bbe9dae7c9625de6565c063",
+    "runtime_patch_sha256": "0181578f465cb188ab4f34ba8a859b704a99cca5caa5bdec2d502ba3e48571b0",
+    "model_revision": "238abdd290bb874b90a5da1b4549881b7d05c091",
+    "model_size_bytes": 63387346208,
+    "context_tokens": 4096,
+    "batch_tokens": 4,
+    "micro_batch_tokens": 1,
+    "fit_target_mib": 1024,
+    "warmup": false,
+    "completion_cap_tokens": 1,
+    "expert_cache_slots": 128,
+    "cpu_fill": true,
+    "direct_views": true,
+    "grouped_dispatch": false,
+    "prefetch_threads": 0,
+    "maximum_swap_growth_gib": 2,
+    "minimum_memory_free_percent": 3,
+    "maximum_run_seconds": 1800
+  },
+  "result": {
+    "outcome": "no-go",
+    "phase_reached": "model-loading",
+    "server_ready": false,
+    "readiness_seconds": null,
+    "first_completion_event_ms": null,
+    "first_content_or_reasoning_token_ms": null,
+    "prompt_timing": null,
+    "decode_timing": null,
+    "completion_tokens": 0,
+    "server_exit_code": null,
+    "server_exit_signal": "SIGTERM",
+    "watchdog_triggered": "watchdog: swap growth exceeded 2 GiB",
+    "failure": "watchdog: swap growth exceeded 2 GiB"
+  },
+  "telemetry": {
+    "sample_count": 75,
+    "peak_process_rss_bytes": 4914872320,
+    "peak_process_virtual_memory_bytes": 560832036864,
+    "swap_start_bytes": 0,
+    "peak_swap_used_bytes": 2606497792,
+    "swap_end_bytes": 2592279101.44,
+    "swap_growth_bytes": 2592279101.44,
+    "memory_free_percent_start": 71,
+    "memory_free_percent_minimum": 34,
+    "memory_free_percent_end": 78,
+    "peak_process_cpu_percent": 99.2,
+    "vm_counter_delta": {
+      "translation_faults": 6303134,
+      "pageins": 5470243,
+      "pageouts": 3556,
+      "compressions": 1153685,
+      "decompressions": 354199,
+      "swapins": 2414,
+      "swapouts": 160268
+    }
+  },
+  "artifacts": {
+    "raw_output_directory": "output/low-memory/2026-07-31-m1-pro-stage1-1-token",
+    "baseline_json_sha256": "1305c839c37ecfe77468e314014369327d75193c2e2aa8bd593f409aa76a191d",
+    "llama_server_log_sha256": "15e8f06ca6fcf1450258854cb21d1a7f8855a267d2df74806f4ebb9a194606dc"
+  },
+  "decision": {
+    "stage_1_passed": false,
+    "stage_2_authorized": false,
+    "retry_as_stock_placement_authorized": false,
+    "interpretation": "The protected direct-view probe exceeded the bounded swap-growth limit before server readiness on this physical 16 GiB host."
+  },
+  "notes": [
+    "The raw report's source_revision is the literal string HEAD because the writable destination had an empty Git metadata directory; this sanitized record uses the verified source commit from the populated source checkout.",
+    "Missing readiness and timing fields remain null and are not inferred as zero."
+  ]
+}

@@ -5,6 +5,10 @@
   "state": "provisional",
   "title": "ExpertCache: Page-Aware Direct Expert Views for Oversized Sparse Models on Apple Silicon",
   "repository": "https://github.com/amos-labs/expertcache",
+  "licenses": {
+    "software": "Apache-2.0",
+    "paper": "CC-BY-4.0"
+  },
   "primary_model": {
     "id": "gpt-oss-120b-mxfp4",
     "repository": "ggml-org/gpt-oss-120b-GGUF",
@@ -12,6 +16,13 @@
     "filename": "gpt-oss-120b-MXFP4.gguf",
     "size_bytes": 63387346208
   },
+  "secondary_models": [
+    {
+      "id": "gpt-oss-20b-mxfp4",
+      "spec": "artifact/model-specs/gpt-oss-20b-mxfp4.json",
+      "purpose": "same-family sparse-checkpoint portability control"
+    }
+  ],
   "claims": [
     {
       "id": "C1",
@@ -21,14 +32,18 @@
     {
       "id": "C2",
       "grade": "targeted-quality-validated",
-      "evidence": ["docs/EXPERT_CACHE_ZERO_COPY_RESULTS.md"]
+      "evidence": [
+        "docs/EXPERT_CACHE_ZERO_COPY_RESULTS.md",
+        "evidence/qualification-controls-2026-07-31/"
+      ]
     },
     {
       "id": "C3",
       "grade": "deterministic-equivalence-validated",
       "evidence": [
         "docs/EXPERT_CACHE_CEILING_RESULTS.md",
-        "evidence/prefetch-2026-07-29/full-gate-qualification.json"
+        "evidence/prefetch-2026-07-29/full-gate-qualification.json",
+        "evidence/second-checkpoint-20b-2026-07-31/"
       ]
     },
     {
@@ -51,7 +66,8 @@
     {"id": "full-quality-suite", "status": "pending"},
     {"id": "complete-resource-telemetry", "status": "pending"},
     {"id": "apple-silicon-32g", "status": "scoped-out"},
-    {"id": "second-sparse-checkpoint", "status": "pending"},
+    {"id": "second-sparse-checkpoint", "status": "active"},
+    {"id": "second-oversized-architecture", "status": "scoped-out"},
     {"id": "tagged-source-release", "status": "pending"}
   ],
   "bundle_include": [

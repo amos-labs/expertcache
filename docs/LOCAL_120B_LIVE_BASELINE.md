@@ -1,5 +1,10 @@
 # Local GPT-OSS 120B live baseline
 
+> Publication note (2026-07-31): the optimization-coding evaluator was held
+> out during the original runs described below. It is now disclosed in
+> `scripts/benchmarkLocalModels.js`, so subsequent executions are regression
+> gates rather than fresh hidden-set evidence.
+
 This experiment runs the pinned, unmodified llama.cpp Metal runtime against the
 official GPT-OSS 120B MXFP4 GGUF on a 64 GB Apple Silicon Mac. It is the control
 for every later ExpertCache, mixed-precision, or distributed-inference change.
@@ -329,9 +334,10 @@ methodology, ablations, and publication gates are in
 
 1. repeat the zero-copy arm cold and warm with fixed host-state capture;
 2. run the frozen full qualification suite and compare output artifacts;
-3. characterize 32 GB and 64 GB Apple Silicon separately;
+3. retain physical 16/32 GB studies as supplemental hardware boundaries;
 4. add a safe multi-token path without recreating the physical-memory burst;
 5. reduce per-expert command encoding and view-creation overhead;
-6. test at least one second oversized MoE checkpoint; and
+6. run the pinned official GPT-OSS 20B same-family portability control and
+   keep a second oversized architecture as a separate follow-on; and
 7. extract the runtime and benchmark into a neutral open-source repository
    once the result reproduces outside the AMOS worktree.

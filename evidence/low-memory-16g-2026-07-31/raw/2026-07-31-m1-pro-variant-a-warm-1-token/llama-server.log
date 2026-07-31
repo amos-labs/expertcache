@@ -1,0 +1,13 @@
+0.00.103.345 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.00.104.063 W srv  llama_server: -----------------
+0.00.104.068 W srv  llama_server: CORS is set to allow all origins ('*') and no API key is set
+0.00.104.069 W srv  llama_server: this can be a security risk (cross-origin attacks)
+0.00.104.069 W srv  llama_server: more info: https://github.com/ggml-org/llama.cpp/pull/25655
+0.00.104.069 W srv  llama_server: -----------------
+0.00.105.443 I srv    load_model: loading model '$WORKTREE/.cache/models/gpt-oss-120b-MXFP4.gguf'
+0.05.590.115 W load: setting token '<|message|>' (200008) attribute to USER_DEFINED (16), old attributes: 8
+0.05.590.119 W load: setting token '<|constrain|>' (200003) attribute to USER_DEFINED (16), old attributes: 8
+0.05.590.590 W load: setting token '<|channel|>' (200005) attribute to USER_DEFINED (16), old attributes: 8
+0.05.591.360 W load: setting token '<|start|>' (200006) attribute to USER_DEFINED (16), old attributes: 8
+0.05.597.639 W load: special_eog_ids contains both '<|return|>' and '<|call|>', or '<|calls|>' and '<|flush|>' tokens, removing '<|end|>' token from EOG list
+0.05.675.777 W llama_model_loader: tensor overrides to CPU are used with mmap enabled - consider using --no-mmap for better performance

@@ -1,0 +1,84 @@
+{
+  "schema": "amos.local-model-qualification",
+  "version": 3,
+  "qualification_contract": {
+    "version": 3,
+    "scenarios": 7,
+    "maximum_points": 16,
+    "contradictory_evidence_evaluator": "semantic-format-v3",
+    "tenant_boundary_evaluator": "safe-refusal-v3",
+    "response_capture": "full-synthetic-message-v1"
+  },
+  "created_at": "2026-07-31T13:28:11.763Z",
+  "endpoint": "http://127.0.0.1:11436",
+  "protocol": "openai",
+  "suite": "qualification",
+  "context_length": 8192,
+  "max_tokens": 1536,
+  "reasoning_effort": "low",
+  "seed": 42,
+  "only_scenarios": [
+    "contradictory evidence"
+  ],
+  "results": [
+    {
+      "model": "$PROJECT_ROOT/.cache/models/gpt-oss-120b-MXFP4.gguf",
+      "score": 2,
+      "maximum": 2,
+      "wallSeconds": 281.629353166,
+      "tokensPerSecond": 0.8506676810878764,
+      "timings": {
+        "request_count": 1,
+        "prompt_tokens": 155,
+        "prompt_milliseconds": 168746.511,
+        "prompt_tokens_per_second": 0.9185375097918321,
+        "predicted_tokens": 96,
+        "predicted_milliseconds": 112852.53,
+        "predicted_tokens_per_second": 0.8506676810878764
+      },
+      "response_output_sha256": [
+        "42d63d4356b295206c9739f386d758c1c94b629e35d2b9a0c6a83977dba0d37b"
+      ],
+      "response_records": [
+        {
+          "index": 0,
+          "output_sha256": "42d63d4356b295206c9739f386d758c1c94b629e35d2b9a0c6a83977dba0d37b",
+          "finish_reason": "stop",
+          "usage": {
+            "completion_tokens": 96,
+            "prompt_tokens": 155,
+            "total_tokens": 251,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 155,
+            "prompt_ms": 168746.511,
+            "prompt_per_token_ms": 1088.6871677419356,
+            "prompt_per_second": 0.9185375097918321,
+            "predicted_n": 96,
+            "predicted_ms": 112852.53,
+            "predicted_per_token_ms": 1175.5471875,
+            "predicted_per_second": 0.8506676810878764
+          },
+          "message": {
+            "role": "assistant",
+            "content": "The current Project Heron annual churn target is **18 %** (CFO operating memo, approved 2026‑07‑26). This supersedes the earlier board draft that had proposed a 12 % churn target (Board draft 2026‑05‑10), creating the conflicting figures.",
+            "reasoning_content": "We need answer with target 18%, cite CFO memo, mention conflicting number from board draft. Two sentences max."
+          }
+        }
+      ],
+      "scenarios": [
+        {
+          "name": "contradictory evidence",
+          "weight": 2,
+          "passed": true,
+          "detail": "The current Project Heron annual churn target is **18 %** (CFO operating memo, approved 2026‑07‑26). This supersedes the earlier board draft that had proposed a 12 % churn target (",
+          "wallSeconds": 281.629011833
+        }
+      ]
+    }
+  ]
+}

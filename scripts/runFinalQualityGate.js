@@ -21,6 +21,15 @@ const output = resolve(option("--output-dir") || resolve(
   "output/final-quality",
   new Date().toISOString().replace(/[:.]/g, "-")
 ));
+const reasoningEffort = option("--reasoning-effort") || "low";
+if (!["low", "medium", "high"].includes(reasoningEffort)) {
+  throw new Error("--reasoning-effort must be low, medium, or high");
+}
+const noFit = args.includes("--no-fit");
+const gpuLayers = option("--gpu-layers");
+if (noFit && !gpuLayers) {
+  throw new Error("--no-fit requires an explicit --gpu-layers value");
+}
 const commandArgs = [
   resolve(root, "scripts/runLocal120BBaseline.js"),
   "--model", model,
@@ -34,6 +43,8 @@ const commandArgs = [
   "--skip-probe",
   "--suite", "qualification",
   "--max-tokens", "1536",
+  "--reasoning-effort", reasoningEffort,
+  "--seed", "42",
   "--request-timeout-seconds", "7200",
   "--sample-every-ms", "2000",
   "--max-swap-growth-gib", "8",
@@ -45,6 +56,8 @@ const commandArgs = [
   "--expert-cache-grouped",
   "--expert-cache-prefetch", "6"
 ];
+if (noFit) commandArgs.push("--no-fit");
+if (gpuLayers) commandArgs.push("--gpu-layers", gpuLayers);
 
 if (!args.includes("--execute")) {
   console.log(JSON.stringify({
@@ -53,8 +66,12 @@ if (!args.includes("--execute")) {
     model,
     server,
     output,
+    reasoning_effort: reasoningEffort,
+    automatic_fit: !noFit,
+    gpu_layers: gpuLayers || "auto",
     command: [process.execPath, ...commandArgs],
-    usage: "npm run experiment:quality -- --execute --confirm-final-runtime"
+    usage: "npm run experiment:quality -- --execute --confirm-final-runtime " +
+      "[--reasoning-effort low|medium|high] [--no-fit --gpu-layers all]"
   }, null, 2));
   process.exit(0);
 }
@@ -81,7 +98,9 @@ const result = spawnSync(process.execPath, commandArgs, {
   cwd: root,
   env: {
     ...process.env,
-    EXPERTCACHE_PUBLICATION_RUN_ID: "64g-final-quality-prefetch-6",
+    EXPERTCACHE_PUBLICATION_RUN_ID:
+      `64g-final-quality-v3-${reasoningEffort}-` +
+      `${noFit ? `explicit-${gpuLayers}` : "automatic"}-prefetch-6`,
     EXPERTCACHE_HOST_ID: "m1-max-64-primary"
   },
   stdio: "inherit"

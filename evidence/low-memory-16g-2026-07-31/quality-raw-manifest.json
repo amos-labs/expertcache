@@ -1,0 +1,204 @@
+{
+  "schema": "expertcache.sanitized-quality-evidence-manifest",
+  "version": 1,
+  "transformations": [
+    "Replace the absolute pull-request worktree path with $WORKTREE.",
+    "Replace the absolute project/cache root with $PROJECT_ROOT.",
+    "Replace any remaining absolute home path with $HOME.",
+    "Replace the host fingerprint and battery device identifier with redacted."
+  ],
+  "files": [
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-battery-8k-8-token-gate/baseline.json",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-battery-8k-8-token-gate/baseline.json",
+      "original_sha256": "7bc82db2060e5bb0992b8d0b793f6c64974285eba1b4685cdc3d276cff88dded",
+      "published_sha256": "293d867eedd7aaf69ea1bdcf68f5c61237e8297e53e6cd64a8e44d2d26afba22",
+      "original_size_bytes": 59180,
+      "published_size_bytes": 58972
+    },
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-battery-8k-8-token-gate/llama-server.log",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-battery-8k-8-token-gate/llama-server.log",
+      "original_sha256": "70236b1addbb91e8301c214377441ba38438ba45b775498ff255c274a7e3a000",
+      "published_sha256": "accaa537bf8cc3d1f5ed69e0a4fc540489b2bd4ee06f0803e0c958209053e091",
+      "original_size_bytes": 4983,
+      "published_size_bytes": 4951
+    },
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-quality-01-contradictory/baseline.json",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-quality-01-contradictory/baseline.json",
+      "original_sha256": "e987cda47696f037024b3cd9120e62a10fd72071a98f8a751e438f17284d293c",
+      "published_sha256": "8d7ca8522a73d185d06d7627cd58cba0dda3b23712cb6056d88e615aef8a80e8",
+      "original_size_bytes": 141900,
+      "published_size_bytes": 141628
+    },
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-quality-01-contradictory/qualification.json",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-quality-01-contradictory/qualification.json",
+      "original_sha256": "0040be736a5d65f8f8a6dc3ddffe8cf8f7d3f06bbca9bcc48cc044ce86b04916",
+      "published_sha256": "761b17225cacfb4517e4ff6ed6754dcf3383c030a245c9de98ed8ea40ee5a9ef",
+      "original_size_bytes": 3036,
+      "published_size_bytes": 3004
+    },
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-quality-01-contradictory/llama-server.log",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-quality-01-contradictory/llama-server.log",
+      "original_sha256": "430e786886e1f14ceed6d45df3ec34abdabe9103ebea87b70ecc307c0e053ab2",
+      "published_sha256": "2469d21707408d9b3ff6d455b3ca921debd4199facaf61a264f419a559a108a3",
+      "original_size_bytes": 7864,
+      "published_size_bytes": 7832
+    },
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-quality-02-prompt-injection/baseline.json",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-quality-02-prompt-injection/baseline.json",
+      "original_sha256": "6ed40e164a8f3d538c3ea8ec5afdb45c70df16256de16b81057575ac5d7f067c",
+      "published_sha256": "0d3a431adcdfe507ff59af6da6150fe93bd311b629a6ce5caac4f61d083b6471",
+      "original_size_bytes": 173464,
+      "published_size_bytes": 173192
+    },
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-quality-02-prompt-injection/qualification.json",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-quality-02-prompt-injection/qualification.json",
+      "original_sha256": "8af977005a6cfe62166342f836a6a24d5c4c6bba09be3970587b06181f895925",
+      "published_sha256": "d8fe8aff057aa9ba44d2431df28c756c7ac3768c4533ece6664304362915649a",
+      "original_size_bytes": 3187,
+      "published_size_bytes": 3155
+    },
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-quality-02-prompt-injection/llama-server.log",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-quality-02-prompt-injection/llama-server.log",
+      "original_sha256": "a7e61bc57dc5cb06399a951d66f8b38680941305d69b2e167ef8a1cebd907c9d",
+      "published_sha256": "706dad366f2f08087a223cb0868b6bb6a999b25d3ca4036d8a3322a9c6fb334f",
+      "original_size_bytes": 10090,
+      "published_size_bytes": 10058
+    },
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-quality-03-tenant-boundary/baseline.json",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-quality-03-tenant-boundary/baseline.json",
+      "original_sha256": "c497d8baa09480fef6df738a07c45ff533cf85eb503b4540060a922e87ddc842",
+      "published_sha256": "0ff944bdbf7f6be8f72286ec1d0f4f7d525cc3bba3b037b2d1a7b415dbeb2e81",
+      "original_size_bytes": 159857,
+      "published_size_bytes": 159585
+    },
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-quality-03-tenant-boundary/qualification.json",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-quality-03-tenant-boundary/qualification.json",
+      "original_sha256": "200a7dec2705f7679e92cd0bf5563a7379eefe155fc1799469b2a41140b02a27",
+      "published_sha256": "0785df2cc6e8c069b6d8d2f86fe55320acdde8dedc7ee642fddd22de837c423a",
+      "original_size_bytes": 3114,
+      "published_size_bytes": 3082
+    },
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-quality-03-tenant-boundary/llama-server.log",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-quality-03-tenant-boundary/llama-server.log",
+      "original_sha256": "f6138044c60706f8fd072d61d9656052a9d1c5e02c93c5bb54afc150a71bbf14",
+      "published_sha256": "0c0535939fe95c5dd4b82844c54be3cd228236ab7bc4e0cb13078a4449e933cd",
+      "original_size_bytes": 9016,
+      "published_size_bytes": 8984
+    },
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-quality-04-parked-approval/baseline.json",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-quality-04-parked-approval/baseline.json",
+      "original_sha256": "ae0e183772164af191cba6b464e57417f7faf02bf961e30be7482efe33000ae1",
+      "published_sha256": "822f3202ceff3f79859ab77e92ec2f6321170408bdf013935c5370eefb99633e",
+      "original_size_bytes": 164680,
+      "published_size_bytes": 164408
+    },
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-quality-04-parked-approval/qualification.json",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-quality-04-parked-approval/qualification.json",
+      "original_sha256": "50f5c04613c45d74cdd58f27aa1ad6c1e48f813057441514e26a2dc00d07408b",
+      "published_sha256": "3ff3ea3d2795f690be87ab793b8ff36ebf8b642f3046dd75cec2e0755e927a9b",
+      "original_size_bytes": 4260,
+      "published_size_bytes": 4228
+    },
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-quality-04-parked-approval/llama-server.log",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-quality-04-parked-approval/llama-server.log",
+      "original_sha256": "bf45dc18103227fcd935d08736d1efb04252bb2cc4173950ea56121c3d0deb3f",
+      "published_sha256": "04a4129614c2750d3bc0407098f20c6ebc6f426cf84a75f49ffb6db742f9e5d3",
+      "original_size_bytes": 10838,
+      "published_size_bytes": 10806
+    },
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-quality-05-multi-tool/baseline.json",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-quality-05-multi-tool/baseline.json",
+      "original_sha256": "a1e2be1f7dd0927b6a7e35738eafb734837de7a76af63acf1c8dceabb9cc7d45",
+      "published_sha256": "dc38c0c7eb07b95833429a53310931bc264bef3b95c0df2b5142899320dfe3ef",
+      "original_size_bytes": 300806,
+      "published_size_bytes": 300534
+    },
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-quality-05-multi-tool/qualification.json",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-quality-05-multi-tool/qualification.json",
+      "original_sha256": "ed3432bef988dc120264437ebd6db6a5cc6af1da107ff46f04f3cd596576983f",
+      "published_sha256": "3fd1e8fff935636597175ef1f28a740a045cbbaad6fa65779aae50ebac0c3dbb",
+      "original_size_bytes": 6072,
+      "published_size_bytes": 6040
+    },
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-quality-05-multi-tool/llama-server.log",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-quality-05-multi-tool/llama-server.log",
+      "original_sha256": "757395c84351eec0fcc2c537f93ea37006e54062ae48455048f0a3e7b69adb79",
+      "published_sha256": "a68119d77d3238b735ed18917819247e76e3919a934bc3720f552b9d756458c9",
+      "original_size_bytes": 17228,
+      "published_size_bytes": 17196
+    },
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-quality-06-coding/baseline.json",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-quality-06-coding/baseline.json",
+      "original_sha256": "6516e9cdb76b88ab29c9dad0752d06c9a8989d3b3895426d540697b58fc0ab0e",
+      "published_sha256": "eb87c4c6c10195220d9b585d5ad3e2bb57e9573cd40541a7acf7707162b41530",
+      "original_size_bytes": 368537,
+      "published_size_bytes": 368265
+    },
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-quality-06-coding/qualification.json",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-quality-06-coding/qualification.json",
+      "original_sha256": "e1b7d1b70502ba884d49e012427c09aac252d60be9504a2e3a5d6748a5ac8ff1",
+      "published_sha256": "97021b8ab29a3784ab838f47d3a0560bbaf0870ff2bd3d94d12de555d2abb300",
+      "original_size_bytes": 4178,
+      "published_size_bytes": 4146
+    },
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-quality-06-coding/llama-server.log",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-quality-06-coding/llama-server.log",
+      "original_sha256": "008f790a6b64ffd8638dfaa09ddcc4ccbf3712d6d9a1bb48a3a62c08d78dad25",
+      "published_sha256": "0d020e389dbee72697ef2a00c9eb9ce3706b6391d930052129a60a80ee8a030e",
+      "original_size_bytes": 22296,
+      "published_size_bytes": 22264
+    },
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-quality-07b-distractor-caffeinated/baseline.json",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-quality-07b-distractor-caffeinated/baseline.json",
+      "original_sha256": "041cbe0bb9b1fdbc810bf36bc60b4f687a87de066b0c929684e7d52bf3e268f7",
+      "published_sha256": "dc5d2adf3364961895e10511e27b5bb9cd18ae4b7fa05cefe09a11b19efa3416",
+      "original_size_bytes": 2366939,
+      "published_size_bytes": 2366667
+    },
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-quality-07b-distractor-caffeinated/qualification.json",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-quality-07b-distractor-caffeinated/qualification.json",
+      "original_sha256": "df243c5a2209e2798e7a5babf2dbfc55ed915a1dcccc4daac719603de406d0a0",
+      "published_sha256": "5e21812a441e5e1ace60462594ab9eff527a9a87f5078f4a13c5a3c48ff8366a",
+      "original_size_bytes": 2980,
+      "published_size_bytes": 2948
+    },
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-quality-07b-distractor-caffeinated/llama-server.log",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-quality-07b-distractor-caffeinated/llama-server.log",
+      "original_sha256": "38493cd9518beaeac3708379ccf41af4c866365aa71f912226bcb481a6c70245",
+      "published_sha256": "74928c77edd9b7430e37666fefa2a43984d7ebb7abf123cead42405744744370",
+      "original_size_bytes": 152352,
+      "published_size_bytes": 152320
+    },
+    {
+      "source_output": "output/low-memory-quality/2026-07-31-m1-pro-warm-quality-07-distractor-retrieval/llama-server.log",
+      "published_path": "evidence/low-memory-16g-2026-07-31/quality-raw/2026-07-31-m1-pro-warm-quality-07-distractor-retrieval/llama-server.log",
+      "original_sha256": "aac91b0a834b095549c0b529d455037a6a60efa9cc42608fd91fcfb5d6dbca65",
+      "published_sha256": "a2fcbaff424b54d4e9da141b44f3b22da087d8d9451ac96e402e1d3e7ed65733",
+      "original_size_bytes": 27412,
+      "published_size_bytes": 27380
+    }
+  ]
+}
