@@ -46,7 +46,35 @@ the work.
 - `test/` — deterministic unit and replay tests.
 - `evidence/` — committed, machine-readable decision-grade result bundles.
 - `docs/REPRODUCIBILITY.md` — end-to-end experimental workflow.
-- `paper/` — arXiv preparation gates and artifact plan.
+- `paper/` — manuscript, claim ledger, registered protocol, and result macros.
+- `artifact/` — machine-readable experiment matrix and publication manifest.
+- `ROADMAP.md` — publication gates, production architecture, and retained
+  negative results.
+
+## Publication program
+
+The manuscript is intentionally provisional while the registered experiment
+matrix is running. Existing measurements remain labeled decision-grade until
+the counterbalanced clean-host blocks, full quality gate, telemetry gate, and
+second-checkpoint portability study close.
+
+```bash
+npm run paper:check
+npm run artifact:validate
+npm run experiment:publication
+```
+
+The last command prints the registered blocks without starting inference. A
+live block requires explicit execution and clean-boot confirmations; see
+[`paper/EXPERIMENT_PROTOCOL.md`](paper/EXPERIMENT_PROTOCOL.md). A 32 GiB Mac is
+an optional physical-hardware replication, not something this 64 GiB host can
+legitimately emulate for a hardware claim.
+
+For a physical 16 GiB Apple Silicon host, `experiment:low-memory` provides a
+separate, protected one-token feasibility gate. It aborts on bounded swap,
+memory-pressure, or wall-time limits and must not be used as a 32 GiB claim.
+Follow the [physical 16 GiB M1 Pro runbook](docs/LOW_MEMORY_16G_RUNBOOK.md)
+without skipping directly to quality or throughput testing.
 
 ## Quick validation
 
@@ -62,8 +90,8 @@ npm run check
 ```
 
 Preparing the live runtime clones the pinned `llama.cpp` revision, verifies the
-patch digest, applies it, and builds the Metal binaries in
-`~/.cache/expertcache/llama.cpp`:
+patch digest, applies it, and builds the Metal binaries in the requested
+checkout (the publication workflow uses `.cache/runtime/llama.cpp`):
 
 ```bash
 npm run runtime:prepare
@@ -93,6 +121,9 @@ ExpertCache-authored code is Apache-2.0. The runtime patch applies to the
 MIT-licensed `llama.cpp`; its license is preserved in
 [`third_party/llama.cpp-LICENSE.txt`](third_party/llama.cpp-LICENSE.txt).
 See [`NOTICE`](NOTICE) and [`PROVENANCE.md`](PROVENANCE.md).
+The AI-assisted research and writing boundary is documented in
+[`AI_USAGE.md`](AI_USAGE.md); AI systems are acknowledged as tools, not listed
+as authors.
 
 ## Citation
 

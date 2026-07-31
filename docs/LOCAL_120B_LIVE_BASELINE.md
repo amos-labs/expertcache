@@ -201,11 +201,13 @@ the final publication multiplier. The clean short probe measured 98.1 versus
 71.4 seconds and 1.83 versus 3.39 reported generation tok/s. A clean,
 counterbalanced full-length A/B remains required.
 
-The full 768-token qualification score remains 11/16 for strict comparison
-with the resident controls. The 1,536-token coding run is a diagnostic, not a
-retroactive change to that contract. Bedrock's tenant-boundary response was
-also safe but missed the evaluator's narrow accepted wording; that evaluator
-false negative should be fixed separately without changing the frozen score.
+For strict comparison with the resident controls, the last contemporaneous
+full 768-token qualification score remains 11/16. Across the latest component
+evidence, the later 1,536-token coding run adds a demonstrated 3/3 hidden-gate
+pass, for composite coverage of 14/16 points. That composite is not a
+retroactive full-suite score. Bedrock's tenant-boundary response was also safe
+but missed the evaluator's narrow accepted wording; that evaluator false
+negative should be fixed separately without changing the frozen score.
 
 Use `--skip-probe` during targeted performance work to avoid paying for the
 independent 32-token readiness generation before every scenario:

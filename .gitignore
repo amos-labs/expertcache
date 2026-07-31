@@ -2,6 +2,7 @@
 .env
 .env.*
 .venv*/
+.cache/
 node_modules/
 output/
 *.gguf

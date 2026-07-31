@@ -1,0 +1,418 @@
+\documentclass[10pt,twocolumn]{article}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{url}
+
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+\newcommand{\Pending}[1]{\textcolor{red}{\textbf{[PENDING: #1]}}}
+\newcommand{\system}{ExpertCache}
+\input{results.tex}
+
+\title{ExpertCache: Page-Aware Direct Expert Views for\\
+Oversized Sparse Models on Apple Silicon}
+\author{Rick Barkley\\AMOS Labs}
+\date{Draft of July 31, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Sparse mixture-of-experts (MoE) models reduce active computation, but their
+complete checkpoints can still leave too little memory headroom for practical
+inference on consumer unified-memory systems.  We present \system, an
+experimental Metal path that keeps an MoE checkpoint file mapped while
+exposing only currently routed expert ranges to the GPU through page-aligned,
+no-copy buffer views.  The path combines expert-grouped multi-token dispatch
+with asynchronous prefetch of a recent routed-expert union.  On a 64~GiB Apple
+M1 Max, the current artifact executed the complete 63,387,346,208-byte GPT-OSS
+120B MXFP4 checkpoint, preserved a targeted 3/3 hidden coding gate, and
+produced a bit-exact \CurrentTrajectoryTokens-token trajectory across the
+prefetch boundary.  In a single decision-grade A/B, routed-union prefetch
+raised real-prompt prefill from \CurrentPrefetchControlRate{} to
+\CurrentPrefetchRate{} tokens/s (\CurrentPrefetchGain), while serial decode
+remained near \CurrentDecodeRange{} tokens/s.  A synthetic four-expert hot
+ceiling reached \CurrentHotGroupedRate{} tokens/s with grouped dispatch, but
+is deliberately invalid for model-quality claims.  We also report negative
+results for page-advice-only residency, persistent copied slots, parallel
+projection copies, and wide cold blocks.  The released repository includes a
+pinned runtime patch, deterministic tests, raw decision-grade evidence, a
+registered repeated/counterbalanced protocol, and checksummed artifact
+tooling.  Final publication estimates remain gated on those registered runs,
+the frozen quality suite, complete resource telemetry, and a second sparse
+checkpoint.
+\end{abstract}
+
+\section{Introduction}
+
+Conditional computation permits a model to hold far more parameters than it
+uses for one token.  It does not make the inactive parameters disappear from
+storage or from a runtime's resource accounting.  This gap is especially
+visible on Apple Silicon: CPU and GPU share physical memory, which removes a
+discrete PCIe copy boundary but makes the operating system, checkpoint pages,
+Metal resources, KV cache, working buffers, and interactive applications
+compete for one capacity pool.
+
+GPT-OSS 120B is a useful stress case.  It has 116.8B total parameters, 5.13B
+active parameters per token, 128 experts per layer, and four selected experts
+per token \cite{openai2025gptoss}.  The pinned GGUF used here is 63.4~GB in
+decimal units (about 59.0~GiB).  It is therefore smaller than a 64~GiB
+machine's physical memory, but too large to treat a successful \texttt{mmap}
+as evidence of usable Metal inference.  The stock control loaded the artifact
+but produced no first token, entered a Metal command-buffer out-of-memory
+state, and in one run grew swap from 9.6 to 42.1~GiB.
+
+The central research question is narrower than ``can a laptop run a 120B
+model?''  We ask whether a read-only, page-aware runtime can expose only the
+authoritatively selected expert bytes to Metal, preserve model math, and bound
+the physical working set sufficiently to make useful inference possible.
+
+This paper makes four contributions:
+
+\begin{enumerate}[leftmargin=*]
+  \item a direct-view Metal path that creates page-aligned, no-copy views over
+  selected MXFP4 expert ranges instead of binding or duplicating complete MoE
+  tensors;
+  \item an expert-grouped dispatch path and asynchronous routed-union
+  prefetcher that preserve per-output accumulation math while reducing launch
+  and cold-page serialization;
+  \item a sequence of correctness-bearing positive and negative experiments,
+  including a failed page-advice architecture and rejected copied-cache
+  variants; and
+  \item an open, pinned artifact with claim grades, a registered experiment
+  matrix, privacy-safe route/evidence formats, and release validation that
+  refuses to label incomplete measurements as publication-grade.
+\end{enumerate}
+
+The present draft distinguishes architecture-validated results from
+decision-grade performance observations.  The claim ledger in the artifact
+is normative; placeholders remain visible where the registered publication
+matrix has not finished.
+
+\section{Background and Related Work}
+
+\subsection{Sparse mixture-of-experts inference}
+
+Sparsely gated MoE layers use a learned router to select a small subset of
+experts, increasing parameter capacity without proportional per-example
+compute \cite{shazeer2017moe}.  Switch Transformers simplified sparse routing
+and demonstrated large-scale conditional computation
+\cite{fedus2022switch}.  At inference time, however, sparse arithmetic and
+dense checkpoint residency remain separate constraints.
+
+\subsection{Offloading and limited-memory execution}
+
+MoE-Infinity uses request-level activation traces, caching, and prefetch to
+improve expert offloading on discrete accelerator systems
+\cite{xue2024moeinfinity}.  LLM in a Flash reduces storage traffic through
+windowing and larger contiguous reads \cite{alizadeh2023llmflash}.
+PowerInfer partitions hot and cold neurons across a consumer GPU and CPU using
+activation locality and predictors \cite{song2023powerinfer}.  These systems
+motivate locality-aware execution, but their ownership and transfer boundaries
+do not directly answer Metal resource accounting on unified memory.
+
+Speculative decoding is particularly relevant once prefill/verification is
+faster than serial decode.  SpecMoEOff explicitly uses speculative batches to
+hide MoE offloading latency \cite{wang2025specmoeoff}.  \system's present
+paper evaluates the memory and grouped-prefill substrate; resident-draft/
+oversized-verifier execution is a registered next experiment, not part of the
+current result.
+
+\subsection{llama.cpp and Metal}
+
+The implementation is a patch against a pinned \texttt{llama.cpp} revision,
+whose Metal backend provides the existing MXFP4 kernels, graph execution, and
+GGUF mapping path \cite{llamacpp}.  \system{} changes the routed expert
+resource boundary and dispatch organization; it does not modify model weights,
+the router's authoritative selected IDs, or the accumulation order within one
+output element.
+
+\section{Design}
+
+\subsection{Problem boundary}
+
+For one routed expert projection, let $W_{l,e,p}$ denote the weight range for
+layer $l$, expert $e$, and projection $p\in\{\mathrm{gate},\mathrm{up},
+\mathrm{down}\}$.  A token activates only a small set $R_{l,t}$, but a normal
+inference graph may reference the complete tensor containing every
+$W_{l,e,p}$.  Binding that full resource can make Metal account or touch a
+working set that defeats conditional computation.
+
+The runtime must satisfy two invariants:
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Capability invariant:} only router-selected, read-only model
+  ranges may enter the expert multiplication for a token.
+  \item \textbf{Quality invariant:} memory and dispatch policy may change
+  latency, but must not change expert IDs, weights, inputs, or arithmetic for
+  an output element.
+\end{enumerate}
+
+\subsection{Page-aligned direct expert views}
+
+The checkpoint remains a read-only file mapping.  Once the GPU-produced route
+IDs for a layer are visible to the CPU, \system{} validates each ID and derives
+the exact byte range of its three projections.  Each range is expanded only to
+the operating system page boundary needed by Metal's no-copy buffer API.  A
+Metal buffer view points at those mapped bytes, while kernel offsets recover
+the exact expert start.  No parallel expert-weight pool is allocated in the
+direct path.
+
+This design does not pin every mapped page.  Instead, it avoids the
+unconditional second copy and prevents the complete routed projection from
+being bound as one Metal resource.  File-page residency remains an operating
+system concern, which is why explicit telemetry and prefetch are necessary.
+
+\subsection{Expert-grouped dispatch}
+
+The per-route baseline launches the MXFP4 matrix-vector operation separately
+for each token/expert pair.  During multi-token prefill, many tokens share an
+expert.  The grouped path builds a compact map from expert to
+$(\mathrm{token},\mathrm{expert\ slot})$ pairs and launches once per unique
+expert.  The kernel computes the same destination elements with the same
+within-element accumulation.  Single-token decode retains the per-route path,
+because grouping has no reuse to exploit.
+
+\subsection{Asynchronous routed-union prefetch}
+
+When current-layer routes become authoritative, a bounded worker pool reads
+the selected mapped ranges in parallel with GPU work.  It also warms the
+recent route union for a configurable number of future projection/layer
+positions.  The default decision-grade configuration uses six workers, a
+16-build route window, and lookahead three.  The final layer wraps to layer
+zero so the next decode token can begin warmer.
+
+Prefetch workers only read the mapping.  A prediction or heuristic error can
+increase I/O or displace pages, but cannot alter model math.  This asymmetric
+failure mode is essential for future learned residency prediction.
+
+\begin{figure}[t]
+\centering
+\fbox{\begin{minipage}{0.92\columnwidth}
+\small
+\textbf{Authoritative path:} activations $\rightarrow$ model router
+$\rightarrow$ selected expert IDs $\rightarrow$ exact direct views
+$\rightarrow$ grouped MXFP4 kernel.\\[3pt]
+\textbf{Advisory path:} recent route union $\rightarrow$ bounded worker queue
+$\rightarrow$ read-only page touches.\\[3pt]
+Only the authoritative path supplies weight bytes to the multiplication.
+\end{minipage}}
+\caption{\system{} separates correctness-bearing expert selection from
+latency-only residency advice.}
+\label{fig:architecture}
+\end{figure}
+
+\section{Implementation}
+
+The artifact pins \texttt{llama.cpp} revision
+\texttt{7e1e28cae36d41fe7bbe9dae7c9625de6565c063} and verifies the runtime
+patch SHA-256 before application.  The patch adds:
+
+\begin{itemize}[leftmargin=*]
+  \item candidate detection for routed MXFP4 \texttt{MUL\_MAT\_ID} nodes;
+  \item bounded graph execution around route synchronization;
+  \item page-aligned \texttt{newBufferWithBytesNoCopy} expert views;
+  \item a gathered route-map Metal kernel for grouped dispatch;
+  \item a bounded read-only prefetch worker pool; and
+  \item content-free route, byte, timing, and cache instrumentation.
+\end{itemize}
+
+Environment variables and runner flags expose the experimental arms.  They
+are intentionally not a production API.  The release plan replaces them with
+a versioned backend capability, signed manifest, cancellation contract, and
+memory-pressure governor.
+
+The architecture-neutral JavaScript simulator and Python replay harness model
+LRU/TinyLFU policies, route-window union growth, page residency, miss latency,
+and speculative verification batches without model weights.  Native Objective
+C++ probes isolate Metal buffer and MXFP4 kernel behavior.  Tests reject trace
+payloads that contain prompts or model activations.
+
+\section{Methodology}
+
+\subsection{Artifacts and host}
+
+The primary model is the official GPT-OSS 120B MXFP4 GGUF at revision
+\texttt{238abdd290bb874b90a5da1b4549881b7d05c091}.  The exact artifact is
+63,387,346,208 bytes.  The primary host is a 64~GiB Apple M1 Max MacBook Pro.
+The controlled context length is 8,192 tokens.
+
+\subsection{Registered run design}
+
+The final primary comparison uses nine reboot-separated blocks over
+\texttt{direct}, \texttt{grouped}, and \texttt{prefetch-6}.  A registered
+rotation places each arm first---and therefore cold---three times.  Remaining
+positions quantify warm state while retaining block and order.  Cold and warm
+observations are reported separately.  Microbenchmarks and secondary ablations
+use at least five repetitions.  We report medians, IQR, range, planned and
+completed counts, and bootstrap intervals where sample size permits.
+
+The paper does not treat memory reservation or a virtual machine on the 64~GiB
+host as a real 32~GiB replication.  A constrained-budget stress condition may
+be reported as supplemental evidence.  Any 32~GiB hardware claim requires a
+physical host; otherwise the claim is scoped to the measured 64~GiB system.
+
+\subsection{Metrics}
+
+Every run captures readiness, TTFT, prompt and decode throughput, completion
+length, wall time, process RSS, compressed and swap memory, VM page counters,
+ExpertCache route/byte/dispatch telemetry, power-source and thermal state, and
+energy when host permissions permit.  Missing metrics are null with an
+explanation, never zero.
+
+\subsection{Correctness and quality}
+
+Performance promotion requires deterministic raw-output comparison at
+micro-batch 4 and 64, followed by the complete trajectory gate.  The final
+runtime then runs a frozen seven-scenario, 16-point qualification suite.
+Hidden prompt text is
+not published; aggregate and per-case status plus non-reversible output hashes
+are preserved.  A changed trajectory blocks bit-exact claims but is not
+automatically a quality failure; it requires separate analysis.
+
+\subsection{AI-assisted research process}
+
+The code, tests, experiment plans, and manuscript were developed through a
+human-in-the-loop process using Fable and OpenAI GPT Sol for rapid prototyping,
+debugging, test formulation, repository restructuring, and text refinement.
+The human author reviewed the resulting material and operated the empirical
+gates.  AI output was not used as measurement evidence.  Exact service-side
+model versions were not retained for every original interaction; the artifact
+discloses this provenance limitation.  The human author retains full
+responsibility for code integrity, originality, citations, and empirical
+claims.
+
+\section{Evaluation}
+
+\subsection{Stock failure and first working path}
+
+The stock controls loaded the checkpoint but failed before sampling a token.
+The first bounded copied-slot path completed the targeted coding gate at about
+0.93 decode tokens/s.  Layer-grouped projection copies improved the observed
+decode rate to 1.56 tokens/s.  Direct selected-expert views completed the same
+gate in 320.6 seconds, with \CurrentDirectPromptRate{} prompt tokens/s and
+\CurrentDirectDecodeRate{} decode tokens/s.  These full-length runs established
+the architecture and targeted quality but were not a counterbalanced
+performance study.
+
+\subsection{Dispatch and residency ceilings}
+
+On a synthetic four-expert hot set, grouped dispatch increased prompt rate
+from \CurrentHotUngroupedRate{} to \CurrentHotGroupedRate{} tokens/s.  Because
+the runtime replaces authoritative routing in this arm, its output is
+meaningless by design.  The result isolates dispatch/compute headroom only.
+
+Real routing remained much slower.  A 64-token route window used
+\CurrentRouteWindowExperts{} experts per layer on average, corresponding to an
+estimated \CurrentRouteWindowGiB{}~GiB of expert projections before shared
+weights, KV cache, runtime buffers, and the OS.  This gap motivated explicit
+prefetch rather than more dispatch tuning.
+
+\subsection{Decision-grade prefetch result}
+
+The final targeted gate compared grouped control and grouped plus six prefetch
+workers.  Both scored \CurrentTargetedScore{} and produced the same
+\CurrentTrajectoryTokens-token trajectory.  Prompt evaluation rose from
+\CurrentPrefetchControlRate{} to \CurrentPrefetchRate{} tokens/s
+(\CurrentPrefetchGain); decode was 3.38 versus 3.24 tokens/s and total wall
+time remained decode-dominated.  System swap did not grow during that observed
+run.  Because the host carried prior cache/swap history and the result is one
+A/B, this is a decision-grade mechanism result, not the final estimate.
+
+\begin{table*}[t]
+\centering
+\caption{Current observations and required publication replacements.}
+\begin{tabular}{llll}
+\toprule
+Result & Current observation & Grade & Final field \\
+\midrule
+Direct-view prompt & \CurrentDirectPromptRate{} tok/s & architecture run & \PublishedColdDirectPrefill \\
+Grouped cold prompt & decision-grade only & pending & \PublishedColdGroupedPrefill \\
+Prefetch cold prompt & decision-grade only & pending & \PublishedColdPrefetchPrefill \\
+Prefetch effect & \CurrentPrefetchGain{} single A/B & decision-grade & \PublishedPrefetchEffect \\
+Full quality & composite 14/16 points across runs & incomplete & \PublishedFullQuality \\
+32~GiB physical host & not run & scoped out unless obtained & \PublishedThirtyTwoGiB \\
+Second checkpoint & not run & pending & \PublishedSecondCheckpoint \\
+Energy/thermal & incomplete & pending & \PublishedEnergy \\
+\bottomrule
+\end{tabular}
+\label{tab:pending}
+\end{table*}
+
+\subsection{Negative results}
+
+Page advice alone failed its physical residency gate: logical membership did
+not guarantee resident pages, and prewarm could displace useful data.  A
+corrected persistent copied-slot LRU preserved raw output but ran slower than
+the contemporaneous zero-copy control.  Parallel gate/up/down copies reduced
+measured copy time without improving total latency.  Wider expert blocks
+touched too much of the cold checkpoint and entered severe page/swap stalls.
+These results constrain the ownership boundary: logical reuse is insufficient
+when the cache itself creates a competing resident pool.
+
+\section{Discussion and Roadmap}
+
+The present shape---faster prefill, slow serial decode---suggests using the
+oversized model as a verifier rather than an interactive typist.  A resident
+20--30B model can draft a bounded span; the 120B path can verify the span as a
+batch, amortizing route discovery and page-in over accepted tokens.  This is
+an experiment, not an extrapolation from the hot ceiling.
+
+A production design also separates two small-model roles.  A task qualifier
+routes governed work among resident, local-verifier, and hosted paths with
+calibrated abstention.  A distinct residency predictor forecasts expert pages
+from recent authoritative routes.  The latter is advisory: incorrect
+predictions may waste I/O but never replace the model router or alter selected
+weights.  The deterministic route-union heuristic remains its fallback.
+
+Additional work includes adaptive byte-bounded batches, reusable view
+metadata, expert-contiguous GGUF layout, mixed-bit resident experts, long
+contexts, cancellation and memory-pressure control, multi-session scheduling,
+and a private multi-node sovereign fallback.  The repository roadmap records
+exit and kill criteria for each path.
+
+\section{Limitations}
+
+The current complete live result covers one 64~GiB M1 Max and one primary
+checkpoint.  A real 32~GiB host has not been measured and cannot be replaced by
+a memory-reservation claim.  The existing performance evidence was collected
+during an iterative engineering sequence with varying page-cache, swap, and
+background host state.  The final repeated/counterbalanced matrix is still in
+progress.
+
+The targeted 3/3 coding gate is not a general quality evaluation.  The frozen
+full suite, public equivalence corpus, second checkpoint, energy, thermal,
+long-session, cancellation, and concurrency experiments remain open.  Decode
+near three tokens/s is not interactive production performance.  The patch is
+experimental, MXFP4-specific in its grouped correctness-bearing kernel, and
+not an upstream API.  macOS page behavior and Metal implementation details may
+not generalize to discrete GPU systems or later operating-system versions.
+
+\section{Conclusion}
+
+\system{} demonstrates that sparse activation can be carried through the
+Metal resource boundary: a complete 63.4~GB MoE checkpoint executed on a
+64~GiB Apple Silicon system by exposing only selected expert ranges, while a
+targeted result and long deterministic trajectory were preserved.  Grouped
+dispatch removed a measured launch ceiling, and routed-union prefetch improved
+decision-grade real-prompt prefill, but serial decode and publication coverage
+remain open.  The strongest present contribution is therefore an
+architecture, a set of bounded positive and negative results, and an artifact
+that makes unfinished evidence explicit.  The registered experiment program
+will determine the final performance claim and whether the path is a useful
+verifier substrate or remains a research result.
+
+\section{Acknowledgments}
+
+We acknowledge the use of Fable and OpenAI GPT Sol for code synthesis, test
+formulation, debugging, repository restructuring, and text refinement during
+the preparation of this artifact and manuscript.  These systems are not
+authors.  Full responsibility for originality, accuracy, code integrity, and
+empirical findings remains with the human author.
+
+\bibliographystyle{plain}
+\bibliography{references}
+\end{document}

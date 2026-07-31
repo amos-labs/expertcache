@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/amos-labs/expertcache/artifact/publication-manifest.schema.json",
+  "title": "ExpertCache publication artifact manifest",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "artifact_version",
+    "state",
+    "title",
+    "repository",
+    "primary_model",
+    "claims",
+    "gates",
+    "bundle_include"
+  ],
+  "properties": {
+    "schema": {"const": "expertcache.publication-artifact"},
+    "version": {"const": 1},
+    "artifact_version": {"type": "string", "minLength": 1},
+    "state": {"enum": ["provisional", "release-candidate", "release"]},
+    "title": {"type": "string", "minLength": 1},
+    "repository": {"type": "string", "format": "uri"},
+    "primary_model": {
+      "type": "object",
+      "required": ["id", "repository", "revision", "filename", "size_bytes"],
+      "properties": {
+        "id": {"type": "string"},
+        "repository": {"type": "string"},
+        "revision": {"type": "string"},
+        "filename": {"type": "string"},
+        "size_bytes": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "grade", "evidence"],
+        "properties": {
+          "id": {"type": "string"},
+          "grade": {"type": "string"},
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "string"}
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "status"],
+        "properties": {
+          "id": {"type": "string"},
+          "status": {"enum": ["complete", "scoped-out", "active", "pending", "external", "blocked"]}
+        },
+        "additionalProperties": false
+      }
+    },
+    "bundle_include": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"}
+    }
+  },
+  "additionalProperties": false
+}
