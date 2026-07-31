@@ -1,0 +1,51 @@
+{
+  "schema": "expertcache.publication-matrix",
+  "version": 1,
+  "protocol": "paper/EXPERIMENT_PROTOCOL.md",
+  "primary_arms": {
+    "direct": [
+      "--expert-cache-slots", "128",
+      "--expert-cache-cpu-fill",
+      "--expert-cache-zero-copy"
+    ],
+    "grouped": [
+      "--expert-cache-slots", "128",
+      "--expert-cache-cpu-fill",
+      "--expert-cache-zero-copy",
+      "--expert-cache-grouped"
+    ],
+    "prefetch-6": [
+      "--expert-cache-slots", "128",
+      "--expert-cache-cpu-fill",
+      "--expert-cache-zero-copy",
+      "--expert-cache-grouped",
+      "--expert-cache-prefetch", "6"
+    ]
+  },
+  "cold_blocks_64g": [
+    {"id": "64g-block-01", "order": ["direct", "grouped", "prefetch-6"]},
+    {"id": "64g-block-02", "order": ["grouped", "prefetch-6", "direct"]},
+    {"id": "64g-block-03", "order": ["prefetch-6", "direct", "grouped"]},
+    {"id": "64g-block-04", "order": ["direct", "prefetch-6", "grouped"]},
+    {"id": "64g-block-05", "order": ["prefetch-6", "grouped", "direct"]},
+    {"id": "64g-block-06", "order": ["grouped", "direct", "prefetch-6"]},
+    {"id": "64g-block-07", "order": ["direct", "grouped", "prefetch-6"]},
+    {"id": "64g-block-08", "order": ["grouped", "prefetch-6", "direct"]},
+    {"id": "64g-block-09", "order": ["prefetch-6", "direct", "grouped"]}
+  ],
+  "fixed_options": [
+    "--context", "8192",
+    "--batch", "64",
+    "--ubatch", "64",
+    "--suite", "qualification",
+    "--max-tokens", "1536",
+    "--request-timeout-seconds", "7200"
+  ],
+  "external_gates": [
+    "second oversized sparse checkpoint"
+  ],
+  "supplemental_replications": [
+    "32 GiB Apple Silicon host; publish only after measurement on physical hardware",
+    "16 GiB M1 Pro bounded first-token feasibility probe; separate hardware class and not initially a throughput claim"
+  ]
+}

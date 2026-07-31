@@ -1,0 +1,52 @@
+{
+  "schema": "expertcache.restored-runtime-diagnostic",
+  "version": 1,
+  "grade": "decision-grade-diagnostic",
+  "started_at": "2026-07-31T11:22:30.463Z",
+  "completed_at": "2026-07-31T11:24:30.143Z",
+  "host": {
+    "model_identifier": "MacBookPro18,4",
+    "chip": "Apple M1 Max",
+    "physical_memory": "64 GB",
+    "os_version": "26.6",
+    "os_build": "25G72"
+  },
+  "configuration": {
+    "sha256": "a06b456c019eef71a2ee688e556c5a236d8fe1d1f57a2a09ad7152a90da9ba05",
+    "context_tokens": 4096,
+    "batch_tokens": 4,
+    "micro_batch_tokens": 1,
+    "direct_views": true,
+    "grouped_dispatch": false,
+    "prefetch_threads": 0,
+    "warmup": false,
+    "completion_cap_tokens": 8
+  },
+  "result": {
+    "server_exit_status": 0,
+    "readiness_seconds": 38.097553834,
+    "first_completion_event_ms": 43478.859084,
+    "first_content_or_reasoning_token_ms": 45149.265,
+    "prompt": {
+      "tokens": 75,
+      "milliseconds": 43469.54,
+      "tokens_per_second": 1.73
+    },
+    "decode": {
+      "tokens": 8,
+      "milliseconds": 4149.85,
+      "tokens_per_second": 1.93
+    },
+    "peak_rss_bytes": 40848916480,
+    "swap_start_bytes": 1326050181.12,
+    "swap_end_bytes": 1326050181.12,
+    "swap_growth_bytes": 0,
+    "memory_free_percent_start": 73,
+    "memory_free_percent_end": 71,
+    "watchdog_triggered": null
+  },
+  "local_artifact_sha256": {
+    "baseline_json": "b3f7cdbe7e2c0b012c1ef6ffd30fa5299281adfa25dcdfa910fff67bb036b1b8",
+    "llama_server_log": "5c144b84f21562fb6f552b69f42df5ba2f175079a678c0978b850570f1ae9ae8"
+  }
+}

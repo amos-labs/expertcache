@@ -1,0 +1,81 @@
+{
+  "schema": "expertcache.publication-artifact",
+  "version": 1,
+  "artifact_version": "0.2.0-dev",
+  "state": "provisional",
+  "title": "ExpertCache: Page-Aware Direct Expert Views for Oversized Sparse Models on Apple Silicon",
+  "repository": "https://github.com/amos-labs/expertcache",
+  "primary_model": {
+    "id": "gpt-oss-120b-mxfp4",
+    "repository": "ggml-org/gpt-oss-120b-GGUF",
+    "revision": "238abdd290bb874b90a5da1b4549881b7d05c091",
+    "filename": "gpt-oss-120b-MXFP4.gguf",
+    "size_bytes": 63387346208
+  },
+  "claims": [
+    {
+      "id": "C1",
+      "grade": "architecture-validated",
+      "evidence": ["docs/EXPERT_CACHE_ZERO_COPY_RESULTS.md"]
+    },
+    {
+      "id": "C2",
+      "grade": "targeted-quality-validated",
+      "evidence": ["docs/EXPERT_CACHE_ZERO_COPY_RESULTS.md"]
+    },
+    {
+      "id": "C3",
+      "grade": "deterministic-equivalence-validated",
+      "evidence": [
+        "docs/EXPERT_CACHE_CEILING_RESULTS.md",
+        "evidence/prefetch-2026-07-29/full-gate-qualification.json"
+      ]
+    },
+    {
+      "id": "C4",
+      "grade": "decision-grade",
+      "evidence": [
+        "docs/EXPERT_CACHE_CEILING_RESULTS.md",
+        "evidence/prefetch-2026-07-29/"
+      ]
+    },
+    {
+      "id": "C5",
+      "grade": "decision-grade-synthetic",
+      "evidence": ["evidence/grouped-dispatch-2026-07-29/"]
+    }
+  ],
+  "gates": [
+    {"id": "runtime-restored", "status": "complete"},
+    {"id": "clean-64g-matrix", "status": "pending"},
+    {"id": "full-quality-suite", "status": "pending"},
+    {"id": "complete-resource-telemetry", "status": "pending"},
+    {"id": "apple-silicon-32g", "status": "scoped-out"},
+    {"id": "second-sparse-checkpoint", "status": "pending"},
+    {"id": "tagged-source-release", "status": "pending"}
+  ],
+  "bundle_include": [
+    ".github",
+    "AI_USAGE.md",
+    "CITATION.cff",
+    "CONTRIBUTING.md",
+    "LICENSE",
+    "NOTICE",
+    "PROVENANCE.md",
+    "README.md",
+    "ROADMAP.md",
+    "SECURITY.md",
+    "artifact",
+    "docs",
+    "evidence",
+    "harness",
+    "package-lock.json",
+    "package.json",
+    "paper",
+    "runtime",
+    "scripts",
+    "src",
+    "test",
+    "third_party"
+  ]
+}

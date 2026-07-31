@@ -60,9 +60,12 @@ The direct-view run peaked at 47,622,258,688 bytes of process RSS and
 The response passed the same hidden tests as the hosted and copied local
 controls.
 
-The frozen full local qualification result is still 11/16 until the entire
-suite is rerun on this milestone. The 3/3 coding result is a targeted quality
-gate, not a substitute for that broader score.
+The latest demonstrated component results cover 14/16 points: the prior full
+local run scored 11/16, and the subsequently corrected optimization-coding
+arm passed its 3/3 hidden gate at the required 1,536-token allowance. This is
+a composite across runs, not a contemporaneous 14/16 full-suite result. The
+entire seven-scenario suite must still be rerun on this milestone before the
+paper promotes a final quality score.
 
 The full-length table records observed runs, not a counterbalanced performance
 study. A clean grouped/direct A/B in both orders is a publication gate.
