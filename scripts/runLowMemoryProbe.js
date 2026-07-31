@@ -23,8 +23,13 @@ const output = resolve(option("--output-dir") || resolve(
 ));
 const memoryGiB = totalmem() / 1024 ** 3;
 const probeTokens = Number(option("--probe-tokens") || 1);
+const noFit = args.includes("--no-fit");
+const gpuLayers = option("--gpu-layers");
 if (![1, 8].includes(probeTokens)) {
   throw new Error("--probe-tokens must be 1 (decode-step gate) or 8 (visible-token gate)");
+}
+if (noFit && !gpuLayers) {
+  throw new Error("--no-fit requires an explicit --gpu-layers value");
 }
 
 if (!args.includes("--execute")) {
@@ -35,8 +40,10 @@ if (!args.includes("--execute")) {
     server,
     output,
     probe_tokens: probeTokens,
+    automatic_fit: !noFit,
+    gpu_layers: gpuLayers || "auto",
     detected_memory_gib: memoryGiB,
-    usage: "npm run experiment:low-memory -- --execute --confirm-low-memory-host [--probe-tokens 1|8] [--model FILE --server FILE]"
+    usage: "npm run experiment:low-memory -- --execute --confirm-low-memory-host [--probe-tokens 1|8] [--no-fit --gpu-layers all] [--model FILE --server FILE]"
   }, null, 2));
   process.exit(0);
 }
@@ -80,6 +87,8 @@ const commandArgs = [
   "--expert-cache-cpu-fill",
   "--expert-cache-zero-copy"
 ];
+if (noFit) commandArgs.push("--no-fit");
+if (gpuLayers) commandArgs.push("--gpu-layers", gpuLayers);
 const result = spawnSync(process.execPath, commandArgs, {
   cwd: root,
   env: {

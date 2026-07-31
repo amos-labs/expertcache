@@ -1,0 +1,75 @@
+{
+  "schema": "expertcache.low-memory-16g-preflight",
+  "version": 1,
+  "captured_at": "2026-07-31T11:51:31Z",
+  "source_revision": "350677641c9f937d925adb77cc55c8286481fa45",
+  "outcome": "no-go-before-inference",
+  "reason": "Starting swap exceeded the runbook maximum of 2 GiB",
+  "host": {
+    "model_name": "MacBook Pro",
+    "model_identifier": "MacBookPro18,3",
+    "model_number": "MKGQ3LL/A",
+    "chip": "Apple M1 Pro",
+    "cpu_cores": 10,
+    "physical_memory": "16 GB",
+    "os_version": "26.5",
+    "os_build": "25F71",
+    "storage_free_gib": 794,
+    "power_source": "AC Power",
+    "battery_percent": 72,
+    "battery_state": "charging",
+    "thermal_warning": false,
+    "performance_warning": false
+  },
+  "toolchain": {
+    "node_version": "24.14.0",
+    "cmake_version": "4.4.1",
+    "xcode_developer_dir": "/Applications/Xcode.app/Contents/Developer",
+    "clang_version": "Apple clang 21.0.0",
+    "runtime_revision": "7e1e28cae36d41fe7bbe9dae7c9625de6565c063",
+    "runtime_patch_sha256": "0181578f465cb188ab4f34ba8a859b704a99cca5caa5bdec2d502ba3e48571b0"
+  },
+  "validation": {
+    "tests_passed": 22,
+    "tests_failed": 0,
+    "javascript_syntax_check": "pass",
+    "native_metal_operation": {
+      "backend": "MTL0",
+      "operation": "MUL_MAT_ID",
+      "parameters": "type_a=mxfp4,type_b=f32,n_mats=32,n_used=2,b=0,m=2880,n=32,k=2880",
+      "supported": true,
+      "exit_status": 0,
+      "evidence": "native-mxfp4-ops.csv"
+    }
+  },
+  "model": {
+    "repository": "ggml-org/gpt-oss-120b-GGUF",
+    "revision": "238abdd290bb874b90a5da1b4549881b7d05c091",
+    "filename": "gpt-oss-120b-MXFP4.gguf",
+    "size_bytes": 63387346208,
+    "sha256": "582bd40f6886200101f4c4ed9f25f3fe80cc14c86e9e2b37746cd8904a0c622d",
+    "size_verified": true,
+    "sha256_verified": true
+  },
+  "safety_gate": {
+    "swap_total_mib": 6144.0,
+    "swap_used_mib": 4440.19,
+    "swap_free_mib": 1703.81,
+    "maximum_starting_swap_gib": 2,
+    "system_memory_free_percent": 72,
+    "minimum_memory_free_percent": 3,
+    "passed": false
+  },
+  "execution": {
+    "stage_1_started": false,
+    "stage_2_started": false,
+    "baseline_json": null,
+    "llama_server_log": null,
+    "next_action": "Reboot, verify starting swap is at most 2 GiB, then run Stage 1 once"
+  },
+  "notes": [
+    "No inference process was started because the runbook explicitly forbids execution above the starting-swap threshold.",
+    "The npm executable was unavailable in the normal shell; the package scripts were executed directly with the bundled Node.js 24.14.0 runtime.",
+    "The runbook host-preparation section does not mention Python/NumPy, although one npm test requires NumPy."
+  ]
+}

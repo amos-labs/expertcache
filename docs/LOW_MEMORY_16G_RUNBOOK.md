@@ -106,3 +106,31 @@ After human review, and only if both stages remain bounded:
 The paper may claim execution on 16 GiB only after a reproducible run on this
 physical host. A successful 16 GiB result makes 32 GiB promising, but it does
 not replace a physical 32 GiB measurement.
+
+## Distinct explicit-placement recovery arm
+
+If the registered automatic-fit Stage 1 is preserved as a no-go, a separate
+clean-boot engineering arm may test explicit placement. Do not overwrite or
+reclassify the registered result. Use the same watchdogs and add both flags:
+
+```bash
+npm run experiment:low-memory -- \
+  --execute \
+  --confirm-low-memory-host \
+  --probe-tokens 1 \
+  --no-fit \
+  --gpu-layers all
+```
+
+Review and preserve that result before running the corresponding eight-token
+arm. The runtime patch skips whole-file mmap prefetch only while lazy
+ExpertCache tensor mapping is active. Because the 2026-07-31 configuration
+search did not isolate mmap-prefetch removal from automatic-fit removal, any
+claim from this arm applies to the combined configuration.
+
+The 2026-07-31 physical M1 Pro arm began with zero swap and passed one-token,
+eight-token, and natural 50-token completion gates with a session peak of only
+256 KiB swap. This supports a single-host execution claim for the combined
+experimental configuration, not a stock-runtime or reproducibility claim. See
+`docs/LOW_MEMORY_16G_RESULTS.md` and the machine-readable evidence summary for
+the complete boundary and hashes.

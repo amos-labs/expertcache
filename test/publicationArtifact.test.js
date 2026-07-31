@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import { dirname, resolve } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
-import { captureHostSnapshot, parseSwapUsedBytes } from "../src/hostSnapshot.js";
+import {
+  captureHostSnapshot,
+  normalizeGitRevision,
+  parseSwapUsedBytes
+} from "../src/hostSnapshot.js";
 import { validatePublicationArtifact } from "../src/publicationArtifact.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -30,4 +34,11 @@ test("host snapshots are sanitized and swap units parse deterministically", () =
   assert.equal(snapshot.host_id, "test-host");
   assert.match(snapshot.host_fingerprint, /^[0-9a-f]{16}$/);
   assert.equal(JSON.stringify(snapshot).includes("serial"), false);
+});
+
+test("host snapshots accept commit IDs but reject failed symbolic revisions", () => {
+  const revision = "350677641c9f937d925adb77cc55c8286481fa45";
+  assert.equal(normalizeGitRevision(revision), revision);
+  assert.equal(normalizeGitRevision("HEAD"), null);
+  assert.equal(normalizeGitRevision("fatal: ambiguous argument 'HEAD'"), null);
 });
