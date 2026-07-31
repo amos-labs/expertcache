@@ -15,8 +15,8 @@ On one 64 GiB Apple M1 Max system, the pinned artifact:
 
 - executed the complete 63.4 GB GPT-OSS 120B MXFP4 checkpoint while avoiding
   catastrophic swap;
-- preserved a targeted 3/3 hidden coding gate against hosted and copied local
-  controls;
+- preserved a targeted 3/3 coding gate that was held out during the original
+  run and is now disclosed with the artifact;
 - exposed only selected expert ranges to Metal through page-aligned direct
   host-memory views;
 - produced a bit-exact 1,128-token trajectory with grouped dispatch and async

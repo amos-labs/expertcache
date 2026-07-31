@@ -29,7 +29,8 @@ exposing only currently routed expert ranges to the GPU through page-aligned,
 no-copy buffer views.  The path combines expert-grouped multi-token dispatch
 with asynchronous prefetch of a recent routed-expert union.  On a 64~GiB Apple
 M1 Max, the current artifact executed the complete 63,387,346,208-byte GPT-OSS
-120B MXFP4 checkpoint, preserved a targeted 3/3 hidden coding gate, and
+120B MXFP4 checkpoint, preserved a targeted 3/3 coding gate that was held out
+during the original run and is now disclosed, and
 produced a bit-exact \CurrentTrajectoryTokens-token trajectory across the
 prefetch boundary.  In a single decision-grade A/B, routed-union prefetch
 raised real-prompt prefill from \CurrentPrefetchControlRate{} to
@@ -273,9 +274,11 @@ explanation, never zero.
 Performance promotion requires deterministic raw-output comparison at
 micro-batch 4 and 64, followed by the complete trajectory gate.  The final
 runtime then runs a frozen seven-scenario, 16-point qualification suite.
-Hidden prompt text is
-not published; aggregate and per-case status plus non-reversible output hashes
-are preserved.  A changed trajectory blocks bit-exact claims but is not
+Prompts and executable evaluators are disclosed; aggregate and per-case status
+plus non-reversible response hashes are preserved.  The coding evaluator was
+held out during the original engineering run, but final-runtime reruns are
+deterministic regression evidence rather than fresh hidden-set evidence.  A
+changed trajectory blocks bit-exact claims but is not
 automatically a quality failure; it requires separate analysis.
 
 \subsection{AI-assisted research process}

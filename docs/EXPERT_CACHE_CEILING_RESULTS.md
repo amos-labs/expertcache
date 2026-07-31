@@ -1,5 +1,10 @@
 # ExpertCache latency ceilings and route-window locality
 
+> Publication note (2026-07-31): “hidden” below records the evaluator's status
+> during the original engineering runs. The coding prompt and executable tests
+> are now disclosed in `scripts/benchmarkLocalModels.js`; subsequent reruns are
+> deterministic regression evidence, not fresh hidden-set evaluation.
+
 ## Decision
 
 Batching exposes substantial headroom, but the current direct-view

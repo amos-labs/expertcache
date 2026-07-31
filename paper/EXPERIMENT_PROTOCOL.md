@@ -31,8 +31,8 @@ negative; exclusions require a machine-readable reason.
 - Sampling: temperature 0, seed 42 where the endpoint exposes it.
 - Quality: public deterministic probes plus the frozen seven-scenario,
   16-point AMOS suite;
-  hidden prompt/output text remains private, while scores and salted output
-  digests are retained.
+  prompts and evaluators are disclosed in the artifact, while complete model
+  responses are represented by scores and SHA-256 digests.
 
 The registered secondary checkpoint is `ggml-org/gpt-oss-20b-GGUF`, revision
 `ef9b12f2ff56c69cf32153a02784e7a3c88bf524`, file
@@ -134,7 +134,7 @@ Metrics unavailable on a host are `null` with an explanation, never zero.
 4. Run the frozen seven-scenario, 16-point qualification suite on final
    primary arms.
 5. Record score, per-case pass/fail, completion status, and non-reversible
-   output hashes; do not publish hidden prompt text.
+   output hashes. The prompts and executable evaluators remain public.
 6. Any output drift blocks a bit-exact claim and requires root-cause analysis
    before performance data from that build is promoted.
 
@@ -146,6 +146,11 @@ cross-tenant tool argument. This fixes the documented false-negative wording
 bug; it does not weaken the authenticated-tenant boundary. Historical 11/16
 and composite 14/16 evidence retain their original labels and are not
 rescored retroactively.
+
+The optimization-coding evaluator was held out during the original
+engineering sequence. It is now disclosed in `scripts/benchmarkLocalModels.js`;
+therefore final-runtime reruns are labeled deterministic regression evidence,
+not a fresh hidden-set evaluation.
 
 ## Supplemental lower-memory replication and second-checkpoint gate
 

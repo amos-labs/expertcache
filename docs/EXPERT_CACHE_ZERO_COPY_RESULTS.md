@@ -1,5 +1,10 @@
 # ExpertCache direct-view research result
 
+> Publication note (2026-07-31): the coding evaluator was held out during the
+> original run. Its prompt and executable tests are now disclosed in
+> `scripts/benchmarkLocalModels.js`; future reruns validate regression and
+> reproducibility, not performance on a fresh hidden set.
+
 Date: 2026-07-29
 
 ## Status

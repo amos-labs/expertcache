@@ -581,7 +581,7 @@ async function qualificationCoding(model, stats) {
     return [
       passed,
       passed
-        ? "passed hidden optimum, tie-break, and immutability tests"
+        ? "passed disclosed optimum, tie-break, and immutability tests"
         : `returned ${JSON.stringify({ resultA, resultB, resultC })}`
     ];
   });
