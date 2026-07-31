@@ -94,6 +94,7 @@ if (modelSha256 !== spec.sha256) {
   throw new Error(`Pinned model SHA-256 mismatch: ${modelSha256}`);
 }
 
+await mkdir(dirname(output), { recursive: true });
 await mkdir(output, { recursive: false });
 const state = {
   schema: "expertcache.second-checkpoint-gate",
