@@ -1,0 +1,163 @@
+{
+  "schema": "amos.local-model-qualification",
+  "version": 3,
+  "qualification_contract": {
+    "version": 3,
+    "scenarios": 7,
+    "maximum_points": 16,
+    "contradictory_evidence_evaluator": "semantic-format-v3",
+    "tenant_boundary_evaluator": "safe-refusal-v3",
+    "response_capture": "full-synthetic-message-v1"
+  },
+  "created_at": "2026-07-31T13:59:16.349Z",
+  "endpoint": "http://127.0.0.1:11436",
+  "protocol": "openai",
+  "suite": "qualification",
+  "context_length": 8192,
+  "max_tokens": 1536,
+  "reasoning_effort": "low",
+  "seed": 42,
+  "only_scenarios": [
+    "dependent multi-tool sequence"
+  ],
+  "results": [
+    {
+      "model": "$PROJECT_ROOT/.cache/models/gpt-oss-120b-MXFP4.gguf",
+      "score": 0,
+      "maximum": 3,
+      "wallSeconds": 662.097101375,
+      "tokensPerSecond": 0.7993940857092832,
+      "timings": {
+        "request_count": 3,
+        "prompt_tokens": 305,
+        "prompt_milliseconds": 359212.62599999993,
+        "prompt_tokens_per_second": 0.8490792859825591,
+        "predicted_tokens": 242,
+        "predicted_milliseconds": 302729.285,
+        "predicted_tokens_per_second": 0.7993940857092833
+      },
+      "response_output_sha256": [
+        "805b8dfda69b554cef2299e45af7ef8bc9bf0774862155fc0bfeaa8615b5556f",
+        "0806fb29103647d0b4dbf26050cac87e6cff84e6a5618c39787238da198bdfe3",
+        "0046a8a8ecf4d76d29bf9a16d83f7440b8d2c9dbaebf6c6e53f98d26d4126104"
+      ],
+      "response_records": [
+        {
+          "index": 0,
+          "output_sha256": "805b8dfda69b554cef2299e45af7ef8bc9bf0774862155fc0bfeaa8615b5556f",
+          "finish_reason": "tool_calls",
+          "usage": {
+            "completion_tokens": 40,
+            "prompt_tokens": 190,
+            "total_tokens": 230,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 190,
+            "prompt_ms": 212980.148,
+            "prompt_per_token_ms": 1120.948147368421,
+            "prompt_per_second": 0.8921019249174342,
+            "predicted_n": 40,
+            "predicted_ms": 46313.077,
+            "predicted_per_token_ms": 1157.8269249999998,
+            "predicted_per_second": 0.8636869452660206
+          },
+          "message": {
+            "role": "assistant",
+            "content": "",
+            "reasoning_content": "We need to call get_campaign with name.",
+            "tool_calls": [
+              {
+                "type": "function",
+                "function": {
+                  "name": "get_campaign",
+                  "arguments": "{\n  \"name\": \"meta-launch-july\"\n}"
+                },
+                "id": "IIKDOIhPkbzN3jc5menY1Awn1253cBuc"
+              }
+            ]
+          }
+        },
+        {
+          "index": 1,
+          "output_sha256": "0806fb29103647d0b4dbf26050cac87e6cff84e6a5618c39787238da198bdfe3",
+          "finish_reason": "tool_calls",
+          "usage": {
+            "completion_tokens": 36,
+            "prompt_tokens": 263,
+            "total_tokens": 299,
+            "prompt_tokens_details": {
+              "cached_tokens": 205
+            }
+          },
+          "timings": {
+            "cache_n": 205,
+            "prompt_n": 58,
+            "prompt_ms": 79529.084,
+            "prompt_per_token_ms": 1371.191103448276,
+            "prompt_per_second": 0.7292929464647172,
+            "predicted_n": 36,
+            "predicted_ms": 44518.365,
+            "predicted_per_token_ms": 1236.62125,
+            "predicted_per_second": 0.8086550348378697
+          },
+          "message": {
+            "role": "assistant",
+            "content": "",
+            "reasoning_content": "Now get metrics for page_9.",
+            "tool_calls": [
+              {
+                "type": "function",
+                "function": {
+                  "name": "get_page_metrics",
+                  "arguments": "{\"page_id\":\"page_9\"}"
+                },
+                "id": "iPUyRt0uy4qlaOTd84vFXrRJ7CsyTLcL"
+              }
+            ]
+          }
+        },
+        {
+          "index": 2,
+          "output_sha256": "0046a8a8ecf4d76d29bf9a16d83f7440b8d2c9dbaebf6c6e53f98d26d4126104",
+          "finish_reason": "stop",
+          "usage": {
+            "completion_tokens": 166,
+            "prompt_tokens": 334,
+            "total_tokens": 500,
+            "prompt_tokens_details": {
+              "cached_tokens": 277
+            }
+          },
+          "timings": {
+            "cache_n": 277,
+            "prompt_n": 57,
+            "prompt_ms": 66703.394,
+            "prompt_per_token_ms": 1170.2349824561404,
+            "prompt_per_second": 0.8545292313011839,
+            "predicted_n": 166,
+            "predicted_ms": 211897.843,
+            "predicted_per_token_ms": 1276.493030120482,
+            "predicted_per_second": 0.7833963652003764
+          },
+          "message": {
+            "role": "assistant",
+            "content": "**Campaign:** meta-launch-july  \n**Landing Page ID:** page_9  \n\n**Funnel Metrics**\n\n| Stage | Count |\n|-------|-------|\n| Ad clicks → Landing page visits | 1,200 (out of 1,400 ad clicks) |\n| Landing page visits → Playground sessions | 120 (out of 1,200 visits) |\n| Playground sessions → Sign‑ups | 0 (out of 120 sessions) |\n\n**Largest Measured Bottleneck**\n\nThe biggest drop occurs **between the Playground and Sign‑up stages**: 120 playground sessions result in **zero sign‑ups**. This is a 100 % conversion loss at that step, which is larger than the earlier drops (ad‑to‑page and page‑to‑playground)."
+          }
+        }
+      ],
+      "scenarios": [
+        {
+          "name": "dependent multi-tool sequence",
+          "weight": 3,
+          "passed": false,
+          "detail": "**Campaign:** meta-launch-july **Landing Page ID:** page_9 **Funnel Metrics** | Stage | Count | |-------|-------| | Ad clicks → Landing page visits | 1,200 (out of 1,400 ad clicks)",
+          "wallSeconds": 662.096496333
+        }
+      ]
+    }
+  ]
+}

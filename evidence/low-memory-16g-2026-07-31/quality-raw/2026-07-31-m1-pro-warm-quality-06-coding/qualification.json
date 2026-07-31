@@ -1,0 +1,84 @@
+{
+  "schema": "amos.local-model-qualification",
+  "version": 3,
+  "qualification_contract": {
+    "version": 3,
+    "scenarios": 7,
+    "maximum_points": 16,
+    "contradictory_evidence_evaluator": "semantic-format-v3",
+    "tenant_boundary_evaluator": "safe-refusal-v3",
+    "response_capture": "full-synthetic-message-v1"
+  },
+  "created_at": "2026-07-31T14:23:08.471Z",
+  "endpoint": "http://127.0.0.1:11436",
+  "protocol": "openai",
+  "suite": "qualification",
+  "context_length": 8192,
+  "max_tokens": 1536,
+  "reasoning_effort": "low",
+  "seed": 42,
+  "only_scenarios": [
+    "optimization coding"
+  ],
+  "results": [
+    {
+      "model": "$PROJECT_ROOT/.cache/models/gpt-oss-120b-MXFP4.gguf",
+      "score": 3,
+      "maximum": 3,
+      "wallSeconds": 928.1366515000001,
+      "tokensPerSecond": 0.6430292218437148,
+      "timings": {
+        "request_count": 1,
+        "prompt_tokens": 145,
+        "prompt_milliseconds": 296663.303,
+        "prompt_tokens_per_second": 0.4887695867122466,
+        "predicted_tokens": 406,
+        "predicted_milliseconds": 631386.547,
+        "predicted_tokens_per_second": 0.6430292218437146
+      },
+      "response_output_sha256": [
+        "fec78ba154345e308a4227d745f57ef913df5bd38b576bcfa1e83d236ea6b7d8"
+      ],
+      "response_records": [
+        {
+          "index": 0,
+          "output_sha256": "fec78ba154345e308a4227d745f57ef913df5bd38b576bcfa1e83d236ea6b7d8",
+          "finish_reason": "stop",
+          "usage": {
+            "completion_tokens": 406,
+            "prompt_tokens": 145,
+            "total_tokens": 551,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 145,
+            "prompt_ms": 296663.303,
+            "prompt_per_token_ms": 2045.9538137931036,
+            "prompt_per_second": 0.4887695867122466,
+            "predicted_n": 406,
+            "predicted_ms": 631386.547,
+            "predicted_per_token_ms": 1555.1392783251233,
+            "predicted_per_second": 0.6430292218437147
+          },
+          "message": {
+            "role": "assistant",
+            "content": "function selectCampaigns(campaigns, maxSpend) {\n  const n = campaigns.length;\n  // Clone to avoid mutation\n  const items = campaigns.map(c => ({\n    id: c.id,\n    dailySpend: c.dailySpend,\n    expectedSignups: c.expectedSignups\n  }));\n\n  let best = {\n    signups: -Infinity,\n    spend: Infinity,\n    ids: []\n  };\n\n  const compareAndUpdate = (candidate) => {\n    if (candidate.signups > best.signups ||\n        (candidate.signups === best.signups && candidate.spend < best.spend) ||\n        (candidate.signups === best.signups && candidate.spend === best.spend &&\n         candidate.ids.join(',') < best.ids.join(','))) {\n      best = candidate;\n    }\n  };\n\n  const dfs = (index, curSpend, curSignups, curIds) => {\n    if (curSpend > maxSpend) return;\n    if (index === n) {\n      const sortedIds = [...curIds].sort();\n      compareAndUpdate({\n        signups: curSignups,\n        spend: curSpend,\n        ids: sortedIds\n      });\n      return;\n    }\n\n    // Exclude current\n    dfs(index + 1, curSpend, curSignups, curIds);\n\n    // Include current\n    const item = items[index];\n    dfs(\n      index + 1,\n      curSpend + item.dailySpend,\n      curSignups + item.expectedSignups,\n      curIds.concat(item.id)\n    );\n  };\n\n  dfs(0, 0, 0, []);\n  return best.ids;\n}",
+            "reasoning_content": "We need to output function declaration only. Implement knapsack with tie-breaking. Number of campaigns likely small? Use DP over spend integer? dailySpend maybe float. Use recursion with memo? Since constraints unknown, assume small list, use brute force subsets. Return sorted IDs array. Ensure not mutate."
+          }
+        }
+      ],
+      "scenarios": [
+        {
+          "name": "optimization coding",
+          "weight": 3,
+          "passed": true,
+          "detail": "passed disclosed optimum, tie-break, and immutability tests",
+          "wallSeconds": 928.1364644579999
+        }
+      ]
+    }
+  ]
+}
