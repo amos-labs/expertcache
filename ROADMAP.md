@@ -14,7 +14,7 @@ Status: **done**, **active**, **planned**, **scoped out**, **external gate**, or
 | P0 | Freeze claims and exclusions | done | Every numerical claim maps to the claim ledger and committed evidence. |
 | P0 | Restore pinned 120B artifact and runtime | done | Exact size/revision verified; patch digest verified; native MXFP4 Metal self-test passes. |
 | P0 | 64 GiB clean/cold and warm matrix | active | Three cold first-position runs per primary arm plus counterbalanced warm observations. |
-| P0 | Full frozen quality suite | planned | Seven-scenario, 16-point suite plus public deterministic equivalence artifacts on the final runtime. |
+| P0 | Full frozen quality suite | active | Version-2 seven-scenario, 16-point suite plus response hashes and public deterministic equivalence artifacts on the final runtime. |
 | P0 | Complete host telemetry | planned | TTFT, prefill/decode, RSS, compressed memory, swap, page faults, bytes touched, energy and thermal state. |
 | P2 | 32 GiB Apple Silicon replication | scoped out | Supplemental only: run the pinned protocol on physical hardware before making any 32 GiB claim. |
 | P0 | Second oversized sparse checkpoint | planned | A second checkpoint executes through a declared compatible path; unsupported kernels are reported, not hidden. |

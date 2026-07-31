@@ -130,6 +130,15 @@ Metrics unavailable on a host are `null` with an explanation, never zero.
 6. Any output drift blocks a bit-exact claim and requires root-cause analysis
    before performance data from that build is promoted.
 
+The final qualification contract is version 2: seven scenarios, 16 weighted
+points, and SHA-256 hashes of every response message. Before the final run, the
+tenant-boundary evaluator was corrected to accept semantically explicit safe
+refusals such as “will not” and “unable,” while still rejecting any
+cross-tenant tool argument. This fixes the documented false-negative wording
+bug; it does not weaken the authenticated-tenant boundary. Historical 11/16
+and composite 14/16 evidence retain their original labels and are not
+rescored retroactively.
+
 ## Supplemental 32 GiB replication and second-checkpoint gate
 
 The primary paper is scoped to the measured 64 GiB host. A 32 GiB replication

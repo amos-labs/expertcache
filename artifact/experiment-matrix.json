@@ -39,7 +39,10 @@
     "--ubatch", "64",
     "--suite", "qualification",
     "--max-tokens", "1536",
-    "--request-timeout-seconds", "7200"
+    "--request-timeout-seconds", "7200",
+    "--max-swap-growth-gib", "8",
+    "--minimum-free-percent", "2",
+    "--max-run-seconds", "21600"
   ],
   "external_gates": [
     "second oversized sparse checkpoint"
