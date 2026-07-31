@@ -14,7 +14,7 @@ Status: **done**, **active**, **planned**, **scoped out**, **external gate**, or
 | P0 | Freeze claims and exclusions | done | Every numerical claim maps to the claim ledger and committed evidence. |
 | P0 | Restore pinned 120B artifact and runtime | done | Exact size/revision verified; patch digest verified; native MXFP4 Metal self-test passes. |
 | P0 | 64 GiB clean/cold and warm matrix | active | Three cold first-position runs per primary arm plus counterbalanced warm observations. |
-| P0 | Full frozen quality suite | active | Version-4 seven-scenario, 16-point suite with complete synthetic response records, finish reasons, token usage, and public deterministic evaluators on the final runtime. |
+| P0 | Full frozen quality suite | active | Version-5 seven-scenario, 16-point suite with complete synthetic response records, finish reasons, token usage, strict and opaque-ID-canonical hashes, and public deterministic evaluators on the final runtime. |
 | P0 | Complete host telemetry | planned | TTFT, prefill/decode, RSS, compressed memory, swap, page faults, bytes touched, energy and thermal state. |
 | P2 | 32 GiB Apple Silicon replication | scoped out | Supplemental only: run the pinned protocol on physical hardware before making any 32 GiB claim. |
 | P0 | Second official sparse checkpoint | active | The pinned GPT-OSS 20B MXFP4 control produces identical application-output hashes across stock, direct, grouped, and prefetch paths. |

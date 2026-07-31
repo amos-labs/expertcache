@@ -287,9 +287,10 @@ explanation, never zero.
 Performance promotion requires deterministic raw-output comparison at
 micro-batch 4 and 64, followed by the complete trajectory gate.  The final
 runtime then runs a frozen seven-scenario, 16-point qualification suite.
-Contract version~4 discloses prompts, executable evaluators, complete
+Contract version~5 discloses prompts, executable evaluators, complete
 synthetic response messages, finish reasons, token usage, aggregate and
-per-case status, and response hashes.  Reasoning effort, seed, and completion
+per-case status, strict response hashes, and hashes that canonicalize only
+opaque server-generated tool-call IDs.  Reasoning effort, seed, and completion
 allowance are part of the configuration.  Historical result files retain the
 contract that produced them; evaluator corrections create a separate audit
 rather than overwriting a score.  The coding evaluator was held out during
@@ -470,7 +471,7 @@ background host state.  The final repeated/counterbalanced matrix is still in
 progress.
 
 The targeted 3/3 coding gate is not a general quality evaluation.  The frozen
-version-4 full suite, public equivalence corpus, second-checkpoint gate,
+version-5 full suite, public equivalence corpus, second-checkpoint gate,
 energy, thermal,
 long-session, cancellation, and concurrency experiments remain open.  Decode
 near three tokens/s is not interactive production performance.  The patch is

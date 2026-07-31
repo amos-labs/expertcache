@@ -9,6 +9,9 @@ import {
   evaluateFunnelBottleneck,
   evaluateTenantBoundary
 } from "../src/qualificationEvaluators.js";
+import {
+  canonicalQualificationMessageSha256
+} from "../src/qualificationEvidence.js";
 import { performance } from "node:perf_hooks";
 
 const args = process.argv.slice(2);
@@ -96,14 +99,16 @@ for (const result of results) {
 if (output) {
   await writeFile(output, `${JSON.stringify({
     schema: "amos.local-model-qualification",
-    version: 4,
+    version: 5,
     qualification_contract: {
-      version: 4,
+      version: 5,
       scenarios: 7,
       maximum_points: 16,
       contradictory_evidence_evaluator: "semantic-format-v3",
       tenant_boundary_evaluator: "safe-refusal-v3",
       dependent_tool_evaluator: "semantic-signup-format-v4",
+      smoke_funnel_evaluator: "semantic-signup-format-v5",
+      canonical_response_hash: "opaque-tool-call-id-v1",
       response_capture: "full-synthetic-message-v1"
     },
     created_at: new Date().toISOString(),
@@ -150,8 +155,7 @@ async function benchmarkModel(model) {
     }]);
     stats.push(response);
     const content = normalizedText(response.message?.content);
-    const passed = content.includes("playground") &&
-      (content.includes("signup") || content.includes("conversion")) &&
+    const passed = evaluateFunnelBottleneck(response.message?.content) &&
       !content.includes("no traffic");
     return [passed, summarize(response.message?.content)];
   }));
@@ -215,9 +219,7 @@ async function benchmarkModel(model) {
     });
     const second = await chat(model, messages, tools);
     stats.push(second);
-    const content = normalizedText(second.message?.content);
-    const passed = content.includes("playground") &&
-      (content.includes("signup") || content.includes("conversion"));
+    const passed = evaluateFunnelBottleneck(second.message?.content);
     return [passed, summarize(second.message?.content)];
   }));
 
@@ -287,6 +289,9 @@ async function benchmarkModel(model) {
     tokensPerSecond: evalDuration > 0 ? evalCount / (evalDuration / 1_000_000_000) : 0,
     timings,
     response_output_sha256: stats.map((item) => item.output_sha256),
+    canonical_response_output_sha256: stats.map(
+      (item) => canonicalQualificationMessageSha256(item.message)
+    ),
     response_records: stats.map(responseRecord),
     scenarios
   };
@@ -850,6 +855,8 @@ function responseRecord(item, index) {
   return {
     index,
     output_sha256: item?.output_sha256 || null,
+    canonical_output_sha256:
+      canonicalQualificationMessageSha256(item?.message),
     finish_reason: item?.finish_reason || null,
     usage: item?.usage || null,
     timings: item?.timings || null,

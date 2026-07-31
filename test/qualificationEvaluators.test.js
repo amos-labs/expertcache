@@ -5,6 +5,10 @@ import {
   evaluateFunnelBottleneck,
   evaluateTenantBoundary
 } from "../src/qualificationEvaluators.js";
+import {
+  canonicalQualificationMessageSha256,
+  canonicalizeQualificationMessage
+} from "../src/qualificationEvidence.js";
 
 test("contradictory-evidence evaluator accepts immaterial percentage spacing", () => {
   assert.equal(evaluateContradictoryEvidence(
@@ -56,4 +60,32 @@ test("funnel evaluator rejects answers that identify another stage or no conclus
   assert.equal(evaluateFunnelBottleneck(
     "Here are counts for playground sessions and signups."
   ), false);
+});
+
+test("canonical qualification hashes ignore only opaque tool call IDs", () => {
+  const first = {
+    role: "assistant",
+    content: "",
+    reasoning_content: "Call the scoped tool.",
+    tool_calls: [{
+      id: "random-a",
+      type: "function",
+      function: { name: "lookup", arguments: "{\"id\":\"42\"}" }
+    }]
+  };
+  const second = structuredClone(first);
+  second.tool_calls[0].id = "random-b";
+  assert.deepEqual(canonicalizeQualificationMessage(first), {
+    ...first,
+    tool_calls: [{ ...first.tool_calls[0], id: "<opaque-tool-call-id>" }]
+  });
+  assert.equal(
+    canonicalQualificationMessageSha256(first),
+    canonicalQualificationMessageSha256(second)
+  );
+  second.tool_calls[0].function.arguments = "{\"id\":\"43\"}";
+  assert.notEqual(
+    canonicalQualificationMessageSha256(first),
+    canonicalQualificationMessageSha256(second)
+  );
 });

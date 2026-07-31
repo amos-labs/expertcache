@@ -138,7 +138,7 @@ Metrics unavailable on a host are `null` with an explanation, never zero.
 6. Any output drift blocks a bit-exact claim and requires root-cause analysis
    before performance data from that build is promoted.
 
-The current qualification contract is version 4: seven scenarios, 16 weighted
+The current qualification contract is version 5: seven scenarios, 16 weighted
 points, and complete synthetic response capture. Version 3 added full response
 records and corrected the tenant-boundary evaluator to accept semantically
 explicit safe refusals such as “will not” and “unable,” while still rejecting
@@ -146,6 +146,14 @@ any cross-tenant tool argument. Version 4 corrects the dependent-tool
 evaluator to treat `signup`, `sign-up`, `sign‑up`, and `sign up` as equivalent.
 The change fixes a documented formatting false negative and does not change
 the required tool order, dependent page ID, or bottleneck conclusion.
+
+Version 5 applies the same semantic funnel evaluator to the public smoke
+cases and records two hashes for every captured response: the strict message
+hash and a canonical hash that replaces only the server-generated opaque tool
+call ID. Tool name, arguments, reasoning, content, order, and every other
+message field remain hash-bearing. Strict hashes are never removed. Cross-arm
+model equivalence uses the canonical hash so transport identifiers are not
+misclassified as model-output drift.
 
 Historical files remain immutable under the contract that produced them. The
 2026-07-31 medium-effort full run therefore remains 8/16 under version 3; a

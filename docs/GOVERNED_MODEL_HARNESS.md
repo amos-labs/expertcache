@@ -41,6 +41,12 @@ behavior under the disclosed harness, not bit-exact inference. Hosted and
 local providers can differ in templates, kernels, scheduling, and reasoning
 implementation even when model family, seed, and requested effort match.
 
+Contract v5 preserves a strict hash of every full response and adds a second
+hash that canonicalizes only the server-generated opaque tool-call ID. This
+prevents random protocol identifiers from masquerading as model-output drift;
+tool names, arguments, reasoning, content, ordering, and all other fields
+remain hash-bearing.
+
 ## Deterministic product controls
 
 ### Tenant isolation before inference
