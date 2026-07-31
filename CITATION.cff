@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use ExpertCache, cite this software artifact. Paper metadata will be added after arXiv submission."
+title: "ExpertCache: Page-aware Metal inference for oversized sparse mixture-of-experts models"
+type: software
+authors:
+  - family-names: Barkley
+    given-names: Rick
+version: 0.1.0
+date-released: 2026-07-31
+license: Apache-2.0
+repository-code: "https://github.com/amos-labs/expertcache"
+url: "https://github.com/amos-labs/expertcache"
+keywords:
+  - mixture-of-experts
+  - Apple Silicon
+  - Metal
+  - local inference
+  - llama.cpp

@@ -1,0 +1,11 @@
+ExpertCache
+Copyright 2026 AMOS Labs
+
+This product includes an experimental patch against llama.cpp.
+llama.cpp is Copyright (c) 2023-2026 The ggml authors and is distributed
+under the MIT License. A copy of that license is included at
+third_party/llama.cpp-LICENSE.txt.
+
+Model weights are not included. Model names and repository identifiers are
+used only to identify the pinned research artifacts required to reproduce the
+experiments. GPT-OSS and OpenAI are trademarks of their respective owners.

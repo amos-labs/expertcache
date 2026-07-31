@@ -1,0 +1,3 @@
+# Phase 1 replay depends only on NumPy. Keep this separate from the
+# hardware-specific reference-capture stack in requirements-reference.txt.
+numpy==1.26.4

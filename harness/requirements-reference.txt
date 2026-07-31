@@ -1,0 +1,5 @@
+# Install a hardware-appropriate PyTorch build separately.
+accelerate>=1.8,<2
+huggingface-hub>=0.34,<2
+safetensors>=0.5,<1
+transformers @ git+https://github.com/huggingface/transformers.git@ff24c90cdda4b620327e8b4168692729289ce477

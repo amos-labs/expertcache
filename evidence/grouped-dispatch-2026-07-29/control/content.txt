@@ -1,0 +1,2 @@
+We need to write a JS function that selects subset of campaigns maximizing total expected return without exceeding budget. This is classic 0/1 knapsack
+===CONTENT===

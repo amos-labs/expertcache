@@ -1,0 +1,32 @@
+{
+  "schema": "amos.local-model-qualification",
+  "version": 1,
+  "created_at": "2026-07-29T16:05:40.780Z",
+  "endpoint": "http://127.0.0.1:11476",
+  "protocol": "openai",
+  "suite": "qualification",
+  "context_length": 8192,
+  "max_tokens": 1536,
+  "reasoning_effort": null,
+  "only_scenarios": [
+    "optimization coding"
+  ],
+  "results": [
+    {
+      "model": "/models/gpt-oss-120b-MXFP4.gguf",
+      "score": 3,
+      "maximum": 3,
+      "wallSeconds": 363.3584584999979,
+      "tokensPerSecond": 3.236246038256026,
+      "scenarios": [
+        {
+          "name": "optimization coding",
+          "weight": 3,
+          "passed": true,
+          "detail": "passed hidden optimum, tie-break, and immutability tests",
+          "wallSeconds": 363.3583618340008
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1657 @@
+diff --git a/ggml/src/ggml-metal/ggml-metal-context.m b/ggml/src/ggml-metal/ggml-metal-context.m
+index 32d97cd5..cf04f6c6 100644
+--- a/ggml/src/ggml-metal/ggml-metal-context.m
++++ b/ggml/src/ggml-metal/ggml-metal-context.m
+@@ -435,12 +435,333 @@ bool ggml_metal_cpy_tensor_async(ggml_metal_t ctx_src, ggml_metal_t ctx_dst, con
+     }
+ }
+ 
++static enum ggml_status ggml_metal_expert_cache_compute_range(
++        ggml_metal_t ctx,
++        struct ggml_cgraph * gf,
++        int idx_start,
++        int idx_end) {
++    if (idx_start >= idx_end) {
++        return GGML_STATUS_SUCCESS;
++    }
++
++    id<MTLCommandQueue> queue = ggml_metal_device_get_queue(ctx->dev);
++    id<MTLCommandBuffer> cmd_buf =
++        [[queue commandBufferWithUnretainedReferences] retain];
++
++    ggml_metal_op_t ctx_op = ggml_metal_op_init(
++        ctx->dev,
++        cmd_buf,
++        gf,
++        idx_start,
++        idx_end,
++        false,
++        false,
++        false,
++        ctx->debug_graph,
++        ctx->debug_fusion);
++
++    for (int idx = 0; idx < ggml_metal_op_n_nodes(ctx_op); ++idx) {
++        const int res = ggml_metal_op_encode(ctx_op, idx);
++        if (res == 0) {
++            break;
++        }
++        idx += res - 1;
++    }
++
++    ggml_metal_op_free(ctx_op);
++    [cmd_buf commit];
++    [cmd_buf waitUntilCompleted];
++
++    const MTLCommandBufferStatus status = [cmd_buf status];
++    if (status != MTLCommandBufferStatusCompleted) {
++        GGML_LOG_ERROR(
++            "%s: ExpertCache command buffer [%d,%d) failed with status %d\n",
++            __func__,
++            idx_start,
++            idx_end,
++            (int) status);
++        if (status == MTLCommandBufferStatusError) {
++            GGML_LOG_ERROR(
++                "error: %s\n",
++                [[cmd_buf error].localizedDescription UTF8String]);
++        }
++        [cmd_buf release];
++        ctx->has_error = true;
++        return GGML_STATUS_FAILED;
++    }
++
++    [cmd_buf release];
++    return GGML_STATUS_SUCCESS;
++}
++
+ enum ggml_status ggml_metal_graph_compute(ggml_metal_t ctx, struct ggml_cgraph * gf) {
+     if (ctx->has_error) {
+         GGML_LOG_ERROR("%s: backend is in error state from a previous command buffer failure - recreate the backend to recover\n", __func__);
+         return GGML_STATUS_FAILED;
+     }
+ 
++    const char * expert_cache_env = getenv("GGML_METAL_EXPERT_CACHE_SLOTS");
++    if (expert_cache_env != NULL && atoi(expert_cache_env) > 0) {
++        const bool cpu_fill =
++            getenv("GGML_METAL_EXPERT_CACHE_CPU_FILL") != NULL;
++
++        if (cpu_fill) {
++            // Architectural proof path: run ordinary graph spans normally,
++            // synchronizing only before each routed expert projection so the
++            // selected IDs are visible to the CPU. The CPU copies just those
++            // selected byte ranges from the mmap-backed GGUF tensor into the
++            // shared Metal slots. Crucially, the full expert projection is
++            // never bound to a Metal command encoder in this mode.
++            if (ctx->cmd_buf_last) {
++                [ctx->cmd_buf_last waitUntilCompleted];
++                ctx->cmd_buf_last = nil;
++            }
++
++            const bool trace =
++                getenv("GGML_METAL_EXPERT_CACHE_TRACE") != NULL;
++            const CFAbsoluteTime graph_started =
++                trace ? CFAbsoluteTimeGetCurrent() : 0;
++            double ordinary_ms = 0;
++            double staging_ms = 0;
++            double expert_ms = 0;
++            double tail_ms = 0;
++            int expert_groups = 0;
++            int expert_projections = 0;
++            int range_start = 0;
++            for (int node_index = 0; node_index < gf->n_nodes; ++node_index) {
++                struct ggml_tensor * node = gf->nodes[node_index];
++                if (!ggml_metal_op_mul_mat_id_is_expert_cache_candidate(node)) {
++                    continue;
++                }
++
++                @autoreleasepool {
++                    const CFAbsoluteTime ordinary_started =
++                        trace ? CFAbsoluteTimeGetCurrent() : 0;
++                    enum ggml_status status =
++                        ggml_metal_expert_cache_compute_range(
++                            ctx, gf, range_start, node_index);
++                    if (trace) {
++                        ordinary_ms += (
++                            CFAbsoluteTimeGetCurrent() - ordinary_started
++                        ) * 1000.0;
++                    }
++                    if (status != GGML_STATUS_SUCCESS) {
++                        return status;
++                    }
++                    if (!ggml_metal_op_mul_mat_id_uses_expert_cache(node)) {
++                        GGML_LOG_ERROR(
++                            "%s: routed union for node %d '%s' exceeds the configured expert-cache slots\n",
++                            __func__,
++                            node_index,
++                            node->name);
++                        ctx->has_error = true;
++                        return GGML_STATUS_FAILED;
++                    }
++
++                    // All routed projections in one transformer layer share
++                    // the same selected-ID tensor. Give each projection its
++                    // own bounded slot buffer, stage them together after one
++                    // routing synchronization, then execute the complete
++                    // layer span in a single command buffer. This replaces
++                    // three CPU/GPU barriers per layer with one.
++                    const struct ggml_tensor * route_ids = node->src[2];
++                    int group_end = node_index;
++                    struct ggml_tensor * group_nodes[8] = { nil };
++                    int group_node_indices[8] = { 0 };
++                    int group_count = 0;
++                    for (int scan = node_index; scan < gf->n_nodes; ++scan) {
++                        struct ggml_tensor * candidate = gf->nodes[scan];
++                        if (!ggml_metal_op_mul_mat_id_is_expert_cache_candidate(candidate)) {
++                            continue;
++                        }
++                        if (candidate->src[2] != route_ids) {
++                            break;
++                        }
++                        if (!ggml_metal_op_mul_mat_id_uses_expert_cache(candidate)) {
++                            GGML_LOG_ERROR(
++                                "%s: routed union for node %d '%s' exceeds the configured expert-cache slots\n",
++                                __func__,
++                                scan,
++                                candidate->name);
++                            ctx->has_error = true;
++                            return GGML_STATUS_FAILED;
++                        }
++                        GGML_ASSERT(group_count < 8);
++                        group_nodes[group_count] = candidate;
++                        group_node_indices[group_count] = scan;
++                        group_count++;
++                        group_end = scan + 1;
++                    }
++
++                    const CFAbsoluteTime staging_started =
++                        trace ? CFAbsoluteTimeGetCurrent() : 0;
++                    bool stage_results[8] = { false };
++                    for (int group_index = 0;
++                         group_index < group_count;
++                         ++group_index) {
++                        stage_results[group_index] =
++                            ggml_metal_op_expert_cache_prepare_cpu(
++                                ctx->dev, group_nodes[group_index]);
++                    }
++
++                    for (int group_index = 0;
++                         group_index < group_count;
++                         ++group_index) {
++                        if (!stage_results[group_index]) {
++                            GGML_LOG_ERROR(
++                                "%s: ExpertCache CPU staging failed for node %d '%s'\n",
++                                __func__,
++                                group_node_indices[group_index],
++                                group_nodes[group_index]->name);
++                            ctx->has_error = true;
++                            return GGML_STATUS_FAILED;
++                        }
++                        expert_projections++;
++                    }
++                    if (trace) {
++                        staging_ms += (
++                            CFAbsoluteTimeGetCurrent() - staging_started
++                        ) * 1000.0;
++                    }
++
++                    const CFAbsoluteTime expert_started =
++                        trace ? CFAbsoluteTimeGetCurrent() : 0;
++                    status = ggml_metal_expert_cache_compute_range(
++                        ctx, gf, node_index, group_end);
++                    if (trace) {
++                        expert_ms += (
++                            CFAbsoluteTimeGetCurrent() - expert_started
++                        ) * 1000.0;
++                    }
++                    if (status != GGML_STATUS_SUCCESS) {
++                        return status;
++                    }
++
++                    expert_groups++;
++                    range_start = group_end;
++                    node_index = group_end - 1;
++                }
++            }
++
++            @autoreleasepool {
++                const CFAbsoluteTime tail_started =
++                    trace ? CFAbsoluteTimeGetCurrent() : 0;
++                enum ggml_status status =
++                    ggml_metal_expert_cache_compute_range(
++                        ctx, gf, range_start, gf->n_nodes);
++                if (trace) {
++                    tail_ms += (
++                        CFAbsoluteTimeGetCurrent() - tail_started
++                    ) * 1000.0;
++                }
++                if (status != GGML_STATUS_SUCCESS) {
++                    return status;
++                }
++            }
++
++            if (trace) {
++                const double total_ms =
++                    (CFAbsoluteTimeGetCurrent() - graph_started) * 1000.0;
++                GGML_LOG_INFO(
++                    "ExpertCache graph nodes=%d groups=%d projections=%d "
++                    "ordinary_ms=%.3f staging_ms=%.3f expert_ms=%.3f "
++                    "tail_ms=%.3f total_ms=%.3f\n",
++                    gf->n_nodes,
++                    expert_groups,
++                    expert_projections,
++                    ordinary_ms,
++                    staging_ms,
++                    expert_ms,
++                    tail_ms,
++                    total_ms);
++            }
++
++            return GGML_STATUS_SUCCESS;
++        }
++
++        // A normal inference graph references every MoE projection in one or
++        // two command buffers. Metal accounts those complete mapped resources
++        // even when the ExpertCache kernel reads only four routed slices. Keep
++        // each command buffer's resource set bounded while proving the cache
++        // architecture. This deliberately synchronous baseline will be
++        // replaced by event-chained streaming once first-token correctness is
++        // established.
++        const char * nodes_env = getenv("GGML_METAL_EXPERT_CACHE_NODES_PER_CB");
++        const int nodes_per_cb = nodes_env ? MAX(1, atoi(nodes_env)) : 32;
++        id<MTLCommandQueue> queue = ggml_metal_device_get_queue(ctx->dev);
++
++        if (ctx->cmd_buf_last) {
++            [ctx->cmd_buf_last waitUntilCompleted];
++            ctx->cmd_buf_last = nil;
++        }
++
++        for (int idx_start = 0; idx_start < gf->n_nodes; idx_start += nodes_per_cb) {
++            const int idx_end = MIN(idx_start + nodes_per_cb, gf->n_nodes);
++            id<MTLCommandBuffer> cmd_buf =
++                [[queue commandBufferWithUnretainedReferences] retain];
++
++            ggml_metal_op_t ctx_op = ggml_metal_op_init(
++                ctx->dev,
++                cmd_buf,
++                gf,
++                idx_start,
++                idx_end,
++                ctx->use_fusion,
++                false,
++                false,
++                ctx->debug_graph,
++                ctx->debug_fusion);
++
++            for (int idx = 0; idx < ggml_metal_op_n_nodes(ctx_op); ++idx) {
++                const int res = ggml_metal_op_encode(ctx_op, idx);
++                if (res == 0) {
++                    break;
++                }
++                idx += res - 1;
++            }
++
++            ggml_metal_op_free(ctx_op);
++            [cmd_buf commit];
++            [cmd_buf waitUntilCompleted];
++
++            const MTLCommandBufferStatus status = [cmd_buf status];
++            if (status != MTLCommandBufferStatusCompleted) {
++                GGML_LOG_ERROR(
++                    "%s: ExpertCache command buffer [%d,%d) failed with status %d\n",
++                    __func__, idx_start, idx_end, (int) status);
++                for (int node_index = idx_start; node_index < idx_end; ++node_index) {
++                    const struct ggml_tensor * node = gf->nodes[node_index];
++                    const struct ggml_tensor * src0 = node->src[0];
++                    GGML_LOG_ERROR(
++                        "  node %d: op=%s name='%s' src0='%s' type=%s ne=[%lld,%lld,%lld,%lld]\n",
++                        node_index,
++                        ggml_op_name(node->op),
++                        node->name,
++                        src0 ? src0->name : "",
++                        src0 ? ggml_type_name(src0->type) : "none",
++                        src0 ? (long long) src0->ne[0] : 0,
++                        src0 ? (long long) src0->ne[1] : 0,
++                        src0 ? (long long) src0->ne[2] : 0,
++                        src0 ? (long long) src0->ne[3] : 0);
++                }
++                if (status == MTLCommandBufferStatusError) {
++                    GGML_LOG_ERROR("error: %s\n", [[cmd_buf error].localizedDescription UTF8String]);
++                }
++                [cmd_buf release];
++                ctx->has_error = true;
++                return GGML_STATUS_FAILED;
++            }
++
++            // Release every completed command buffer immediately. Holding the
++            // objects until an outer autorelease pool drains also holds their
++            // mapped expert resources, causing residency to accumulate one
++            // layer at a time despite the bounded slot cache.
++            [cmd_buf release];
++        }
++
++        return GGML_STATUS_SUCCESS;
++    }
++
+     // number of nodes encoded by the main thread (empirically determined)
+     const int n_main = MAX(64, 0.1*gf->n_nodes);
+ 
+diff --git a/ggml/src/ggml-metal/ggml-metal-device.cpp b/ggml/src/ggml-metal/ggml-metal-device.cpp
+index 16e98eb5..01c0ecbe 100644
+--- a/ggml/src/ggml-metal/ggml-metal-device.cpp
++++ b/ggml/src/ggml-metal/ggml-metal-device.cpp
+@@ -1179,6 +1179,48 @@ ggml_metal_pipeline_with_params ggml_metal_library_get_pipeline_mul_mv_id(ggml_m
+     return res;
+ }
+ 
++ggml_metal_pipeline_with_params ggml_metal_library_get_pipeline_mul_mv_id_gathered(ggml_metal_library_t lib, const ggml_tensor * op) {
++    const ggml_type tsrc0 = op->src[0]->type;
++    const ggml_type tsrc1 = op->src[1]->type;
++
++    // The ExpertCache grouped path only instantiates the MXFP4 dispatch; the
++    // candidacy check enforces the same constraint before selecting it.
++    GGML_ASSERT(tsrc0 == GGML_TYPE_MXFP4);
++    GGML_ASSERT(tsrc1 == GGML_TYPE_F32);
++
++    const int nsg = N_SG_MXFP4;
++    const int nr0 = N_R0_MXFP4;
++    const int nr1 = 1;
++    const size_t smem = 32*sizeof(float);
++
++    char base[256];
++    char name[256];
++
++    snprintf(base, 256, "kernel_mul_mv_id_gathered_%s_%s", ggml_type_name(tsrc0), ggml_type_name(tsrc1));
++    snprintf(name, 256, "%s_nsg=%d", base, nsg);
++
++    ggml_metal_pipeline_with_params res = ggml_metal_library_get_pipeline(lib, name);
++    if (!res.pipeline) {
++        ggml_metal_cv_t cv = ggml_metal_cv_init();
++
++        ggml_metal_cv_set_int16(cv, nsg, FC_MUL_MV + 0);
++        ggml_metal_cv_set_int16(cv, 1,   FC_MUL_MV + 2);
++        ggml_metal_cv_set_int16(cv, 1,   FC_MUL_MV + 3);
++        ggml_metal_cv_set_int16(cv, 1,   FC_MUL_MV + 4);
++
++        res = ggml_metal_library_compile_pipeline(lib, base, name, cv);
++
++        ggml_metal_cv_free(cv);
++    }
++
++    res.nr0  = nr0;
++    res.nr1  = nr1;
++    res.nsg  = nsg;
++    res.smem = smem;
++
++    return res;
++}
++
+ ggml_metal_pipeline_with_params ggml_metal_library_get_pipeline_argmax(ggml_metal_library_t lib, const ggml_tensor * op) {
+     GGML_ASSERT(op->src[0]->type == GGML_TYPE_F32);
+     GGML_ASSERT(ggml_is_contiguous_1(op->src[0]));
+diff --git a/ggml/src/ggml-metal/ggml-metal-device.h b/ggml/src/ggml-metal/ggml-metal-device.h
+index d0956df5..3af71bf6 100644
+--- a/ggml/src/ggml-metal/ggml-metal-device.h
++++ b/ggml/src/ggml-metal/ggml-metal-device.h
+@@ -136,6 +136,7 @@ struct ggml_metal_pipeline_with_params ggml_metal_library_get_pipeline_mul_mv
+ struct ggml_metal_pipeline_with_params ggml_metal_library_get_pipeline_mul_mm_id_map0    (ggml_metal_library_t lib, int ne02, int ne20);
+ struct ggml_metal_pipeline_with_params ggml_metal_library_get_pipeline_mul_mm_id         (ggml_metal_library_t lib, const struct ggml_tensor * op);
+ struct ggml_metal_pipeline_with_params ggml_metal_library_get_pipeline_mul_mv_id         (ggml_metal_library_t lib, const struct ggml_tensor * op);
++struct ggml_metal_pipeline_with_params ggml_metal_library_get_pipeline_mul_mv_id_gathered(ggml_metal_library_t lib, const struct ggml_tensor * op);
+ struct ggml_metal_pipeline_with_params ggml_metal_library_get_pipeline_argmax            (ggml_metal_library_t lib, const struct ggml_tensor * op);
+ struct ggml_metal_pipeline_with_params ggml_metal_library_get_pipeline_argsort           (ggml_metal_library_t lib, const struct ggml_tensor * op);
+ struct ggml_metal_pipeline_with_params ggml_metal_library_get_pipeline_argsort_merge     (ggml_metal_library_t lib, const struct ggml_tensor * op);
+@@ -321,6 +322,14 @@ void   ggml_metal_buffer_clear        (ggml_metal_buffer_t buf, uint8_t value);
+ // Metal buffer based on the host memory pointer
+ //
+ struct ggml_metal_buffer_id ggml_metal_buffer_get_id(ggml_metal_buffer_t buf, const struct ggml_tensor * t);
++struct ggml_metal_buffer_id ggml_metal_buffer_get_raw_id(
++        ggml_metal_buffer_t buf,
++        size_t offset,
++        size_t size);
++struct ggml_metal_buffer_id ggml_metal_buffer_get_host_range_id(
++        ggml_metal_device_t dev,
++        const void * ptr,
++        size_t size);
+ 
+ #ifdef __cplusplus
+ }
+diff --git a/ggml/src/ggml-metal/ggml-metal-device.m b/ggml/src/ggml-metal/ggml-metal-device.m
+index 4edd77c6..fb5d3407 100644
+--- a/ggml/src/ggml-metal/ggml-metal-device.m
++++ b/ggml/src/ggml-metal/ggml-metal-device.m
+@@ -827,6 +827,13 @@ ggml_metal_device_t ggml_metal_device_init(int device) {
+             dev->props.use_residency_sets = true;
+ #if defined(GGML_METAL_HAS_RESIDENCY_SETS)
+             dev->props.use_residency_sets = getenv("GGML_METAL_NO_RESIDENCY") == nil;
++            if (getenv("GGML_METAL_EXPERT_CACHE_SLOTS") != NULL) {
++                // ExpertCache intentionally touches only the routed slices of the
++                // mapped MoE tensors. Requesting residency for the complete model
++                // defeats that contract and can poison the command buffer before
++                // the bounded slot cache has a chance to run.
++                dev->props.use_residency_sets = false;
++            }
+ #endif
+ 
+             dev->props.use_shared_buffers = dev->props.has_unified_memory;
+@@ -1610,9 +1617,32 @@ ggml_metal_buffer_t ggml_metal_buffer_map(ggml_metal_device_t dev, void * ptr, s
+     }
+ 
+     const struct ggml_metal_device_props * props_dev = ggml_metal_device_get_props(dev);
++    if (getenv("GGML_METAL_LAZY_TENSOR_MAP") != NULL) {
++        // Keep the mmap-backed model as CPU storage. Exact tensor-sized Metal
++        // views are created on demand in ggml_metal_buffer_get_id() and live
++        // only for the bounded command span that uses them. This avoids
++        // representing a 59 GiB GGUF as a handful of enormous Metal resources.
++        res->use_residency_sets = false;
++        GGML_LOG_INFO(
++            "%s: leaving %.2f MiB model mapping outside Metal; tensor views will be created lazily\n",
++            __func__,
++            size_aligned / 1024.0 / 1024.0);
++        return res;
++    }
++
++    size_t mapped_view_size = props_dev->max_buffer_size;
++    const char * mapped_view_mib_env = getenv("GGML_METAL_MAPPED_VIEW_MIB");
++    if (mapped_view_mib_env != NULL) {
++        const long long mapped_view_mib = atoll(mapped_view_mib_env);
++        if (mapped_view_mib > 0) {
++            const size_t requested =
++                (size_t) mapped_view_mib * 1024ULL * 1024ULL;
++            mapped_view_size = MIN(mapped_view_size, requested);
++        }
++    }
+ 
+     // the buffer fits into the max buffer size allowed by the device
+-    if (size_aligned <= props_dev->max_buffer_size) {
++    if (size_aligned <= mapped_view_size) {
+         res->buffers[res->n_buffers].data  = ptr;
+         res->buffers[res->n_buffers].size  = size;
+         res->buffers[res->n_buffers].metal = nil;
+@@ -1634,8 +1664,35 @@ ggml_metal_buffer_t ggml_metal_buffer_map(ggml_metal_device_t dev, void * ptr, s
+         // this overlap between the views will guarantee that the tensor with the maximum size will fully fit into
+         // one of the views
+         const size_t size_ovlp = ((max_tensor_size + size_page - 1) / size_page + 1) * size_page; // round-up 2 pages just in case
+-        const size_t size_step = props_dev->max_buffer_size - size_ovlp;
+-        const size_t size_view = props_dev->max_buffer_size;
++        if (mapped_view_size <= size_ovlp) {
++            GGML_LOG_ERROR(
++                "%s: mapped Metal view %.2f MiB must exceed maximum tensor overlap %.2f MiB\n",
++                __func__,
++                mapped_view_size / 1024.0 / 1024.0,
++                size_ovlp / 1024.0 / 1024.0);
++            free(res);
++            return NULL;
++        }
++        const size_t size_step = mapped_view_size - size_ovlp;
++        const size_t size_view = mapped_view_size;
++        const size_t n_views = (size + size_step - 1) / size_step;
++        if (n_views > GGML_METAL_MAX_BUFFERS) {
++            GGML_LOG_ERROR(
++                "%s: mapped Metal view %.2f MiB would require %zu buffers (limit %d); increase GGML_METAL_MAPPED_VIEW_MIB\n",
++                __func__,
++                mapped_view_size / 1024.0 / 1024.0,
++                n_views,
++                GGML_METAL_MAX_BUFFERS);
++            free(res);
++            return NULL;
++        }
++        GGML_LOG_INFO(
++            "%s: mapping %.2f MiB into %zu tensor-scale Metal views of at most %.2f MiB (overlap %.2f MiB)\n",
++            __func__,
++            size_aligned / 1024.0 / 1024.0,
++            n_views,
++            size_view / 1024.0 / 1024.0,
++            size_ovlp / 1024.0 / 1024.0);
+ 
+         for (size_t i = 0; i < size; i += size_step) {
+             const size_t size_step_aligned = (i + size_view <= size) ? size_view : (size_aligned - i);
+@@ -1895,6 +1952,36 @@ struct ggml_metal_buffer_id ggml_metal_buffer_get_id(ggml_metal_buffer_t buf, co
+ 
+     const int64_t tsize = ggml_nbytes(t);
+ 
++    if (buf->n_buffers == 0 &&
++        getenv("GGML_METAL_LAZY_TENSOR_MAP") != NULL) {
++        const size_t page_size = sysconf(_SC_PAGESIZE);
++        const uintptr_t tensor_addr = (uintptr_t) t->data;
++        const size_t page_offset = tensor_addr % page_size;
++        void * aligned_data = (void *) (tensor_addr - page_offset);
++        size_t mapped_size = page_offset + (size_t) tsize;
++        if (mapped_size % page_size != 0) {
++            mapped_size += page_size - (mapped_size % page_size);
++        }
++
++        id<MTLBuffer> tensor_buffer =
++            [buf->dev->mtl_device newBufferWithBytesNoCopy:aligned_data
++                                                    length:mapped_size
++                                                   options:MTLResourceStorageModeShared
++                                               deallocator:nil];
++        if (tensor_buffer == nil) {
++            GGML_LOG_ERROR(
++                "%s: failed to create lazy Metal view for tensor '%s', size %.2f MiB\n",
++                __func__,
++                t->name,
++                mapped_size / 1024.0 / 1024.0);
++            return res;
++        }
++
++        res.metal = [tensor_buffer autorelease];
++        res.offs = page_offset;
++        return res;
++    }
++
+     // find the view that contains the tensor fully
+     for (int i = 0; i < buf->n_buffers; ++i) {
+         const int64_t ioffs = (int64_t) t->data - (int64_t) buf->buffers[i].data;
+@@ -1914,3 +2001,59 @@ struct ggml_metal_buffer_id ggml_metal_buffer_get_id(ggml_metal_buffer_t buf, co
+ 
+     return res;
+ }
++
++struct ggml_metal_buffer_id ggml_metal_buffer_get_raw_id(
++        ggml_metal_buffer_t buf,
++        size_t offset,
++        size_t size) {
++    struct ggml_metal_buffer_id res = { nil, 0 };
++
++    if (buf == NULL || buf->n_buffers != 1 || offset + size > buf->buffers[0].size) {
++        GGML_LOG_ERROR("%s: invalid raw Metal buffer range: offset=%zu size=%zu\n",
++                __func__, offset, size);
++        return res;
++    }
++
++    res.metal = buf->buffers[0].metal;
++    res.offs  = offset;
++    return res;
++}
++
++struct ggml_metal_buffer_id ggml_metal_buffer_get_host_range_id(
++        ggml_metal_device_t dev,
++        const void * ptr,
++        size_t size) {
++    struct ggml_metal_buffer_id res = { nil, 0 };
++    if (dev == NULL || ptr == NULL || size == 0) {
++        GGML_LOG_ERROR(
++            "%s: invalid host range ptr=%p size=%zu\n",
++            __func__, ptr, size);
++        return res;
++    }
++
++    const size_t page_size = sysconf(_SC_PAGESIZE);
++    const uintptr_t address = (uintptr_t) ptr;
++    const size_t page_offset = address % page_size;
++    void * aligned_data = (void *) (address - page_offset);
++    size_t mapped_size = page_offset + size;
++    if (mapped_size % page_size != 0) {
++        mapped_size += page_size - (mapped_size % page_size);
++    }
++
++    id<MTLBuffer> view =
++        [dev->mtl_device newBufferWithBytesNoCopy:aligned_data
++                                           length:mapped_size
++                                          options:MTLResourceStorageModeShared
++                                      deallocator:nil];
++    if (view == nil) {
++        GGML_LOG_ERROR(
++            "%s: failed to create %.2f MiB host-range Metal view\n",
++            __func__,
++            mapped_size / 1024.0 / 1024.0);
++        return res;
++    }
++
++    res.metal = [view autorelease];
++    res.offs = page_offset;
++    return res;
++}
+diff --git a/ggml/src/ggml-metal/ggml-metal-impl.h b/ggml/src/ggml-metal/ggml-metal-impl.h
+index 9f350aad..0022941d 100644
+--- a/ggml/src/ggml-metal/ggml-metal-impl.h
++++ b/ggml/src/ggml-metal/ggml-metal-impl.h
+@@ -549,6 +549,13 @@ typedef struct {
+     int32_t  nr0;
+ } ggml_metal_kargs_mul_mv_id;
+ 
++typedef struct {
++    uint64_t bytes_per_expert;
++    uint64_t source_expert_stride;
++    uint32_t experts_used;
++    uint32_t reserved;
++} ggml_metal_kargs_expert_cache_fill;
++
+ // NORM
+ // RMS_NORM
+ typedef struct {
+diff --git a/ggml/src/ggml-metal/ggml-metal-ops.cpp b/ggml/src/ggml-metal/ggml-metal-ops.cpp
+index 76626a45..81b265c6 100644
+--- a/ggml/src/ggml-metal/ggml-metal-ops.cpp
++++ b/ggml/src/ggml-metal/ggml-metal-ops.cpp
+@@ -10,8 +10,20 @@
+ 
+ #include <cassert>
+ #include <algorithm>
+-#include <limits>
++#include <chrono>
+ #include <cmath>
++#include <condition_variable>
++#include <cstdlib>
++#include <cstring>
++#include <deque>
++#include <mutex>
++#include <string>
++#include <thread>
++#include <unordered_map>
++#include <vector>
++
++#include <sys/mman.h>
++#include <unistd.h>
+ 
+ static ggml_metal_buffer_id ggml_metal_get_buffer_id(const ggml_tensor * t) {
+     if (!t) {
+@@ -172,6 +184,282 @@ static bool ggml_metal_op_concurrency_add(ggml_metal_op_t ctx, const ggml_tensor
+     return ggml_mem_ranges_add(ctx->mem_ranges, node);
+ }
+ 
++struct ggml_metal_expert_cache {
++    ggml_metal_buffer_t weights = nullptr;
++    ggml_metal_buffer_t ids = nullptr;
++    // Grouped dispatch: (token, expert-use slot) int32 pairs ordered so each
++    // routed expert's tokens are contiguous, plus the CSR bookkeeping that
++    // maps each unique expert to its pair range.
++    ggml_metal_buffer_t route_map = nullptr;
++    size_t weight_capacity = 0;
++    size_t id_capacity = 0;
++    size_t route_map_capacity = 0;
++    size_t active_weight_bytes = 0;
++    size_t active_id_bytes = 0;
++    int64_t active_slots = 0;
++    std::vector<int32_t> grouped_expert_ids;
++    std::vector<int64_t> grouped_route_offsets;
++    int64_t grouped_route_count = 0;
++};
++
++// Async routed-union page prefetcher. Worker threads touch mapped expert
++// byte ranges so cold page-ins overlap GPU compute instead of serializing at
++// command-buffer schedule time. Read-only on a read-only file mapping: it can
++// change latency, never bytes.
++struct ggml_metal_expert_prefetcher {
++    struct prefetch_range {
++        const uint8_t * ptr;
++        size_t bytes;
++    };
++
++    struct tensor_entry {
++        const uint8_t * data;
++        size_t bytes_per_expert;
++        int64_t n_experts;
++        uint32_t build_counter = 0;
++        std::vector<uint32_t> last_seen; // build counter per expert, 0 = never
++    };
++
++    std::mutex mutex;
++    std::condition_variable cv;
++    std::deque<prefetch_range> queue;
++    std::vector<std::thread> workers;
++    std::vector<tensor_entry> registry; // first-seen (graph) order
++    std::unordered_map<const void *, size_t> registry_index;
++    size_t page_size;
++    size_t max_queue;
++
++    explicit ggml_metal_expert_prefetcher(int n_threads) {
++        page_size = (size_t) sysconf(_SC_PAGESIZE);
++        max_queue = 4096;
++        for (int i = 0; i < n_threads; ++i) {
++            workers.emplace_back([this] { run(); });
++            workers.back().detach();
++        }
++    }
++
++    void run() {
++        for (;;) {
++            prefetch_range range;
++            {
++                std::unique_lock<std::mutex> lock(mutex);
++                cv.wait(lock, [this] { return !queue.empty(); });
++                range = queue.front();
++                queue.pop_front();
++            }
++            touch(range);
++        }
++    }
++
++    void touch(const prefetch_range & range) {
++        const uintptr_t begin =
++            (uintptr_t) range.ptr & ~(uintptr_t) (page_size - 1);
++        const uintptr_t end = (uintptr_t) range.ptr + range.bytes;
++        madvise((void *) begin, end - begin, MADV_WILLNEED);
++        volatile uint8_t sink = 0;
++        for (uintptr_t page = begin; page < end; page += page_size) {
++            sink ^= *(const volatile uint8_t *) page;
++        }
++        (void) sink;
++    }
++
++    void enqueue(const uint8_t * ptr, size_t bytes) {
++        std::lock_guard<std::mutex> lock(mutex);
++        if (queue.size() >= max_queue) {
++            return; // saturated: dropping a hint is always safe
++        }
++        queue.push_back({ ptr, bytes });
++        cv.notify_one();
++    }
++
++    // Record this tensor's routed experts, race the GPU on their pages, and
++    // prefetch the recent route union for the next `ahead` expert tensors
++    // (wrapping so the last layer warms layer 0 for the next token).
++    void on_routes(
++            const void * tensor_key,
++            const uint8_t * data,
++            size_t bytes_per_expert,
++            int64_t n_experts,
++            const std::vector<int32_t> & routed,
++            uint32_t window,
++            size_t ahead) {
++        size_t idx;
++        {
++            std::lock_guard<std::mutex> lock(mutex);
++            auto it = registry_index.find(tensor_key);
++            if (it == registry_index.end()) {
++                idx = registry.size();
++                registry_index.emplace(tensor_key, idx);
++                registry.push_back(tensor_entry{});
++                tensor_entry & entry = registry.back();
++                entry.data = data;
++                entry.bytes_per_expert = bytes_per_expert;
++                entry.n_experts = n_experts;
++                entry.last_seen.assign((size_t) n_experts, 0);
++            } else {
++                idx = it->second;
++            }
++            tensor_entry & entry = registry[idx];
++            entry.build_counter++;
++            for (int32_t expert_id : routed) {
++                if (expert_id >= 0 && expert_id < entry.n_experts) {
++                    entry.last_seen[(size_t) expert_id] = entry.build_counter;
++                }
++            }
++        }
++
++        for (int32_t expert_id : routed) {
++            enqueue(data + (size_t) expert_id * bytes_per_expert,
++                    bytes_per_expert);
++        }
++
++        std::lock_guard<std::mutex> lock(mutex);
++        const size_t n_entries = registry.size();
++        if (n_entries < 2) {
++            return;
++        }
++        bool notified = false;
++        for (size_t k = 1; k <= ahead; ++k) {
++            const tensor_entry & next = registry[(idx + k) % n_entries];
++            const uint32_t floor =
++                next.build_counter > window ? next.build_counter - window : 1;
++            for (int64_t e = 0; e < next.n_experts; ++e) {
++                if (next.last_seen[(size_t) e] >= floor) {
++                    if (queue.size() >= max_queue) {
++                        break;
++                    }
++                    queue.push_back({
++                        next.data + (size_t) e * next.bytes_per_expert,
++                        next.bytes_per_expert });
++                    notified = true;
++                }
++            }
++        }
++        if (notified) {
++            cv.notify_all();
++        }
++    }
++};
++
++static ggml_metal_expert_prefetcher * ggml_metal_get_expert_prefetcher() {
++    static ggml_metal_expert_prefetcher * prefetcher = [] {
++        const char * env = getenv("GGML_METAL_EXPERT_CACHE_PREFETCH");
++        const int n_threads = env ? atoi(env) : 0;
++        if (n_threads <= 0) {
++            return (ggml_metal_expert_prefetcher *) nullptr;
++        }
++        // Intentionally leaked: detached workers must outlive static
++        // destruction order.
++        return new ggml_metal_expert_prefetcher(std::min(n_threads, 16));
++    }();
++    return prefetcher;
++}
++
++static int32_t ggml_metal_expert_cache_effective_id(
++        const ggml_tensor * selected_ids,
++        int64_t experts_used,
++        int64_t route,
++        int64_t n_experts) {
++    if (getenv("GGML_METAL_EXPERT_CACHE_HOT_CEILING") != nullptr) {
++        // Synthetic performance ceiling only: repeatedly bind the same four
++        // experts so their mapped pages can remain resident after warmup.
++        // This intentionally invalidates model quality and must never be
++        // enabled for normal inference.
++        return (int32_t) (route % std::min<int64_t>(4, n_experts));
++    }
++    GGML_ASSERT(selected_ids != nullptr);
++    GGML_ASSERT(selected_ids->data != nullptr);
++    GGML_ASSERT(experts_used > 0);
++    const int64_t expert_slot = route % experts_used;
++    const int64_t token = route / experts_used;
++    const uint8_t * selected_data =
++        static_cast<const uint8_t *>(selected_ids->data);
++    const int32_t * selected_id = reinterpret_cast<const int32_t *>(
++        selected_data +
++        (size_t) expert_slot * selected_ids->nb[0] +
++        (size_t) token * selected_ids->nb[1]);
++    return *selected_id;
++}
++
++static int64_t ggml_metal_expert_cache_unique_count(
++        const ggml_tensor * selected_ids,
++        int64_t experts_used,
++        int64_t n_tokens,
++        int64_t n_experts) {
++    if (selected_ids == nullptr ||
++        selected_ids->data == nullptr ||
++        experts_used <= 0 ||
++        n_tokens <= 0 ||
++        n_experts <= 0) {
++        return n_experts;
++    }
++    std::vector<uint8_t> seen(n_experts, 0);
++    int64_t unique = 0;
++    for (int64_t route = 0;
++         route < experts_used * n_tokens;
++         ++route) {
++        const int32_t expert_id = ggml_metal_expert_cache_effective_id(
++            selected_ids, experts_used, route, n_experts);
++        if (expert_id < 0 || expert_id >= n_experts) {
++            return n_experts;
++        }
++        if (!seen[expert_id]) {
++            seen[expert_id] = 1;
++            unique++;
++        }
++    }
++    return unique;
++}
++
++static ggml_metal_expert_cache & ggml_metal_get_expert_cache(
++        ggml_metal_device_t dev,
++        const ggml_tensor * tensor,
++        size_t weight_bytes,
++        size_t id_bytes) {
++    static std::mutex mutex;
++    static std::unordered_map<
++        ggml_metal_device_t,
++        std::unordered_map<const ggml_tensor *, ggml_metal_expert_cache>
++    > caches;
++
++    std::lock_guard<std::mutex> lock(mutex);
++    ggml_metal_expert_cache & cache = caches[dev][tensor];
++
++    const bool cpu_fill = getenv("GGML_METAL_EXPERT_CACHE_CPU_FILL") != nullptr;
++
++    if (cache.weight_capacity < weight_bytes) {
++        if (cache.weights != nullptr) {
++            ggml_metal_buffer_free(cache.weights);
++        }
++        cache.weights = ggml_metal_buffer_init(dev, weight_bytes, cpu_fill);
++        GGML_ASSERT(cache.weights != nullptr);
++        cache.weight_capacity = weight_bytes;
++    }
++
++    if (cache.id_capacity < id_bytes) {
++        if (cache.ids != nullptr) {
++            ggml_metal_buffer_free(cache.ids);
++        }
++        cache.ids = ggml_metal_buffer_init(dev, id_bytes, cpu_fill);
++        GGML_ASSERT(cache.ids != nullptr);
++        cache.id_capacity = id_bytes;
++    }
++
++    if (getenv("GGML_METAL_EXPERT_CACHE_GROUPED") != nullptr) {
++        const size_t route_map_bytes = 2 * sizeof(int32_t) * (id_bytes / sizeof(int32_t));
++        if (cache.route_map_capacity < route_map_bytes) {
++            if (cache.route_map != nullptr) {
++                ggml_metal_buffer_free(cache.route_map);
++            }
++            cache.route_map = ggml_metal_buffer_init(dev, route_map_bytes, cpu_fill);
++            GGML_ASSERT(cache.route_map != nullptr);
++            cache.route_map_capacity = route_map_bytes;
++        }
++    }
++
++    return cache;
++}
++
+ static int ggml_metal_op_encode_impl(ggml_metal_op_t ctx, int idx) {
+     struct ggml_tensor * node = ctx->node(idx);
+ 
+@@ -2341,6 +2629,271 @@ size_t ggml_metal_op_mul_mat_id_extra_ids(const ggml_tensor * op) {
+     return ggml_type_size(GGML_TYPE_I32)*ne02*ne21;
+ }
+ 
++bool ggml_metal_op_mul_mat_id_is_expert_cache_candidate(
++        const ggml_tensor * op) {
++    if (op == nullptr || op->op != GGML_OP_MUL_MAT_ID) {
++        return false;
++    }
++
++    const char * expert_cache_env = getenv("GGML_METAL_EXPERT_CACHE_SLOTS");
++    const int expert_cache_slots = expert_cache_env ? atoi(expert_cache_env) : 0;
++
++    const int64_t n_experts = op->src[0] != nullptr ? op->src[0]->ne[2] : 0;
++    const int64_t experts_used =
++        op->src[2] != nullptr ? op->src[2]->ne[0] : 0;
++    const int64_t n_tokens =
++        op->src[2] != nullptr ? op->src[2]->ne[1] : 0;
++    return
++        expert_cache_slots > 0 &&
++        op->src[0] != nullptr &&
++        op->src[1] != nullptr &&
++        op->src[2] != nullptr &&
++        op->src[0]->type == GGML_TYPE_MXFP4 &&
++        op->src[2]->type == GGML_TYPE_I32 &&
++        n_experts > 0 &&
++        experts_used > 0 &&
++        n_tokens > 0 &&
++        op->src[0]->nb[2] % 16 == 0;
++}
++
++bool ggml_metal_op_mul_mat_id_uses_expert_cache(const ggml_tensor * op) {
++    if (!ggml_metal_op_mul_mat_id_is_expert_cache_candidate(op)) {
++        return false;
++    }
++
++    const int expert_cache_slots =
++        std::atoi(getenv("GGML_METAL_EXPERT_CACHE_SLOTS"));
++    const int64_t maximum_unique =
++        ggml_metal_expert_cache_unique_count(
++            op->src[2],
++            op->src[2]->ne[0],
++            op->src[2]->ne[1],
++            op->src[0]->ne[2]);
++
++    return maximum_unique <= expert_cache_slots;
++}
++
++bool ggml_metal_op_expert_cache_prepare_cpu(
++        ggml_metal_device_t dev,
++        const ggml_tensor * op) {
++    if (!ggml_metal_op_mul_mat_id_uses_expert_cache(op)) {
++        return false;
++    }
++
++    const int64_t n_experts = op->src[0]->ne[2];
++    const int64_t experts_used = op->src[2]->ne[0];
++    const int64_t n_tokens = op->src[2]->ne[1];
++    const int64_t route_count = experts_used * n_tokens;
++    const int64_t slot_limit = std::min<int64_t>(
++        n_experts,
++        std::atoi(getenv("GGML_METAL_EXPERT_CACHE_SLOTS")));
++    const size_t bytes_per_expert = op->src[0]->nb[2];
++    const bool zero_copy =
++        getenv("GGML_METAL_EXPERT_CACHE_ZERO_COPY") != nullptr;
++    const size_t maximum_weight_bytes =
++        zero_copy ? 0 : bytes_per_expert * slot_limit;
++    const size_t id_bytes = sizeof(int32_t) * route_count;
++
++    ggml_metal_expert_cache & cache =
++        ggml_metal_get_expert_cache(
++            dev, op->src[0], maximum_weight_bytes, id_bytes);
++
++    if (!zero_copy) {
++        GGML_ASSERT(ggml_metal_buffer_is_shared(cache.weights));
++    }
++    GGML_ASSERT(ggml_metal_buffer_is_shared(cache.ids));
++    GGML_ASSERT(op->src[0]->data != nullptr);
++    GGML_ASSERT(op->src[2]->data != nullptr);
++
++    uint8_t * slots =
++        zero_copy
++            ? nullptr
++            : static_cast<uint8_t *>(
++                ggml_metal_buffer_get_base(cache.weights));
++    int32_t * compact_ids = static_cast<int32_t *>(
++        ggml_metal_buffer_get_base(cache.ids));
++    const uint8_t * source = static_cast<const uint8_t *>(op->src[0]->data);
++    int64_t unique_experts = 0;
++    int64_t cache_hits = 0;
++    int64_t cache_misses = 0;
++    const auto copy_started = std::chrono::steady_clock::now();
++    if (zero_copy) {
++        // Grouping pays off when several tokens share routed experts; for a
++        // single-token pass it only adds bookkeeping, so keep the per-route
++        // dispatch there.
++        const bool grouped =
++            getenv("GGML_METAL_EXPERT_CACHE_GROUPED") != nullptr &&
++            n_tokens > 1;
++        ggml_metal_expert_prefetcher * prefetcher =
++            ggml_metal_get_expert_prefetcher();
++        std::vector<int32_t> routed_unique;
++        std::vector<uint8_t> routed_seen;
++        if (prefetcher != nullptr) {
++            routed_seen.assign((size_t) n_experts, 0);
++        }
++        std::vector<int32_t> expert_to_group;
++        std::vector<int64_t> group_counts;
++        if (grouped) {
++            expert_to_group.assign(n_experts, -1);
++        }
++        cache.grouped_expert_ids.clear();
++        cache.grouped_route_offsets.clear();
++        cache.grouped_route_count = 0;
++        for (int64_t route = 0; route < route_count; ++route) {
++            const int32_t expert_id = ggml_metal_expert_cache_effective_id(
++                op->src[2], experts_used, route, n_experts);
++            if (expert_id < 0 || expert_id >= n_experts) {
++                GGML_LOG_ERROR(
++                    "%s: invalid routed expert id %d at route %lld (n_experts=%lld)\n",
++                    __func__,
++                    expert_id,
++                    (long long) route,
++                    (long long) n_experts);
++                return false;
++            }
++            compact_ids[route] = 0;
++            if (prefetcher != nullptr && !routed_seen[(size_t) expert_id]) {
++                routed_seen[(size_t) expert_id] = 1;
++                routed_unique.push_back(expert_id);
++            }
++            if (grouped) {
++                int32_t group = expert_to_group[expert_id];
++                if (group < 0) {
++                    group = (int32_t) cache.grouped_expert_ids.size();
++                    expert_to_group[expert_id] = group;
++                    cache.grouped_expert_ids.push_back(expert_id);
++                    group_counts.push_back(0);
++                    cache_misses++;
++                } else {
++                    cache_hits++;
++                }
++                group_counts[group]++;
++            }
++        }
++        if (grouped) {
++            unique_experts = (int64_t) cache.grouped_expert_ids.size();
++            cache.grouped_route_offsets.assign(unique_experts + 1, 0);
++            for (int64_t g = 0; g < unique_experts; ++g) {
++                cache.grouped_route_offsets[g + 1] =
++                    cache.grouped_route_offsets[g] + group_counts[g];
++            }
++            GGML_ASSERT(cache.route_map != nullptr);
++            GGML_ASSERT(
++                cache.route_map_capacity >=
++                2 * sizeof(int32_t) * (size_t) route_count);
++            int32_t * route_pairs = static_cast<int32_t *>(
++                ggml_metal_buffer_get_base(cache.route_map));
++            std::vector<int64_t> cursor = cache.grouped_route_offsets;
++            for (int64_t route = 0; route < route_count; ++route) {
++                const int32_t expert_id =
++                    ggml_metal_expert_cache_effective_id(
++                        op->src[2], experts_used, route, n_experts);
++                const int32_t group = expert_to_group[expert_id];
++                const int64_t pair = cursor[group]++;
++                route_pairs[2 * pair + 0] =
++                    (int32_t) (route / experts_used); // token
++                route_pairs[2 * pair + 1] =
++                    (int32_t) (route % experts_used); // expert-use slot
++            }
++            cache.grouped_route_count = route_count;
++        }
++        if (prefetcher != nullptr) {
++            static const uint32_t window = [] {
++                const char * env =
++                    getenv("GGML_METAL_EXPERT_CACHE_PREFETCH_WINDOW");
++                const int v = env ? atoi(env) : 16;
++                return (uint32_t) std::max(1, v);
++            }();
++            static const size_t ahead = [] {
++                const char * env =
++                    getenv("GGML_METAL_EXPERT_CACHE_PREFETCH_AHEAD");
++                const int v = env ? atoi(env) : 3;
++                return (size_t) std::max(1, v);
++            }();
++            prefetcher->on_routes(
++                op->src[0],
++                source,
++                bytes_per_expert,
++                n_experts,
++                routed_unique,
++                window,
++                ahead);
++        }
++        cache.active_slots = 0;
++        cache.active_weight_bytes = 0;
++    } else {
++        std::vector<int32_t> expert_to_slot(n_experts, -1);
++        for (int64_t route = 0; route < route_count; ++route) {
++            const int32_t expert_id = ggml_metal_expert_cache_effective_id(
++                op->src[2], experts_used, route, n_experts);
++            if (expert_id < 0 || expert_id >= n_experts) {
++                GGML_LOG_ERROR(
++                    "%s: invalid routed expert id %d at route %lld (n_experts=%lld)\n",
++                    __func__,
++                    expert_id,
++                    (long long) route,
++                    (long long) n_experts);
++                return false;
++            }
++            int32_t slot = expert_to_slot[expert_id];
++            if (slot < 0) {
++                if (unique_experts >= slot_limit) {
++                    GGML_LOG_ERROR(
++                        "%s: routed batch needs more than %lld expert slots\n",
++                        __func__,
++                        (long long) slot_limit);
++                    return false;
++                }
++                slot = (int32_t) unique_experts++;
++                expert_to_slot[expert_id] = slot;
++                memcpy(
++                    slots + (size_t) slot * bytes_per_expert,
++                    source + (size_t) expert_id * bytes_per_expert,
++                    bytes_per_expert);
++                cache_misses++;
++            } else {
++                cache_hits++;
++            }
++            compact_ids[route] = slot;
++        }
++
++        cache.active_slots = unique_experts;
++        cache.active_weight_bytes = bytes_per_expert * unique_experts;
++    }
++
++    cache.active_id_bytes = id_bytes;
++
++    if (getenv("GGML_METAL_EXPERT_CACHE_TRACE") != nullptr) {
++        const double elapsed_ms =
++            std::chrono::duration<double, std::milli>(
++                std::chrono::steady_clock::now() - copy_started).count();
++        std::string routed_experts;
++        routed_experts.reserve((size_t) route_count * 5);
++        for (int64_t route = 0; route < route_count; ++route) {
++            if (!routed_experts.empty()) {
++                routed_experts += ",";
++            }
++            routed_experts += std::to_string(
++                ggml_metal_expert_cache_effective_id(
++                    op->src[2], experts_used, route, n_experts));
++        }
++        GGML_LOG_INFO(
++            "ExpertCache stage tensor='%s' tokens=%lld routes=%lld unique=%lld "
++            "hits=%lld misses=%lld bytes=%zu elapsed_ms=%.3f ids=[%s]\n",
++            op->src[0]->name,
++            (long long) n_tokens,
++            (long long) route_count,
++            (long long) unique_experts,
++            (long long) cache_hits,
++            (long long) cache_misses,
++            bytes_per_expert * (size_t) cache_misses,
++            elapsed_ms,
++            routed_experts.c_str());
++    }
++
++    return true;
++}
++
+ int ggml_metal_op_mul_mat_id(ggml_metal_op_t ctx, int idx) {
+     ggml_tensor * op = ctx->node(idx);
+ 
+@@ -2367,11 +2920,100 @@ int ggml_metal_op_mul_mat_id(ggml_metal_op_t ctx, int idx) {
+     GGML_ASSERT(ne03 == 1);
+     GGML_ASSERT(ne13 == 1);
+ 
+-    ggml_metal_buffer_id bid_src0 = ggml_metal_get_buffer_id(op->src[0]);
+     ggml_metal_buffer_id bid_src1 = ggml_metal_get_buffer_id(op->src[1]);
+     ggml_metal_buffer_id bid_src2 = ggml_metal_get_buffer_id(op->src[2]);
+     ggml_metal_buffer_id bid_dst  = ggml_metal_get_buffer_id(op);
+ 
++    const bool use_expert_cache =
++        ggml_metal_op_mul_mat_id_uses_expert_cache(op);
++    const bool cpu_fill =
++        getenv("GGML_METAL_EXPERT_CACHE_CPU_FILL") != nullptr;
++    const bool zero_copy =
++        getenv("GGML_METAL_EXPERT_CACHE_ZERO_COPY") != nullptr;
++    ggml_metal_buffer_id bid_src0 = { nullptr, 0 };
++    if (!use_expert_cache || !cpu_fill) {
++        bid_src0 = ggml_metal_get_buffer_id(op->src[0]);
++    }
++
++    if (use_expert_cache) {
++        const size_t default_weight_bytes = nb02 * ne20;
++        const size_t default_id_bytes = sizeof(int32_t) * ne20 * ne21;
++        ggml_metal_expert_cache & cache = ggml_metal_get_expert_cache(
++            ctx->dev,
++            op->src[0],
++            zero_copy ? 0 : default_weight_bytes,
++            default_id_bytes);
++        const size_t weight_bytes =
++            cpu_fill ? cache.active_weight_bytes : default_weight_bytes;
++        const size_t id_bytes =
++            cpu_fill ? cache.active_id_bytes : default_id_bytes;
++
++        GGML_ASSERT(id_bytes > 0);
++        ggml_metal_buffer_id bid_compact_ids = ggml_metal_buffer_get_raw_id(
++            cache.ids, 0, id_bytes);
++        GGML_ASSERT(bid_compact_ids.metal != nullptr);
++
++        if (zero_copy) {
++            GGML_ASSERT(cpu_fill);
++            bid_src2 = bid_compact_ids;
++        } else {
++            GGML_ASSERT(weight_bytes > 0);
++            ggml_metal_buffer_id bid_slots =
++                ggml_metal_buffer_get_raw_id(
++                    cache.weights, 0, weight_bytes);
++            GGML_ASSERT(bid_slots.metal != nullptr);
++
++            if (!cpu_fill) {
++                ggml_metal_kargs_expert_cache_fill fill_args = {
++                    /*.bytes_per_expert      =*/ nb02,
++                    /*.source_expert_stride =*/ nb02,
++                    /*.experts_used          =*/ (uint32_t) ne20,
++                    /*.reserved              =*/ 0,
++                };
++
++                auto fill_pipeline = ggml_metal_library_get_pipeline(
++                    lib, "kernel_expert_cache_fill");
++                if (!fill_pipeline.pipeline) {
++                    fill_pipeline = ggml_metal_library_compile_pipeline(
++                        lib,
++                        "kernel_expert_cache_fill",
++                        "kernel_expert_cache_fill",
++                        nullptr);
++                }
++                GGML_ASSERT(fill_pipeline.pipeline != nullptr);
++
++                ggml_metal_encoder_set_pipeline(enc, fill_pipeline);
++                ggml_metal_encoder_set_bytes(
++                    enc, &fill_args, sizeof(fill_args), 0);
++                ggml_metal_encoder_set_buffer(enc, bid_src0, 1);
++                ggml_metal_encoder_set_buffer(enc, bid_src2, 2);
++                ggml_metal_encoder_set_buffer(enc, bid_slots, 3);
++                ggml_metal_encoder_set_buffer(enc, bid_compact_ids, 4);
++
++                const uint64_t total_words = weight_bytes / 16;
++                const int threads = std::min(
++                    256,
++                    ggml_metal_pipeline_max_theads_per_threadgroup(
++                        fill_pipeline));
++                ggml_metal_encoder_dispatch_threadgroups(
++                    enc,
++                    (int) ((total_words + threads - 1) / threads),
++                    1,
++                    1,
++                    threads,
++                    1,
++                    1);
++
++                // The multiply must observe both the copied expert bytes and
++                // the compact 0..N slot IDs in the same command stream.
++                ggml_metal_op_concurrency_reset(ctx);
++            }
++
++            bid_src0 = bid_slots;
++            bid_src2 = bid_compact_ids;
++        }
++    }
++
+     const uint32_t r2 = 1;
+     const uint32_t r3 = 1;
+ 
+@@ -2381,7 +3023,10 @@ int ggml_metal_op_mul_mat_id(ggml_metal_op_t ctx, int idx) {
+     // ne21 = n_rows (batch size)
+     const int ne21_mm_id_min = 32;
+ 
+-    if (props_dev->has_simdgroup_mm && ne00 >= 64 && (ne21 >= ne21_mm_id_min)) {
++    if (!zero_copy &&
++        props_dev->has_simdgroup_mm &&
++        ne00 >= 64 &&
++        ne21 >= ne21_mm_id_min) {
+         // some Metal matrix data types require aligned pointers
+         // ref: https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf (Table 2.5)
+         //switch (op->src[0]->type) {
+@@ -2407,7 +3052,9 @@ int ggml_metal_op_mul_mat_id(ggml_metal_op_t ctx, int idx) {
+                 nb12,
+                 ne21, // n_tokens
+                 ne20, // n_expert_used
+-                nb21,
++                use_expert_cache
++                    ? sizeof(int32_t) * (uint64_t) ne20
++                    : nb21,
+             };
+ 
+             auto pipeline = ggml_metal_library_get_pipeline_mul_mm_id_map0(lib, ne02, ne20);
+@@ -2468,6 +3115,186 @@ int ggml_metal_op_mul_mat_id(ggml_metal_op_t ctx, int idx) {
+ 
+             ggml_metal_encoder_dispatch_threadgroups(enc, (ne21 + 31)/32, (ne01 + 63)/64, ne02, 128, 1, 1);
+         }
++    } else if (zero_copy) {
++        GGML_ASSERT(op->src[0]->data != nullptr);
++        GGML_ASSERT(op->src[2]->data != nullptr);
++
++        const uint8_t * expert_source =
++            static_cast<const uint8_t *>(op->src[0]->data);
++
++        ggml_metal_expert_cache & cache = ggml_metal_get_expert_cache(
++            ctx->dev,
++            op->src[0],
++            0,
++            sizeof(int32_t) * (size_t) ne20 * ne21);
++        const bool grouped =
++            getenv("GGML_METAL_EXPERT_CACHE_GROUPED") != nullptr &&
++            cache.grouped_route_count == (int64_t) ne20 * ne21 &&
++            !cache.grouped_expert_ids.empty() &&
++            cache.route_map != nullptr;
++
++        if (grouped) {
++            auto pipeline =
++                ggml_metal_library_get_pipeline_mul_mv_id_gathered(lib, op);
++            const int nr0 = pipeline.nr0;
++            const int nsg = pipeline.nsg;
++            const size_t smem = pipeline.smem;
++
++            ggml_metal_kargs_mul_mv_id args = {
++                /*.nei0 =*/ 1,
++                /*.nei1 =*/ 1,
++                /*.nbi1 =*/ sizeof(int32_t),
++                /*.ne00 =*/ ne00,
++                /*.ne01 =*/ ne01,
++                /*.ne02 =*/ 1,
++                /*.nb00 =*/ nb00,
++                /*.nb01 =*/ nb01,
++                /*.nb02 =*/ nb02,
++                /*.ne10 =*/ ne10,
++                /*.ne11 =*/ ne11,
++                /*.ne12 =*/ ne12,
++                /*.ne13 =*/ ne13,
++                /*.nb10 =*/ nb10,
++                /*.nb11 =*/ nb11,
++                /*.nb12 =*/ nb12,
++                /*.ne0  =*/ ne0,
++                /*.ne1  =*/ ne1,
++                /*.nb1  =*/ nb1,
++                /*.nr0  =*/ nr0,
++            };
++
++            if (ggml_is_quantized(op->src[0]->type)) {
++                GGML_ASSERT(ne00 >= nsg*nr0);
++            }
++
++            const int64_t unique_experts =
++                (int64_t) cache.grouped_expert_ids.size();
++            for (int64_t group = 0; group < unique_experts; ++group) {
++                const int32_t expert_id = cache.grouped_expert_ids[group];
++                GGML_ASSERT(expert_id >= 0 && expert_id < ne02);
++                const int64_t route_begin =
++                    cache.grouped_route_offsets[group];
++                const int64_t route_count_group =
++                    cache.grouped_route_offsets[group + 1] - route_begin;
++                GGML_ASSERT(route_count_group > 0);
++
++                ggml_metal_buffer_id bid_selected_expert =
++                    ggml_metal_buffer_get_host_range_id(
++                        ctx->dev,
++                        expert_source + (size_t) expert_id * nb02,
++                        nb02);
++                GGML_ASSERT(bid_selected_expert.metal != nullptr);
++
++                ggml_metal_buffer_id bid_route_map =
++                    ggml_metal_buffer_get_raw_id(
++                        cache.route_map,
++                        2 * sizeof(int32_t) * (size_t) route_begin,
++                        2 * sizeof(int32_t) * (size_t) route_count_group);
++                GGML_ASSERT(bid_route_map.metal != nullptr);
++
++                ggml_metal_encoder_set_pipeline(enc, pipeline);
++                ggml_metal_encoder_set_bytes(enc, &args, sizeof(args), 0);
++                ggml_metal_encoder_set_buffer(enc, bid_selected_expert, 1);
++                ggml_metal_encoder_set_buffer(enc, bid_src1, 2);
++                ggml_metal_encoder_set_buffer(enc, bid_dst, 3);
++                ggml_metal_encoder_set_buffer(enc, bid_route_map, 4);
++                ggml_metal_encoder_set_threadgroup_memory_size(enc, smem, 0);
++
++                ggml_metal_encoder_dispatch_threadgroups(
++                    enc,
++                    (ne01 + nr0*nsg - 1)/(nr0*nsg),
++                    1,
++                    (int) route_count_group,
++                    32,
++                    nsg,
++                    1);
++            }
++
++            return 1;
++        }
++
++        auto pipeline = ggml_metal_library_get_pipeline_mul_mv_id(lib, op);
++        const int nr0 = pipeline.nr0;
++        const int nsg = pipeline.nsg;
++        const size_t smem = pipeline.smem;
++
++        ggml_metal_kargs_mul_mv_id args = {
++            /*.nei0 =*/ 1,
++            /*.nei1 =*/ 1,
++            /*.nbi1 =*/ sizeof(int32_t),
++            /*.ne00 =*/ ne00,
++            /*.ne01 =*/ ne01,
++            /*.ne02 =*/ 1,
++            /*.nb00 =*/ nb00,
++            /*.nb01 =*/ nb01,
++            /*.nb02 =*/ nb02,
++            /*.ne10 =*/ ne10,
++            /*.ne11 =*/ 1,
++            /*.ne12 =*/ 1,
++            /*.ne13 =*/ ne13,
++            /*.nb10 =*/ nb10,
++            /*.nb11 =*/ nb11,
++            /*.nb12 =*/ nb12,
++            /*.ne0  =*/ ne0,
++            /*.ne1  =*/ 1,
++            /*.nb1  =*/ nb1,
++            /*.nr0  =*/ nr0,
++        };
++
++        if (ggml_is_quantized(op->src[0]->type)) {
++            GGML_ASSERT(ne00 >= nsg*nr0);
++        }
++
++        for (int64_t route = 0; route < ne20 * ne21; ++route) {
++            const int64_t expert_slot = route % ne20;
++            const int64_t token = route / ne20;
++            const int32_t expert_id = ggml_metal_expert_cache_effective_id(
++                op->src[2], ne20, route, ne02);
++            GGML_ASSERT(expert_id >= 0 && expert_id < ne02);
++
++            ggml_metal_buffer_id bid_selected_expert =
++                ggml_metal_buffer_get_host_range_id(
++                    ctx->dev,
++                    expert_source + (size_t) expert_id * nb02,
++                    nb02);
++            GGML_ASSERT(bid_selected_expert.metal != nullptr);
++
++            ggml_metal_buffer_id bid_route_src1 = bid_src1;
++            bid_route_src1.offs +=
++                (size_t) (expert_slot % ne11) * nb11 +
++                (size_t) token * nb12;
++            ggml_metal_buffer_id bid_route_dst = bid_dst;
++            bid_route_dst.offs +=
++                (size_t) expert_slot * nb1 +
++                (size_t) token * nb2;
++            ggml_metal_buffer_id bid_route_src2 = bid_src2;
++            bid_route_src2.offs += (size_t) route * sizeof(int32_t);
++
++            ggml_metal_encoder_set_pipeline(enc, pipeline);
++            ggml_metal_encoder_set_bytes(enc, &args, sizeof(args), 0);
++            ggml_metal_encoder_set_buffer(enc, bid_selected_expert, 1);
++            ggml_metal_encoder_set_buffer(enc, bid_route_src1, 2);
++            ggml_metal_encoder_set_buffer(enc, bid_route_dst, 3);
++            ggml_metal_encoder_set_buffer(enc, bid_route_src2, 4);
++            ggml_metal_encoder_set_threadgroup_memory_size(enc, smem, 0);
++
++            if (op->src[0]->type == GGML_TYPE_F32 ||
++                op->src[0]->type == GGML_TYPE_F16 ||
++                op->src[0]->type == GGML_TYPE_BF16 ||
++                op->src[0]->type == GGML_TYPE_Q8_0) {
++                ggml_metal_encoder_dispatch_threadgroups(
++                    enc, (ne01 + nr0 - 1)/nr0, 1, 1, 32, nsg, 1);
++            } else {
++                ggml_metal_encoder_dispatch_threadgroups(
++                    enc,
++                    (ne01 + nr0*nsg - 1)/(nr0*nsg),
++                    1,
++                    1,
++                    32,
++                    nsg,
++                    1);
++            }
++        }
+     } else {
+         auto pipeline = ggml_metal_library_get_pipeline_mul_mv_id(lib, op);
+ 
+@@ -2480,7 +3307,9 @@ int ggml_metal_op_mul_mat_id(ggml_metal_op_t ctx, int idx) {
+         ggml_metal_kargs_mul_mv_id args = {
+             /*.nei0 =*/ ne20,
+             /*.nei1 =*/ ne21,
+-            /*.nbi1 =*/ nb21,
++            /*.nbi1 =*/ use_expert_cache
++                ? sizeof(int32_t) * (uint64_t) ne20
++                : nb21,
+             /*.ne00 =*/ ne00,
+             /*.ne01 =*/ ne01,
+             /*.ne02 =*/ ne02,
+diff --git a/ggml/src/ggml-metal/ggml-metal-ops.h b/ggml/src/ggml-metal/ggml-metal-ops.h
+index 2783ecb8..10d9b5bb 100644
+--- a/ggml/src/ggml-metal/ggml-metal-ops.h
++++ b/ggml/src/ggml-metal/ggml-metal-ops.h
+@@ -36,6 +36,20 @@ size_t ggml_metal_op_mul_mat_id_extra_tpe(const struct ggml_tensor * op);
+ // id map [n_tokens, n_expert]
+ size_t ggml_metal_op_mul_mat_id_extra_ids(const struct ggml_tensor * op);
+ 
++// Experimental sparse expert staging for MXFP4 MoE inference. The CPU-fill
++// path deliberately synchronizes after routing, deduplicates the experts used
++// by the current token batch, then copies only those byte ranges into a shared
++// Metal slot buffer. Every token's expert IDs are remapped to compact slots.
++// This keeps the complete expert bank out of Metal's resource set while
++// supporting bounded prefill batches on memory-constrained unified-memory
++// systems.
++bool ggml_metal_op_mul_mat_id_is_expert_cache_candidate(
++        const struct ggml_tensor * op);
++bool ggml_metal_op_mul_mat_id_uses_expert_cache(const struct ggml_tensor * op);
++bool ggml_metal_op_expert_cache_prepare_cpu(
++        ggml_metal_device_t dev,
++        const struct ggml_tensor * op);
++
+ // return true if we should use the FA vector kernel for this op
+ bool ggml_metal_op_flash_attn_ext_use_vec(const struct ggml_tensor * op);
+ 
+diff --git a/ggml/src/ggml-metal/ggml-metal.metal b/ggml/src/ggml-metal/ggml-metal.metal
+index f14ee079..90ceeb0c 100644
+--- a/ggml/src/ggml-metal/ggml-metal.metal
++++ b/ggml/src/ggml-metal/ggml-metal.metal
+@@ -11012,6 +11012,100 @@ template [[host_name("kernel_mul_mv_id_iq2_s_f32")]]   kernel kernel_mul_mv_id_t
+ template [[host_name("kernel_mul_mv_id_iq4_nl_f32")]]  kernel kernel_mul_mv_id_t kernel_mul_mv_id<mmv_fn<kernel_mul_mv_iq4_nl_f32_impl <N_R0_IQ4_NL>>>;
+ template [[host_name("kernel_mul_mv_id_iq4_xs_f32")]]  kernel kernel_mul_mv_id_t kernel_mul_mv_id<mmv_fn<kernel_mul_mv_iq4_xs_f32_impl <N_R0_IQ4_XS>>>;
+ 
++// ExpertCache grouped dispatch: one launch covers every token routed to a
++// single expert. src0s is that expert's weight view; route_map[z] carries the
++// token index (x) and expert-use slot (y) each threadgroup writes.
++template<mul_mv_disp_fn_t disp_fn>
++kernel void kernel_mul_mv_id_gathered(
++        constant ggml_metal_kargs_mul_mv_id & args,
++        device const char * src0s,
++        device const char * src1,
++        device       char * dst,
++        device const int2 * route_map,
++        threadgroup  char * shmem [[threadgroup(0)]],
++        uint3  tgpig[[threadgroup_position_in_grid]],
++        ushort tiitg[[thread_index_in_threadgroup]],
++        ushort tiisg[[thread_index_in_simdgroup]],
++        ushort sgitg[[simdgroup_index_in_threadgroup]]) {
++    const int2 route = route_map[tgpig.z];
++    const int64_t i2 = route.x; // token
++    const int64_t i1 = route.y; // expert-use slot
++
++    tgpig.z = 0;
++
++    const int64_t i11 = i1 % args.ne11;
++    const int64_t i12 = i2;
++
++    device const char * src0_cur = src0s;
++    device const char * src1_cur = src1 + i11*args.nb11 + i12*args.nb12;
++
++    device char * dst_cur = dst + (i1*args.ne0 + i2*args.ne1*args.ne0)*sizeof(float);
++
++    ggml_metal_kargs_mul_mv args0 = {
++        /*.ne00 =*/ args.ne00,
++        /*.ne01 =*/ args.ne01,
++        /*.ne02 =*/ 1, // args.ne02,
++        /*.nb00 =*/ args.nb00,
++        /*.nb01 =*/ args.nb01,
++        /*.nb02 =*/ args.nb02,
++        /*.nb03 =*/ args.nb02, // args.ne02 == 1
++        /*.ne10 =*/ args.ne10,
++        /*.ne11 =*/ 1, // args.ne11,
++        /*.ne12 =*/ 1, // args.ne12,
++        /*.nb10 =*/ args.nb10,
++        /*.nb11 =*/ args.nb11,
++        /*.nb12 =*/ args.nb12,
++        /*.nb13 =*/ args.nb12, // ne12 == 1
++        /*.ne0  =*/ args.ne0,
++        /*.ne1  =*/ 1, // args.ne1,
++        /*.nr0  =*/ args.nr0,
++        /*.r2   =*/ 1,
++        /*.r3   =*/ 1,
++    };
++
++    disp_fn(
++        args0,
++        /* src0 */ src0_cur,
++        /* src1 */ src1_cur,
++        /* dst  */ dst_cur,
++        shmem,
++        tgpig,
++        tiitg,
++        tiisg,
++        sgitg);
++}
++
++typedef decltype(kernel_mul_mv_id_gathered<mmv_fn<kernel_mul_mv_t_t_disp<float, float>>>) kernel_mul_mv_id_gathered_t;
++
++template [[host_name("kernel_mul_mv_id_gathered_mxfp4_f32")]] kernel kernel_mul_mv_id_gathered_t kernel_mul_mv_id_gathered<mmv_fn<kernel_mul_mv_mxfp4_f32_impl<N_R0_MXFP4>>>;
++
++kernel void kernel_expert_cache_fill(
++        constant ggml_metal_kargs_expert_cache_fill & args,
++        device const uint4 * source,
++        device const int32_t * global_ids,
++        device uint4 * slots,
++        device int32_t * compact_ids,
++        uint gid [[thread_position_in_grid]]) {
++    const uint64_t words_per_expert = args.bytes_per_expert / sizeof(uint4);
++    const uint64_t total_words = words_per_expert * args.experts_used;
++
++    if (gid < total_words) {
++        const uint32_t slot = gid / words_per_expert;
++        const uint64_t word_in_expert = gid - slot * words_per_expert;
++        const uint64_t source_word_stride =
++            args.source_expert_stride / sizeof(uint4);
++        const uint32_t global_id = global_ids[slot];
++
++        slots[gid] = source[
++            (uint64_t) global_id * source_word_stride + word_in_expert
++        ];
++    }
++
++    if (gid < args.experts_used) {
++        compact_ids[gid] = (int32_t) gid;
++    }
++}
++
+ kernel void kernel_pool_2d_max_f32(
+         constant    ggml_metal_kargs_pool_2d & args,
+         device  const float * src0,

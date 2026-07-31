@@ -1,0 +1,36 @@
+{
+  "schema": "amos.expert-cache-runtime",
+  "version": 4,
+  "runtime": {
+    "repository": "https://github.com/ggml-org/llama.cpp.git",
+    "revision": "7e1e28cae36d41fe7bbe9dae7c9625de6565c063",
+    "branch": "master"
+  },
+  "runtime_patch": {
+    "filename": "llama-expert-cache-runtime.patch",
+    "sha256": "0181578f465cb188ab4f34ba8a859b704a99cca5caa5bdec2d502ba3e48571b0",
+    "purpose": "Bound routed MXFP4 experts, group same-layer projections, and expose selected experts through direct no-copy Metal views."
+  },
+  "model_artifact": {
+    "repository": "ggml-org/gpt-oss-120b-GGUF",
+    "revision": "238abdd290bb874b90a5da1b4549881b7d05c091",
+    "filename": "gpt-oss-120b-MXFP4.gguf",
+    "size_bytes": 63387346208,
+    "x_linked_etag": "582bd40f6886200101f4c4ed9f25f3fe80cc14c86e9e2b37746cd8904a0c622d"
+  },
+  "references": [
+    {
+      "name": "hybrid-cuda-expert-cache",
+      "repository": "https://github.com/leloch/llama.cpp.git",
+      "revision": "a01eb26468a6cb2bf2c3bfd1cc3b5d9e64daefcd",
+      "branch": "moe-cache-pr",
+      "use": "Architecture and correctness reference only; the implementation is CUDA-only."
+    }
+  ],
+  "metal_strategy": {
+    "name": "unified-memory-working-set",
+    "stock_control_flag": "--mode natural",
+    "cache_flag": "--mode working-set",
+    "reason": "Avoid the per-layer synchronization and remapping cost observed in prior Metal slot-pool experiments."
+  }
+}
