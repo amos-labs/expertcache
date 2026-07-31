@@ -1,0 +1,96 @@
+{
+  "schema": "expertcache.stock-direct-logprob-diagnostic",
+  "version": 1,
+  "created_at": "2026-07-31T15:54:59.439Z",
+  "source_revision": "8a2de2d26f56f0e1b7580df1420ddebc88eba6e1",
+  "model": {
+    "id": "gpt-oss-20b-mxfp4",
+    "repository": "ggml-org/gpt-oss-20b-GGUF",
+    "revision": "ef9b12f2ff56c69cf32153a02784e7a3c88bf524",
+    "filename": "gpt-oss-20b-MXFP4.gguf",
+    "size_bytes": 12109566624,
+    "sha256": "27cd6c432c7672cb812a92f611cf3ba7bbc35928262bb1e1253ff4ee6ae35901"
+  },
+  "runtime": {
+    "binary_sha256": "6d23bcd3cadba555d05115fdef17fbdd9fec7236bf1ab25a32071894aacf17cf",
+    "patch_sha256": "6bb978ab189ded46b131edea81fbe0740d7d527797be553f91312e4704f76a63"
+  },
+  "protocol": {
+    "scenario": "business diagnosis",
+    "temperature": 0,
+    "seed": 42,
+    "maximum_completion_tokens": 768,
+    "returned_top_logprobs": 5,
+    "prompt_cache": false,
+    "slot_prompt_similarity": 0,
+    "repetitions_per_arm": 2,
+    "stock_environment": [],
+    "direct_environment": [
+      "GGML_METAL_LAZY_TENSOR_MAP=1",
+      "GGML_METAL_EXPERT_CACHE_SLOTS=128",
+      "GGML_METAL_EXPERT_CACHE_CPU_FILL=1",
+      "GGML_METAL_EXPERT_CACHE_ZERO_COPY=1"
+    ]
+  },
+  "results": {
+    "stock": {
+      "repetitions_message_identical": true,
+      "message_sha256": "5079a1c8ec369b3ee573ea59db63ca2a4de274fef13537768deb0529e45cd87d",
+      "generated_tokens": 265,
+      "accepted_by_contract_v5": true,
+      "answer": "The most immediate bottleneck is the complete failure to convert the 120 playground sessions into any account sign‑ups."
+    },
+    "direct": {
+      "repetitions_message_identical": true,
+      "message_sha256": "e8af40520c244f9e3c03881cef9ed73a8f1cd67a8649fc154a694488d8013c98",
+      "generated_tokens": 248,
+      "accepted_by_contract_v5": true,
+      "answer": "The immediate bottleneck is the complete drop from 120 playground sessions to zero account sign‑ups."
+    },
+    "common_generated_prefix_tokens": 179,
+    "maximum_shared_prefix_selected_logprob_absolute_delta": 0.011917650699615479,
+    "maximum_delta_index": 113,
+    "maximum_delta_token": " account",
+    "first_divergence": {
+      "index": 179,
+      "preceding_tokens": [
+        " sign",
+        "ups",
+        " after",
+        " playground",
+        " sessions",
+        ".",
+        " So",
+        " the"
+      ],
+      "stock": {
+        "selected_token": " sentence",
+        "selected_logprob": -1.1512494087219238,
+        "alternative_token": " bott",
+        "alternative_logprob": -1.1656899452209473,
+        "selected_margin": 0.014440536499023438
+      },
+      "direct": {
+        "selected_token": " bott",
+        "selected_logprob": -1.155874252319336,
+        "alternative_token": " sentence",
+        "alternative_logprob": -1.1562329530715942,
+        "selected_margin": 0.0003587007522583008
+      }
+    }
+  },
+  "interpretation": {
+    "supports": [
+      "repeatable cache-disabled output within each tested arm",
+      "a first stock/direct ranking flip at a near-tied token after a 179-token common prefix",
+      "semantic acceptance of both resulting answers under qualification contract v5"
+    ],
+    "does_not_support": [
+      "whole-kernel numerical equivalence",
+      "a publication timing comparison",
+      "stock-to-custom bit-exact generation",
+      "closing the registered second-checkpoint gate without a forced-token tolerance test"
+    ],
+    "next_gate": "Compare stock and direct logits on a fixed teacher-forced token corpus with a registered absolute/relative tolerance."
+  }
+}

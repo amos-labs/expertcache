@@ -20,6 +20,21 @@ from clean source revision `ea82da9`.
   4. The registered stock-equivalence gate therefore remains incomplete.
 - All four arms recorded zero swap growth during their runs.
 
+## Cache-disabled log-probability diagnostic
+
+The follow-up in `logprob-diagnostic/` contains four sanitized token-level
+traces: two stock repetitions and two direct-path repetitions. Prompt caching
+was disabled and slot prompt similarity was set to zero. Each arm repeated its
+own complete message exactly. The two paths shared 179 generated tokens before
+a near-tied ranking flipped: stock selected ` sentence` over ` bott` by 0.01444
+log-prob, while direct selected ` bott` over ` sentence` by 0.00036 log-prob.
+The maximum selected-token log-prob delta in the shared prefix was 0.01192.
+
+This diagnostic supports a bounded numerical-drift explanation and both
+answers pass the v5 evaluator. It does not close the equivalence gate. That
+requires a separately registered teacher-forced token/logit comparison with
+explicit tolerances.
+
 Strict hashes remain in every frozen report. The canonical hash does not
 normalize model content, reasoning, tool name, tool arguments, order, or
 formatting.

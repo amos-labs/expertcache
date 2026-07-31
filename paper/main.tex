@@ -416,6 +416,18 @@ seconds for direct, grouped, and prefetch-6 respectively.  These are not
 publication timing estimates, but they show why the optional path should be
 bypassed when a checkpoint fits efficiently in stock residency.
 
+A cache-disabled two-repeat diagnostic then localized one divergence.  Stock
+repeated a 265-token message and direct repeated a 248-token message; the paths
+shared 179 generated tokens.  At the first changed token, stock preferred
+\texttt{sentence} over \texttt{bott} by 0.01444 log-prob, while direct preferred
+\texttt{bott} over \texttt{sentence} by 0.00036 log-prob.  The maximum
+selected-token log-prob difference in the shared prefix was 0.01192, and both
+answers passed the semantic evaluator.  This supports a near-tie trajectory
+explanation but not whole-kernel numerical equivalence.  The remaining
+registered gate is therefore a teacher-forced token/logit comparison with
+explicit tolerances; strict and canonical response hashes remain separately
+reported.
+
 \begin{table*}[t]
 \centering
 \caption{Current observations and required publication replacements.}

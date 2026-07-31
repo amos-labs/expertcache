@@ -17,7 +17,7 @@ Status: **done**, **active**, **planned**, **scoped out**, **external gate**, or
 | P0 | Full frozen quality suite | active | Version-5 seven-scenario, 16-point suite with complete synthetic response records, finish reasons, token usage, strict and opaque-ID-canonical hashes, and public deterministic evaluators on the final runtime. |
 | P0 | Complete host telemetry | planned | TTFT, prefill/decode, RSS, compressed memory, swap, page faults, bytes touched, energy and thermal state. |
 | P2 | 32 GiB Apple Silicon replication | scoped out | Supplemental only: run the pinned protocol on physical hardware before making any 32 GiB claim. |
-| P0 | Second official sparse checkpoint | active | All GPT-OSS 20B arms execute and score 7/7 under the v5 audit; direct/grouped/prefetch are canonical-equivalent, but stock-to-custom output equivalence remains unresolved. |
+| P0 | Second official sparse checkpoint | active | All GPT-OSS 20B arms execute and score 7/7 under the v5 audit; direct/grouped/prefetch are canonical-equivalent; a cache-disabled diagnostic localized stock/direct drift to a near-tied token after a 179-token common prefix. Register and pass a teacher-forced logit-tolerance gate before closing. |
 | P1 | Second oversized architecture | scoped out | Not a release gate for this paper; add only after a compatible artifact executes through a separately qualified kernel path. |
 | P0 | Frozen artifact release | planned | Checksummed bundle, tagged source, compiled paper, and archived raw results. |
 | P1 | Upstreamable runtime boundary | planned | Patch is reduced to a reviewable backend extension with tests and no AMOS dependency. |
@@ -140,8 +140,11 @@ This boundary is specified in
   protecting shared tensors; compare quality and total residency.
 - **Second MXFP4 MoE checkpoint:** the official 12,109,566,624-byte GPT-OSS
   20B MXFP4 artifact is the immediate same-family portability control. It can
-  validate stock/direct/grouped/prefetch output equivalence, but cannot support
-  an oversized-memory or second-architecture claim.
+  validate execution, semantic outcomes, and registered numerical tolerances
+  across stock/direct/grouped/prefetch, but cannot support an oversized-memory
+  or second-architecture claim. Exact response hashes remain reported but are
+  not the sole acceptance criterion when a near-tied token changes a greedy
+  trajectory.
 - **Second oversized architecture:** retain as a separate follow-on. A
   different quantization or tensor layout requires a new correctness-bearing
   kernel and must not be folded into the 20B portability result.
@@ -187,7 +190,9 @@ A future optional ExpertCache backend is production-eligible only when it:
   managed verifier;
 - has no unbounded swap growth, UI starvation, or memory-pressure termination;
 - supports deterministic cancellation, restart, update, and rollback;
-- preserves output equivalence for identical model math;
+- passes registered teacher-forced numerical tolerances and semantic quality
+  gates for identical model math, with strict/canonical response hashes
+  reported separately;
 - exposes explicit startup, prefetch, memory, thermal, and fallback state;
 - records a receipt for task routing, verification, and escalation decisions;
 - keeps all prefetch predictions advisory and policy-bounded; and
