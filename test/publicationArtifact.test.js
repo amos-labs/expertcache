@@ -33,6 +33,9 @@ test("host snapshots are sanitized and swap units parse deterministically", () =
   const snapshot = captureHostSnapshot({ hostId: "test-host" });
   assert.equal(snapshot.host_id, "test-host");
   assert.match(snapshot.host_fingerprint, /^[0-9a-f]{16}$/);
+  assert.equal(typeof snapshot.source_dirty, "boolean");
+  assert.match(snapshot.source_state_sha256, /^[0-9a-f]{64}$/);
+  assert.equal(Number.isInteger(snapshot.source_untracked_files), true);
   assert.equal(JSON.stringify(snapshot).includes("serial"), false);
 });
 

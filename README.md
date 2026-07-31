@@ -27,8 +27,11 @@ On one 64 GiB Apple M1 Max system, the pinned artifact:
 These are bounded results from one machine and one model. They do **not** show
 frontier parity, general production readiness, universal model quality, or a
 counterbalanced publication-grade performance result. Decode remained near
-three tokens/second in the final gate and the full qualification suite has not
-yet been rerun on the final milestone.
+three tokens/second in the final gate. The full qualification suite has been
+rerun on the final runtime at low and medium reasoning effort, but those
+single warm-state runs are diagnostic evidence rather than a publication-grade
+quality or performance estimate; see the
+[governed qualification boundary](docs/GOVERNED_MODEL_HARNESS.md).
 
 Read [the direct-view result](docs/EXPERT_CACHE_ZERO_COPY_RESULTS.md),
 [latency ceilings and prefetch result](docs/EXPERT_CACHE_CEILING_RESULTS.md),
@@ -46,6 +49,9 @@ the work.
 - `test/` — deterministic unit and replay tests.
 - `evidence/` — committed, machine-readable decision-grade result bundles.
 - `docs/REPRODUCIBILITY.md` — end-to-end experimental workflow.
+- `docs/GOVERNED_MODEL_HARNESS.md` — raw-model, evaluator-audit, and
+  product-harness result boundaries.
+- `docs/HOSTED_CONTROL.md` — matched Bedrock GPT-OSS qualification control.
 - `paper/` — manuscript, claim ledger, registered protocol, and result macros.
 - `artifact/` — machine-readable experiment matrix and publication manifest.
 - `ROADMAP.md` — publication gates, production architecture, and retained

@@ -37,6 +37,7 @@
     "experiment:low-memory": "node scripts/runLowMemoryProbe.js",
     "experiment:summarize": "node scripts/summarizePublicationResults.js",
     "benchmark:model": "node scripts/benchmarkLocalModels.js",
+    "benchmark:bedrock-gateway": "python3 scripts/bedrockBenchmarkGateway.py",
     "harness:capture": "python3 harness/capture_gpt_oss_trace.py",
     "harness:layout": "python3 harness/build_expert_layout.py",
     "harness:replay": "python3 harness/replay_expert_pages.py"

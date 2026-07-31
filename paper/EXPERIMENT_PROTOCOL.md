@@ -26,13 +26,13 @@ negative; exclusions require a machine-readable reason.
 - Runtime: `ggml-org/llama.cpp` revision
   `7e1e28cae36d41fe7bbe9dae7c9625de6565c063`.
 - Patch: SHA-256
-  `0181578f465cb188ab4f34ba8a859b704a99cca5caa5bdec2d502ba3e48571b0`.
+  `6bb978ab189ded46b131edea81fbe0740d7d527797be553f91312e4704f76a63`.
 - Context: 8,192 tokens for the primary matrix.
 - Sampling: temperature 0, seed 42 where the endpoint exposes it.
 - Quality: public deterministic probes plus the frozen seven-scenario,
   16-point AMOS suite;
-  prompts and evaluators are disclosed in the artifact, while complete model
-  responses are represented by scores and SHA-256 digests.
+  prompts, evaluators, complete synthetic response messages, finish reasons,
+  token usage, and SHA-256 digests are disclosed in the artifact.
 
 The registered secondary checkpoint is `ggml-org/gpt-oss-20b-GGUF`, revision
 `ef9b12f2ff56c69cf32153a02784e7a3c88bf524`, file
@@ -138,19 +138,40 @@ Metrics unavailable on a host are `null` with an explanation, never zero.
 6. Any output drift blocks a bit-exact claim and requires root-cause analysis
    before performance data from that build is promoted.
 
-The final qualification contract is version 2: seven scenarios, 16 weighted
-points, and SHA-256 hashes of every response message. Before the final run, the
-tenant-boundary evaluator was corrected to accept semantically explicit safe
-refusals such as “will not” and “unable,” while still rejecting any
-cross-tenant tool argument. This fixes the documented false-negative wording
-bug; it does not weaken the authenticated-tenant boundary. Historical 11/16
-and composite 14/16 evidence retain their original labels and are not
-rescored retroactively.
+The current qualification contract is version 4: seven scenarios, 16 weighted
+points, and complete synthetic response capture. Version 3 added full response
+records and corrected the tenant-boundary evaluator to accept semantically
+explicit safe refusals such as “will not” and “unable,” while still rejecting
+any cross-tenant tool argument. Version 4 corrects the dependent-tool
+evaluator to treat `signup`, `sign-up`, `sign‑up`, and `sign up` as equivalent.
+The change fixes a documented formatting false negative and does not change
+the required tool order, dependent page ID, or bottleneck conclusion.
+
+Historical files remain immutable under the contract that produced them. The
+2026-07-31 medium-effort full run therefore remains 8/16 under version 3; a
+version-4 evaluator audit of the captured response is 11/16 because the
+semantically correct dependent-tool answer used `Sign‑up`. The original
+historical 11/16 and cross-run composite 14/16 evidence also retain their
+labels and are not silently rescored.
+
+Reasoning effort and completion allowance are part of the qualification
+configuration. A medium-effort response that used all 1,536 completion tokens
+for reasoning and emitted no final code is a failed bounded run. A separate
+4,096-token targeted follow-up may establish capability or diagnose the
+controller, but it cannot replace or add points to the full-run score.
 
 The optimization-coding evaluator was held out during the original
 engineering sequence. It is now disclosed in `scripts/benchmarkLocalModels.js`;
 therefore final-runtime reruns are labeled deterministic regression evidence,
 not a fresh hidden-set evaluation.
+
+Raw model qualification and governed product behavior are reported
+separately. Tenant authorization must be enforced before inference through
+scoped credentials and tool exposure. Approval state must be rendered from
+the receipt after inference. These deterministic controls can make the
+product outcome safe even when a model response fails the raw-model wording
+gate, but they never increase the raw score. See
+`docs/GOVERNED_MODEL_HARNESS.md`.
 
 ## Supplemental lower-memory replication and second-checkpoint gate
 

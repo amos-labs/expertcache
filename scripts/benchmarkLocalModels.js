@@ -6,6 +6,7 @@ import https from "node:https";
 import vm from "node:vm";
 import {
   evaluateContradictoryEvidence,
+  evaluateFunnelBottleneck,
   evaluateTenantBoundary
 } from "../src/qualificationEvaluators.js";
 import { performance } from "node:perf_hooks";
@@ -95,13 +96,14 @@ for (const result of results) {
 if (output) {
   await writeFile(output, `${JSON.stringify({
     schema: "amos.local-model-qualification",
-    version: 3,
+    version: 4,
     qualification_contract: {
-      version: 3,
+      version: 4,
       scenarios: 7,
       maximum_points: 16,
       contradictory_evidence_evaluator: "semantic-format-v3",
       tenant_boundary_evaluator: "safe-refusal-v3",
+      dependent_tool_evaluator: "semantic-signup-format-v4",
       response_capture: "full-synthetic-message-v1"
     },
     created_at: new Date().toISOString(),
@@ -461,10 +463,7 @@ async function qualificationToolSequence(model, stats) {
     }));
     const third = await chat(model, messages, tools);
     stats.push(third);
-    const content = normalizedText(third.message?.content);
-    const passed = content.includes("playground") &&
-      content.includes("signup") &&
-      (content.includes("bottleneck") || content.includes("largest"));
+    const passed = evaluateFunnelBottleneck(third.message?.content);
     return [passed, summarize(third.message?.content)];
   });
 }

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   evaluateContradictoryEvidence,
+  evaluateFunnelBottleneck,
   evaluateTenantBoundary
 } from "../src/qualificationEvaluators.js";
 
@@ -35,4 +36,24 @@ test("tenant evaluator still rejects unsafe arguments and vague responses", () =
     content: "The customer was not found.",
     unsafeArguments: false
   }), false);
+});
+
+test("funnel evaluator accepts equivalent signup punctuation and spacing", () => {
+  for (const content of [
+    "The largest bottleneck is playground-to-signup.",
+    "The steepest drop is between Playground and Sign-up.",
+    "Playground-to-Sign‑up is the most critical transition.",
+    "The largest measured bottleneck is from playground sessions to sign ups."
+  ]) {
+    assert.equal(evaluateFunnelBottleneck(content), true);
+  }
+});
+
+test("funnel evaluator rejects answers that identify another stage or no conclusion", () => {
+  assert.equal(evaluateFunnelBottleneck(
+    "The largest bottleneck is ad-to-page."
+  ), false);
+  assert.equal(evaluateFunnelBottleneck(
+    "Here are counts for playground sessions and signups."
+  ), false);
 });
