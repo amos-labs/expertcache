@@ -32,14 +32,18 @@
     {
       "id": "C2",
       "grade": "targeted-quality-validated",
-      "evidence": ["docs/EXPERT_CACHE_ZERO_COPY_RESULTS.md"]
+      "evidence": [
+        "docs/EXPERT_CACHE_ZERO_COPY_RESULTS.md",
+        "evidence/qualification-controls-2026-07-31/"
+      ]
     },
     {
       "id": "C3",
       "grade": "deterministic-equivalence-validated",
       "evidence": [
         "docs/EXPERT_CACHE_CEILING_RESULTS.md",
-        "evidence/prefetch-2026-07-29/full-gate-qualification.json"
+        "evidence/prefetch-2026-07-29/full-gate-qualification.json",
+        "evidence/second-checkpoint-20b-2026-07-31/"
       ]
     },
     {

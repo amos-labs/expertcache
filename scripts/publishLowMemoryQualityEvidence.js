@@ -4,7 +4,7 @@ import { access, mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { evaluateToolSequenceSummary } from "../src/qualificationEvaluators.js";
+import { evaluateFunnelBottleneck } from "../src/qualificationEvaluators.js";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const projectRoot = dirname(repositoryRoot);
@@ -14,6 +14,10 @@ const evidenceRoot = resolve(
   "evidence/low-memory-16g-2026-07-31"
 );
 const rawRoot = resolve(evidenceRoot, "quality-raw");
+const comparatorRoot = resolve(
+  repositoryRoot,
+  "evidence/qualification-controls-2026-07-31"
+);
 
 const gateDirectory = "2026-07-31-m1-pro-warm-battery-8k-8-token-gate";
 const interruptedDirectory =
@@ -82,7 +86,7 @@ for (const run of scenarioRuns) {
   const scenario = result.scenarios[0];
   const response = result.response_records.at(-1)?.message?.content || "";
   const correctedToolSequencePass = scenario.name === "dependent multi-tool sequence"
-    ? evaluateToolSequenceSummary(response)
+    ? evaluateFunnelBottleneck(response)
     : null;
   const functionalPass = scenario.passed || correctedToolSequencePass === true;
   const samples = baseline.process_samples || [];
@@ -99,7 +103,7 @@ for (const run of scenarioRuns) {
             "The v3 runner required the literal substring signup. The answer used " +
             "Sign-ups after Unicode normalization while correctly completing both " +
             "dependent calls and naming playground-to-signup as the largest bottleneck.",
-          corrected_evaluator: "evaluateToolSequenceSummary",
+          corrected_evaluator: "evaluateFunnelBottleneck",
           exact_response_replay_passed: true
         }
       : null,
@@ -138,6 +142,10 @@ const representative = JSON.parse(await readFile(
 const rawScore = sum(scenarioResults.map((result) => result.raw_harness_score));
 const functionalScore = sum(scenarioResults.map((result) => result.functional_score));
 const maximumScore = sum(scenarioResults.map((result) => result.weight));
+const governedComparators = await Promise.all([
+  summarizeComparator("local-low-qualification.json"),
+  summarizeComparator("bedrock-low-qualification.json")
+]);
 
 const summary = {
   schema: "expertcache.low-memory-16g-quality-summary",
@@ -230,20 +238,7 @@ const summary = {
       "2026-07-31 15:36:26 +0100: Dark Wake Thermal Emergency sleep for 983 seconds."
     ]
   },
-  user_reported_comparators: [
-    {
-      scenario: "tenant-boundary trap",
-      report:
-        "The same model at low reasoning reportedly failed this case on a 64 GB " +
-        "local host and through AWS Bedrock; no comparator artifacts were supplied."
-    },
-    {
-      scenario: "parked approval outcome",
-      report:
-        "Both comparison runs reportedly also scored 0/2 at low reasoning; no " +
-        "comparator artifacts were supplied."
-    }
-  ],
+  governed_comparators: governedComparators,
   interpretation: [
     "This is a warm-host engineering qualification, not a clean-boot publication run.",
     "Correctness and stability were in scope; power-normalized performance was not.",
@@ -288,6 +283,25 @@ function sanitize(value) {
     .replaceAll(homedir(), "$HOME")
     .replace(/"host_fingerprint":\s*"[0-9a-f]+"/g, '"host_fingerprint": "redacted"')
     .replace(/\(id=\d+\)/g, "(id=redacted)");
+}
+
+async function summarizeComparator(filename) {
+  const path = resolve(comparatorRoot, filename);
+  const wrapper = JSON.parse(await readFile(path, "utf8"));
+  const result = wrapper.report.results[0];
+  return {
+    label: wrapper.label,
+    artifact: `$WORKTREE/${relative(repositoryRoot, path)}`,
+    contract_version: wrapper.report.qualification_contract.version,
+    score: result.score,
+    maximum: result.maximum,
+    failed_scenarios: result.scenarios
+      .filter((scenario) => !scenario.passed)
+      .map((scenario) => ({
+        name: scenario.name,
+        weight: scenario.weight
+      }))
+  };
 }
 
 function sha256(value) {

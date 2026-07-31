@@ -5,6 +5,9 @@ import { createReadStream } from "node:fs";
 import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  canonicalQualificationMessageSha256
+} from "../src/qualificationEvidence.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
@@ -94,6 +97,7 @@ if (modelSha256 !== spec.sha256) {
   throw new Error(`Pinned model SHA-256 mismatch: ${modelSha256}`);
 }
 
+await mkdir(dirname(output), { recursive: true });
 await mkdir(output, { recursive: false });
 const state = {
   schema: "expertcache.second-checkpoint-gate",
@@ -162,17 +166,43 @@ const reference = state.runs.find((run) => run.arm === "stock")?.result;
 const equivalence = state.runs.map((run) => {
   const candidate = run.result?.response_output_sha256 || [];
   const expected = reference?.response_output_sha256 || [];
+  const canonicalCandidate = run.result?.canonical_response_output_sha256 || [];
+  const canonicalExpected = reference?.canonical_response_output_sha256 || [];
   return {
     arm: run.arm,
     response_count: candidate.length,
-    exact_output_hash_match: run.status === "complete" &&
+    strict_response_hash_match: run.status === "complete" &&
       candidate.length > 0 && arraysEqual(candidate, expected),
-    mismatch_indices: mismatchIndices(expected, candidate)
+    strict_mismatch_indices: mismatchIndices(expected, candidate),
+    canonical_response_hash_match: run.status === "complete" &&
+      canonicalCandidate.length > 0 &&
+      arraysEqual(canonicalCandidate, canonicalExpected),
+    canonical_mismatch_indices:
+      mismatchIndices(canonicalExpected, canonicalCandidate)
   };
 });
+const direct = state.runs.find((run) => run.arm === "direct")?.result;
+const customEquivalence = state.runs
+  .filter((run) => ["direct", "grouped", "prefetch-6"].includes(run.arm))
+  .map((run) => ({
+    arm: run.arm,
+    reference: "direct",
+    canonical_response_hash_match:
+      arraysEqual(
+        direct?.canonical_response_output_sha256 || [],
+        run.result?.canonical_response_output_sha256 || []
+      ),
+    canonical_mismatch_indices: mismatchIndices(
+      direct?.canonical_response_output_sha256 || [],
+      run.result?.canonical_response_output_sha256 || []
+    )
+  }));
 const complete = state.runs.length === arms.length &&
   state.runs.every((run) => run.status === "complete") &&
-  equivalence.every((item) => item.exact_output_hash_match);
+  state.runs.every((run) => run.result?.score === run.result?.maximum) &&
+  equivalence.every((item) => item.canonical_response_hash_match);
+const customPathsEquivalent = customEquivalence.length === 3 &&
+  customEquivalence.every((item) => item.canonical_response_hash_match);
 const summary = {
   schema: "expertcache.second-checkpoint-summary",
   version: 1,
@@ -187,11 +217,20 @@ const summary = {
     sha256: modelSha256
   },
   scope: {
-    proves: "same-family GPT-OSS MXFP4 checkpoint portability across stock, direct, grouped, and prefetch paths",
+    target: "same-family GPT-OSS MXFP4 checkpoint portability across stock, direct, grouped, and prefetch paths",
+    established: [
+      ...(customPathsEquivalent
+        ? ["canonical response equivalence across direct, grouped, and prefetch-6 paths"]
+        : []),
+      ...(complete
+        ? ["canonical response equivalence from stock through every custom path"]
+        : [])
+    ],
     does_not_prove: ["second oversized checkpoint", "second model architecture"]
   },
   suite: "public deterministic smoke suite",
   equivalence,
+  custom_path_equivalence: customEquivalence,
   scores: state.runs.map((run) => ({
     arm: run.arm,
     score: run.result?.score ?? null,
@@ -241,6 +280,11 @@ async function readRunResult(runDir) {
       score: result.score,
       maximum: result.maximum,
       response_output_sha256: result.response_output_sha256 || [],
+      canonical_response_output_sha256:
+        result.canonical_response_output_sha256 ||
+        (result.response_records || []).map((record) =>
+          canonicalQualificationMessageSha256(record.message)
+        ),
       scenarios: (result.scenarios || []).map((scenario) => ({
         name: scenario.name,
         passed: scenario.passed,

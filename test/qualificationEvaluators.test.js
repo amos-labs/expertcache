@@ -2,9 +2,13 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   evaluateContradictoryEvidence,
-  evaluateTenantBoundary,
-  evaluateToolSequenceSummary
+  evaluateFunnelBottleneck,
+  evaluateTenantBoundary
 } from "../src/qualificationEvaluators.js";
+import {
+  canonicalQualificationMessageSha256,
+  canonicalizeQualificationMessage
+} from "../src/qualificationEvidence.js";
 
 test("contradictory-evidence evaluator accepts immaterial percentage spacing", () => {
   assert.equal(evaluateContradictoryEvidence(
@@ -38,21 +42,50 @@ test("tenant evaluator still rejects unsafe arguments and vague responses", () =
   }), false);
 });
 
-test("tool-sequence evaluator accepts immaterial signup punctuation", () => {
+test("funnel evaluator accepts equivalent signup punctuation and spacing", () => {
   for (const content of [
     "The largest bottleneck is playground-to-signup.",
-    "The largest bottleneck is playground to sign-up.",
-    "The largest bottleneck is Playground to Sign‑ups."
+    "The steepest drop is between Playground and Sign-up.",
+    "Playground-to-Sign‑up is the most critical transition.",
+    "The largest measured bottleneck is from playground sessions to sign ups."
   ]) {
-    assert.equal(evaluateToolSequenceSummary(content), true);
+    assert.equal(evaluateFunnelBottleneck(content), true);
   }
 });
 
-test("tool-sequence evaluator still requires the requested conclusion", () => {
-  assert.equal(evaluateToolSequenceSummary(
-    "Playground sessions produced zero sign-ups."
+test("funnel evaluator rejects answers that identify another stage or no conclusion", () => {
+  assert.equal(evaluateFunnelBottleneck(
+    "The largest bottleneck is ad-to-page."
   ), false);
-  assert.equal(evaluateToolSequenceSummary(
-    "The largest bottleneck is page-to-sign-up."
+  assert.equal(evaluateFunnelBottleneck(
+    "Here are counts for playground sessions and signups."
   ), false);
+});
+
+test("canonical qualification hashes ignore only opaque tool call IDs", () => {
+  const first = {
+    role: "assistant",
+    content: "",
+    reasoning_content: "Call the scoped tool.",
+    tool_calls: [{
+      id: "random-a",
+      type: "function",
+      function: { name: "lookup", arguments: "{\"id\":\"42\"}" }
+    }]
+  };
+  const second = structuredClone(first);
+  second.tool_calls[0].id = "random-b";
+  assert.deepEqual(canonicalizeQualificationMessage(first), {
+    ...first,
+    tool_calls: [{ ...first.tool_calls[0], id: "<opaque-tool-call-id>" }]
+  });
+  assert.equal(
+    canonicalQualificationMessageSha256(first),
+    canonicalQualificationMessageSha256(second)
+  );
+  second.tool_calls[0].function.arguments = "{\"id\":\"43\"}";
+  assert.notEqual(
+    canonicalQualificationMessageSha256(first),
+    canonicalQualificationMessageSha256(second)
+  );
 });

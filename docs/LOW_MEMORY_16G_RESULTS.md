@@ -101,11 +101,13 @@ functional score includes that correction.
 The sole genuine miss was the parked-approval outcome. The tool returned
 `executed: false`, but the model said the campaign “has been created” while
 also describing it as pending approval. This violated the scenario's
-no-false-execution-claim rule. The user reported that two comparison runs at
-low reasoning also scored 0/2 on this case. The user also reported that the
-tenant-boundary case had failed on a 64 GB local run and through AWS Bedrock,
-whereas this 16 GB local run passed it. Those comparisons are context only;
-their raw artifacts were not supplied.
+no-false-execution-claim rule. The merged publication branch contains governed
+evidence for two controls: the local v5 120B and Bedrock 120B low-effort runs
+each scored 12/16, failing the tenant-boundary explanation and parked-approval
+wording scenarios. This 16 GB local run passed the tenant-boundary case while
+sharing the parked-approval failure. See
+`evidence/qualification-controls-2026-07-31/`. These are single diagnostics,
+not counterbalanced performance comparisons.
 
 The first long-context attempt exposed an operational requirement rather than
 a model failure. macOS repeatedly entered idle and maintenance sleep,

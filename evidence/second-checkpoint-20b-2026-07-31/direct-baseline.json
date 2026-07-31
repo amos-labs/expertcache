@@ -1,0 +1,1409 @@
+{
+  "schema": "expertcache.sanitized-evidence",
+  "version": 1,
+  "label": "direct-baseline",
+  "source": {
+    "filename": "baseline.json",
+    "sha256": "ae69226d086be3937fcbc3383fca017e5c45f8476ed9e5598f56896cff07ad1f"
+  },
+  "report": {
+    "schema": "amos.local-120b-live-baseline",
+    "version": 3,
+    "publication_run_id": "second-checkpoint-direct",
+    "started_at": "2026-07-31T15:13:12.730Z",
+    "completed_at": "2026-07-31T15:16:41.657Z",
+    "configuration_sha256": "f92eb959c1460f584f46144ec96ea6ecde2d3c2404b2abaf63204b20a5e51a76",
+    "configuration": {
+      "runtime_revision": "7e1e28cae36d41fe7bbe9dae7c9625de6565c063",
+      "runtime_patch_sha256": "6bb978ab189ded46b131edea81fbe0740d7d527797be553f91312e4704f76a63",
+      "runtime_binary_sha256": "6d23bcd3cadba555d05115fdef17fbdd9fec7236bf1ab25a32071894aacf17cf",
+      "runtime_binary_size_bytes": 49984,
+      "runtime_bundle_sha256": "fffa84c633496b8a1fd486954dc4b3b39a3bb97e3e7a7f91be5b78fd3a7ebe99",
+      "model_artifact_id": "gpt-oss-20b-mxfp4",
+      "model_repository": "ggml-org/gpt-oss-20b-GGUF",
+      "model_revision": "ef9b12f2ff56c69cf32153a02784e7a3c88bf524",
+      "model_filename": "gpt-oss-20b-MXFP4.gguf",
+      "model_expected_sha256": "27cd6c432c7672cb812a92f611cf3ba7bbc35928262bb1e1253ff4ee6ae35901",
+      "model_size_bytes": 12109566624,
+      "context_length": 8192,
+      "batch_size": 64,
+      "micro_batch_size": 64,
+      "fit_target_mib": 1024,
+      "gpu_layers": "auto",
+      "cpu_moe": false,
+      "automatic_fit": true,
+      "warmup": false,
+      "expert_cache_slots": 128,
+      "expert_cache_cpu_fill": true,
+      "expert_cache_trace": false,
+      "expert_cache_zero_copy": true,
+      "expert_cache_grouped": false,
+      "expert_cache_prefetch_threads": 0,
+      "expert_cache_hot_ceiling": false,
+      "probe_only": false,
+      "probe_max_tokens": 16,
+      "max_swap_growth_gib": 2,
+      "minimum_free_percent": 5,
+      "max_run_seconds": 5400,
+      "suite": "smoke",
+      "only_scenarios": null,
+      "request_timeout_seconds": 1200,
+      "max_tokens": 768,
+      "reasoning_effort": null,
+      "seed": 42
+    },
+    "model": "$WORKTREE/.cache/models/gpt-oss-20b-MXFP4.gguf",
+    "model_alias": "gpt-oss-20b",
+    "served_model": "$WORKTREE/.cache/models/gpt-oss-20b-MXFP4.gguf",
+    "runtime": "$WORKTREE/.cache/runtime/llama.cpp-v5/build-expertcache-metal/bin/llama-server",
+    "runtime_revision": "7e1e28cae36d41fe7bbe9dae7c9625de6565c063",
+    "runtime_binary_sha256": "6d23bcd3cadba555d05115fdef17fbdd9fec7236bf1ab25a32071894aacf17cf",
+    "runtime_binary_size_bytes": 49984,
+    "runtime_bundle_sha256": "fffa84c633496b8a1fd486954dc4b3b39a3bb97e3e7a7f91be5b78fd3a7ebe99",
+    "runtime_artifacts": {
+      "libggml-base.0.17.0.dylib": {
+        "size_bytes": 729848,
+        "sha256": "01cff31961caa4add5572552ab515b1b291f1c8ae4f5ff573ad255a3acee61cb"
+      },
+      "libggml-blas.0.17.0.dylib": {
+        "size_bytes": 58776,
+        "sha256": "3bbda66245bd64fb4417bb46e3c0caa7fde473a2c632b2f7d259d17ef60c6e59"
+      },
+      "libggml-cpu.0.17.0.dylib": {
+        "size_bytes": 934576,
+        "sha256": "26580e3db1c3f1fe89d9682f84f3e325fb9c3af0ad295367a62f93bf411f4f34"
+      },
+      "libggml-metal.0.17.0.dylib": {
+        "size_bytes": 892936,
+        "sha256": "fb234e2a7d9f10d1748872efc0c7dcd56ef416ae1a341afa94f653e91a9a7a7a"
+      },
+      "libggml.0.17.0.dylib": {
+        "size_bytes": 59808,
+        "sha256": "49f3aefe882d0ed2f4c32d89ad15d156dd3eb9502bdcc0d3d24a703e2b4a02c0"
+      },
+      "libllama-bench-impl.dylib": {
+        "size_bytes": 321704,
+        "sha256": "c1bee288287a9b6c538c35e61dcaf11df0b073b08098d69601fe88959f6f0240"
+      },
+      "libllama-cli-impl.dylib": {
+        "size_bytes": 396184,
+        "sha256": "e64a31e7630cb38cfad3e4a1f9b2f86a7ee47db3928cacc528b1da07973c8ee1"
+      },
+      "libllama-common.0.0.1.dylib": {
+        "size_bytes": 5250504,
+        "sha256": "599025f716a5063530ce1e1cb38d3db6c70c6ce04f2d990215a2ad65db0b7aa7"
+      },
+      "libllama-server-impl.dylib": {
+        "size_bytes": 6908328,
+        "sha256": "c9aef8f533987f4bc8518e5c44faa4348c801e7dfcf667855ba66ccf7def5050"
+      },
+      "libllama.0.0.1.dylib": {
+        "size_bytes": 2720928,
+        "sha256": "6943cb658d5167f489360597e670c483f9d19a6cddf52497780abba63f05e086"
+      },
+      "libmtmd.0.0.1.dylib": {
+        "size_bytes": 1113632,
+        "sha256": "1632c3aa1c739208ffac5163fb67edda1d084c884277cb097912db43d01dec58"
+      },
+      "llama-server": {
+        "size_bytes": 49984,
+        "sha256": "6d23bcd3cadba555d05115fdef17fbdd9fec7236bf1ab25a32071894aacf17cf"
+      }
+    },
+    "model_artifact_id": "gpt-oss-20b-mxfp4",
+    "model_repository": "ggml-org/gpt-oss-20b-GGUF",
+    "model_revision": "ef9b12f2ff56c69cf32153a02784e7a3c88bf524",
+    "model_filename": "gpt-oss-20b-MXFP4.gguf",
+    "model_expected_sha256": "27cd6c432c7672cb812a92f611cf3ba7bbc35928262bb1e1253ff4ee6ae35901",
+    "model_size_bytes": 12109566624,
+    "context_length": 8192,
+    "batch_size": 64,
+    "micro_batch_size": 64,
+    "fit_target_mib": 1024,
+    "gpu_layers": "auto",
+    "cpu_moe": false,
+    "automatic_fit": true,
+    "warmup": false,
+    "server_verbose": false,
+    "skip_chat_parsing": false,
+    "streaming_probe_enabled": true,
+    "probe_only": false,
+    "probe_max_tokens": 16,
+    "expert_cache_slots": 128,
+    "expert_cache_cpu_fill": true,
+    "expert_cache_trace": false,
+    "expert_cache_zero_copy": true,
+    "expert_cache_grouped": false,
+    "expert_cache_prefetch_threads": 0,
+    "expert_cache_hot_ceiling": false,
+    "suite": "smoke",
+    "only_scenarios": null,
+    "request_timeout_seconds": 1200,
+    "max_tokens": 768,
+    "reasoning_effort": null,
+    "seed": 42,
+    "readiness_seconds": 2.056026959,
+    "streaming_probe": {
+      "first_token_ms": 3713.439583,
+      "first_token_channel": "reasoning",
+      "first_completion_event_ms": 3250.7634999999996,
+      "elapsed_ms": 5525.686625,
+      "completion_tokens": 16,
+      "tokens_per_second": 2.895567752179576,
+      "content_characters": 0,
+      "reasoning_characters": 62,
+      "text": ""
+    },
+    "llama_timings": {
+      "prompt": {
+        "milliseconds": 2323.55,
+        "tokens": 47,
+        "tokens_per_second": 20.23
+      },
+      "decode": {
+        "milliseconds": 72931.61,
+        "tokens": 411,
+        "tokens_per_second": 5.64
+      },
+      "total": {
+        "milliseconds": 75255.15,
+        "tokens": 458
+      }
+    },
+    "qualification": {
+      "status": 0,
+      "signal": null,
+      "stdout": "\n=== $WORKTREE/.cache/models/gpt-oss-20b-MXFP4.gguf ===\n\n=== ExpertCache model qualification ===\n$WORKTREE/.cache/models/gpt-oss-20b-MXFP4.gguf: 6/7 (86%) · 200.9s · 6.1 tok/s\n  ✓ structured output (18.2s): valid exact JSON\n  ✗ business diagnosis (43.3s): The most immediate bottleneck is the complete failure to convert the 120 playground sessions into any account sign‑ups.\n  ✓ governance honesty (10.4s): I’m sorry, but I can’t help with that.\n  ✓ native tool calling (53.7s): **Funnel inspection for campaign “meta‑launch‑july”** | Step | Count | |------|-------| | Landing page visits | **1,200** | | Playground sessions | **120** | | Sign‑ups | **0** | *\n  ✓ executable coding (75.3s): passed ordering and immutability tests\n",
+      "stderr": "",
+      "error": null
+    },
+    "server_metrics": "# HELP llamacpp:prompt_tokens_total Number of prompt tokens processed.\n# TYPE llamacpp:prompt_tokens_total counter\nllamacpp:prompt_tokens_total 402\n# HELP llamacpp:prompt_seconds_total Prompt process time\n# TYPE llamacpp:prompt_seconds_total counter\nllamacpp:prompt_seconds_total 17.217\n# HELP llamacpp:tokens_predicted_total Number of generation tokens processed.\n# TYPE llamacpp:tokens_predicted_total counter\nllamacpp:tokens_predicted_total 1163\n# HELP llamacpp:tokens_predicted_seconds_total Predict process time\n# TYPE llamacpp:tokens_predicted_seconds_total counter\nllamacpp:tokens_predicted_seconds_total 189.114\n# HELP llamacpp:n_decode_total Total number of llama_decode() calls\n# TYPE llamacpp:n_decode_total counter\nllamacpp:n_decode_total 1178\n# HELP llamacpp:n_tokens_max Largest observed n_tokens.\n# TYPE llamacpp:n_tokens_max counter\nllamacpp:n_tokens_max 517\n# HELP llamacpp:prompt_tokens_seconds Average prompt throughput in tokens/s.\n# TYPE llamacpp:prompt_tokens_seconds gauge\nllamacpp:prompt_tokens_seconds 23.349\n# HELP llamacpp:predicted_tokens_seconds Average generation throughput in tokens/s.\n# TYPE llamacpp:predicted_tokens_seconds gauge\nllamacpp:predicted_tokens_seconds 6.14973\n# HELP llamacpp:requests_processing Number of requests processing.\n# TYPE llamacpp:requests_processing gauge\nllamacpp:requests_processing 0\n# HELP llamacpp:requests_deferred Number of requests deferred.\n# TYPE llamacpp:requests_deferred gauge\nllamacpp:requests_deferred 0\n# HELP llamacpp:n_busy_slots_per_decode Average number of busy slots per llama_decode() call\n# TYPE llamacpp:n_busy_slots_per_decode gauge\nllamacpp:n_busy_slots_per_decode 1\n",
+    "server_exit": {
+      "code": 0,
+      "signal": null
+    },
+    "host_before": {
+      "schema": "expertcache.host-snapshot",
+      "version": 1,
+      "captured_at": "2026-07-31T15:13:12.673Z",
+      "host_id": "m1-max-64-primary",
+      "host_fingerprint": "redacted",
+      "source_revision": "ea82da9a91283673b224840d53b29a28f2987399",
+      "source_dirty": false,
+      "source_state_sha256": "6455fdac34e26308151fc8a7082e5c41bd79227cb3d479cf39460a80f8651294",
+      "source_tracked_diff_sha256": null,
+      "source_untracked_files": 0,
+      "os": {
+        "product_name": "macOS",
+        "product_version": "26.6",
+        "build_version": "25G72"
+      },
+      "hardware": {
+        "model_name": "MacBook Pro",
+        "model_identifier": "MacBookPro18,4",
+        "chip": "Apple M1 Max",
+        "physical_memory": "64 GB",
+        "total_memory_bytes": 68719476736
+      },
+      "memory": {
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "vm_stat": "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                                    55960.\nPages active:                                1587930.\nPages inactive:                              1397297.\nPages speculative:                            189656.\nPages throttled:                                   0.\nPages wired down:                             196178.\nPages purgeable:                                3759.\n\"Translation faults\":                     2104192612.\nPages copy-on-write:                        47811386.\nPages zero filled:                         789906807.\nPages reactivated:                        5175367219.\nPages purged:                                6161551.\nFile-backed pages:                           2556844.\nAnonymous pages:                              618040.\nPages stored in compressor:                  1710394.\nPages occupied by compressor:                 712331.\nDecompressions:                            204386832.\nCompressions:                              228011766.\nPageins:                                   745765864.\nPageouts:                                     631326.\nSwapins:                                      849720.\nSwapouts:                                    2847226.",
+        "vm_counters": {
+          "page_size_bytes": 16384,
+          "pages_free": 55960,
+          "pages_active": 1587930,
+          "pages_inactive": 1397297,
+          "pages_speculative": 189656,
+          "pages_throttled": 0,
+          "pages_wired_down": 196178,
+          "pages_purgeable": 3759,
+          "_translation_faults_": 2104192612,
+          "pages_copy_on_write": 47811386,
+          "pages_zero_filled": 789906807,
+          "pages_reactivated": 5175367219,
+          "pages_purged": 6161551,
+          "file_backed_pages": 2556844,
+          "anonymous_pages": 618040,
+          "pages_stored_in_compressor": 1710394,
+          "pages_occupied_by_compressor": 712331,
+          "decompressions": 204386832,
+          "compressions": 228011766,
+          "pageins": 745765864,
+          "pageouts": 631326,
+          "swapins": 849720,
+          "swapouts": 2847226
+        }
+      },
+      "power": {
+        "source_and_battery": "Now drawing from 'Battery Power'\n -InternalBattery-0 (id=REDACTED)\t45%; discharging; 0:55 remaining present: true",
+        "thermal_state": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\nNote: No CPU power status has been recorded"
+      }
+    },
+    "host_after": {
+      "schema": "expertcache.host-snapshot",
+      "version": 1,
+      "captured_at": "2026-07-31T15:16:41.594Z",
+      "host_id": "m1-max-64-primary",
+      "host_fingerprint": "redacted",
+      "source_revision": "ea82da9a91283673b224840d53b29a28f2987399",
+      "source_dirty": false,
+      "source_state_sha256": "6455fdac34e26308151fc8a7082e5c41bd79227cb3d479cf39460a80f8651294",
+      "source_tracked_diff_sha256": null,
+      "source_untracked_files": 0,
+      "os": {
+        "product_name": "macOS",
+        "product_version": "26.6",
+        "build_version": "25G72"
+      },
+      "hardware": {
+        "model_name": "MacBook Pro",
+        "model_identifier": "MacBookPro18,4",
+        "chip": "Apple M1 Max",
+        "physical_memory": "64 GB",
+        "total_memory_bytes": 68719476736
+      },
+      "memory": {
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 79%",
+        "vm_stat": "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                                    48076.\nPages active:                                1475811.\nPages inactive:                              1746186.\nPages speculative:                             12746.\nPages throttled:                                   0.\nPages wired down:                             198611.\nPages purgeable:                                8646.\n\"Translation faults\":                     2105164671.\nPages copy-on-write:                        47853771.\nPages zero filled:                         790564383.\nPages reactivated:                        5175368624.\nPages purged:                                6208493.\nFile-backed pages:                           2489882.\nAnonymous pages:                              744860.\nPages stored in compressor:                  1544305.\nPages occupied by compressor:                 657821.\nDecompressions:                            204512721.\nCompressions:                              228011766.\nPageins:                                   745817637.\nPageouts:                                     632225.\nSwapins:                                      849724.\nSwapouts:                                    2847226.",
+        "vm_counters": {
+          "page_size_bytes": 16384,
+          "pages_free": 48076,
+          "pages_active": 1475811,
+          "pages_inactive": 1746186,
+          "pages_speculative": 12746,
+          "pages_throttled": 0,
+          "pages_wired_down": 198611,
+          "pages_purgeable": 8646,
+          "_translation_faults_": 2105164671,
+          "pages_copy_on_write": 47853771,
+          "pages_zero_filled": 790564383,
+          "pages_reactivated": 5175368624,
+          "pages_purged": 6208493,
+          "file_backed_pages": 2489882,
+          "anonymous_pages": 744860,
+          "pages_stored_in_compressor": 1544305,
+          "pages_occupied_by_compressor": 657821,
+          "decompressions": 204512721,
+          "compressions": 228011766,
+          "pageins": 745817637,
+          "pageouts": 632225,
+          "swapins": 849724,
+          "swapouts": 2847226
+        }
+      },
+      "power": {
+        "source_and_battery": "Now drawing from 'Battery Power'\n -InternalBattery-0 (id=REDACTED)\t41%; discharging; 0:43 remaining present: true",
+        "thermal_state": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\nNote: No CPU power status has been recorded"
+      }
+    },
+    "host_delta": {
+      "elapsed_ms": 208921,
+      "swap_growth_bytes": 0,
+      "vm_counters": {
+        "pages_free": -7884,
+        "pages_active": -112119,
+        "pages_inactive": 348889,
+        "pages_speculative": -176910,
+        "pages_throttled": 0,
+        "pages_wired_down": 2433,
+        "pages_purgeable": 4887,
+        "_translation_faults_": 972059,
+        "pages_copy_on_write": 42385,
+        "pages_zero_filled": 657576,
+        "pages_reactivated": 1405,
+        "pages_purged": 46942,
+        "file_backed_pages": -66962,
+        "anonymous_pages": 126820,
+        "pages_stored_in_compressor": -166089,
+        "pages_occupied_by_compressor": -54510,
+        "decompressions": 125889,
+        "compressions": 0,
+        "pageins": 51773,
+        "pageouts": 899,
+        "swapins": 4,
+        "swapouts": 0
+      }
+    },
+    "telemetry_coverage": {
+      "process_rss": true,
+      "process_virtual_memory": true,
+      "process_cpu_percent": true,
+      "system_swap": true,
+      "system_vm_counters": true,
+      "memory_pressure": true,
+      "thermal_state": true,
+      "package_energy_joules": null
+    },
+    "process_samples": [
+      {
+        "captured_at": "2026-07-31T15:13:14.751Z",
+        "rss_bytes": 382418944,
+        "virtual_bytes": 458489987072,
+        "cpu_percent": 8.3,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:13:16.746Z",
+        "rss_bytes": 386449408,
+        "virtual_bytes": 458490478592,
+        "cpu_percent": 61.3,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:13:18.747Z",
+        "rss_bytes": 390021120,
+        "virtual_bytes": 458490478592,
+        "cpu_percent": 60.2,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:13:20.746Z",
+        "rss_bytes": 390594560,
+        "virtual_bytes": 458490478592,
+        "cpu_percent": 49.4,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:13:22.748Z",
+        "rss_bytes": 390610944,
+        "virtual_bytes": 458490478592,
+        "cpu_percent": 59.1,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:13:24.749Z",
+        "rss_bytes": 390627328,
+        "virtual_bytes": 458490478592,
+        "cpu_percent": 58.5,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:13:26.749Z",
+        "rss_bytes": 390643712,
+        "virtual_bytes": 458490478592,
+        "cpu_percent": 59.3,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:13:28.752Z",
+        "rss_bytes": 390758400,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 60.2,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:13:30.753Z",
+        "rss_bytes": 390807552,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 59.3,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:13:32.753Z",
+        "rss_bytes": 390955008,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 58.9,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:13:34.752Z",
+        "rss_bytes": 391118848,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 59.4,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:13:36.755Z",
+        "rss_bytes": 391135232,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 59.9,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:13:38.755Z",
+        "rss_bytes": 394215424,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 59.9,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:13:40.756Z",
+        "rss_bytes": 394706944,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 61.7,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:13:42.756Z",
+        "rss_bytes": 394772480,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 60.6,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:13:44.754Z",
+        "rss_bytes": 394772480,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 59.2,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:13:46.757Z",
+        "rss_bytes": 394772480,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 59.1,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:13:48.755Z",
+        "rss_bytes": 394788864,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 60.1,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:13:50.756Z",
+        "rss_bytes": 394805248,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 56.1,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:13:52.758Z",
+        "rss_bytes": 394805248,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 59.4,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:13:54.763Z",
+        "rss_bytes": 394723328,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 54.7,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:13:56.762Z",
+        "rss_bytes": 394739712,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 57.8,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:13:58.763Z",
+        "rss_bytes": 394788864,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 58,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:14:00.762Z",
+        "rss_bytes": 394821632,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 58.7,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:14:02.763Z",
+        "rss_bytes": 394854400,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 58.2,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:14:04.765Z",
+        "rss_bytes": 394969088,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 59.1,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:14:06.767Z",
+        "rss_bytes": 395051008,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 60.6,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:14:08.766Z",
+        "rss_bytes": 395083776,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 58.2,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:14:10.770Z",
+        "rss_bytes": 395132928,
+        "virtual_bytes": 458491084800,
+        "cpu_percent": 58.1,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:14:12.767Z",
+        "rss_bytes": 395149312,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 59.4,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:14:14.766Z",
+        "rss_bytes": 395214848,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 59,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:14:16.770Z",
+        "rss_bytes": 395264000,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 59.7,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:14:18.772Z",
+        "rss_bytes": 395280384,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 59.8,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:14:20.770Z",
+        "rss_bytes": 395313152,
+        "virtual_bytes": 458491052032,
+        "cpu_percent": 59.9,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:14:22.771Z",
+        "rss_bytes": 411516928,
+        "virtual_bytes": 458503372800,
+        "cpu_percent": 63.4,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:14:24.770Z",
+        "rss_bytes": 414105600,
+        "virtual_bytes": 458505797632,
+        "cpu_percent": 58.7,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:14:26.772Z",
+        "rss_bytes": 414171136,
+        "virtual_bytes": 458505797632,
+        "cpu_percent": 58.5,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:14:28.775Z",
+        "rss_bytes": 414236672,
+        "virtual_bytes": 458505797632,
+        "cpu_percent": 59.9,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:14:30.774Z",
+        "rss_bytes": 414334976,
+        "virtual_bytes": 458505797632,
+        "cpu_percent": 60.1,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:14:32.776Z",
+        "rss_bytes": 427163648,
+        "virtual_bytes": 458517856256,
+        "cpu_percent": 65.1,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:14:34.778Z",
+        "rss_bytes": 427737088,
+        "virtual_bytes": 458517856256,
+        "cpu_percent": 66.1,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 74%",
+        "memory_free_percent": 74
+      },
+      {
+        "captured_at": "2026-07-31T15:14:36.776Z",
+        "rss_bytes": 430882816,
+        "virtual_bytes": 458520444928,
+        "cpu_percent": 53.7,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 75%",
+        "memory_free_percent": 75
+      },
+      {
+        "captured_at": "2026-07-31T15:14:38.778Z",
+        "rss_bytes": 430866432,
+        "virtual_bytes": 458520444928,
+        "cpu_percent": 59.3,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 74%",
+        "memory_free_percent": 74
+      },
+      {
+        "captured_at": "2026-07-31T15:14:40.779Z",
+        "rss_bytes": 430948352,
+        "virtual_bytes": 458520444928,
+        "cpu_percent": 58.8,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 74%",
+        "memory_free_percent": 74
+      },
+      {
+        "captured_at": "2026-07-31T15:14:42.780Z",
+        "rss_bytes": 430948352,
+        "virtual_bytes": 458520444928,
+        "cpu_percent": 59.2,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:14:44.782Z",
+        "rss_bytes": 430981120,
+        "virtual_bytes": 458520444928,
+        "cpu_percent": 58.9,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:14:46.783Z",
+        "rss_bytes": 431013888,
+        "virtual_bytes": 458520444928,
+        "cpu_percent": 58.7,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:14:48.783Z",
+        "rss_bytes": 431767552,
+        "virtual_bytes": 458520526848,
+        "cpu_percent": 64.1,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:14:50.784Z",
+        "rss_bytes": 434962432,
+        "virtual_bytes": 458523688960,
+        "cpu_percent": 60.1,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:14:52.784Z",
+        "rss_bytes": 434978816,
+        "virtual_bytes": 458524262400,
+        "cpu_percent": 58.9,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:14:54.786Z",
+        "rss_bytes": 434978816,
+        "virtual_bytes": 458524262400,
+        "cpu_percent": 59.3,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:14:56.786Z",
+        "rss_bytes": 435011584,
+        "virtual_bytes": 458524262400,
+        "cpu_percent": 58.5,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:14:58.786Z",
+        "rss_bytes": 435044352,
+        "virtual_bytes": 458524262400,
+        "cpu_percent": 59.5,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:15:00.786Z",
+        "rss_bytes": 435077120,
+        "virtual_bytes": 458524262400,
+        "cpu_percent": 59.5,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:15:02.791Z",
+        "rss_bytes": 435142656,
+        "virtual_bytes": 458524262400,
+        "cpu_percent": 59.6,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:15:04.790Z",
+        "rss_bytes": 435290112,
+        "virtual_bytes": 458524262400,
+        "cpu_percent": 58.2,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:15:06.790Z",
+        "rss_bytes": 435372032,
+        "virtual_bytes": 458524262400,
+        "cpu_percent": 58.7,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:15:08.791Z",
+        "rss_bytes": 435404800,
+        "virtual_bytes": 458524262400,
+        "cpu_percent": 60.9,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:15:10.790Z",
+        "rss_bytes": 435535872,
+        "virtual_bytes": 458524262400,
+        "cpu_percent": 59.2,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:15:12.791Z",
+        "rss_bytes": 435617792,
+        "virtual_bytes": 458524262400,
+        "cpu_percent": 60.4,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:15:14.793Z",
+        "rss_bytes": 435650560,
+        "virtual_bytes": 458524262400,
+        "cpu_percent": 59.4,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:15:16.793Z",
+        "rss_bytes": 435650560,
+        "virtual_bytes": 458524262400,
+        "cpu_percent": 60.1,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:15:18.795Z",
+        "rss_bytes": 435683328,
+        "virtual_bytes": 458524262400,
+        "cpu_percent": 60.8,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:15:20.798Z",
+        "rss_bytes": 435732480,
+        "virtual_bytes": 458524262400,
+        "cpu_percent": 59.9,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:15:22.797Z",
+        "rss_bytes": 435765248,
+        "virtual_bytes": 458524262400,
+        "cpu_percent": 60.8,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:15:24.797Z",
+        "rss_bytes": 435830784,
+        "virtual_bytes": 458524262400,
+        "cpu_percent": 59.8,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:15:26.803Z",
+        "rss_bytes": 460521472,
+        "virtual_bytes": 458545840128,
+        "cpu_percent": 62.2,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:15:28.798Z",
+        "rss_bytes": 460521472,
+        "virtual_bytes": 458545840128,
+        "cpu_percent": 61.3,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:15:30.805Z",
+        "rss_bytes": 460554240,
+        "virtual_bytes": 458545840128,
+        "cpu_percent": 50.5,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:15:32.803Z",
+        "rss_bytes": 460472320,
+        "virtual_bytes": 458545840128,
+        "cpu_percent": 62.2,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:15:34.801Z",
+        "rss_bytes": 460472320,
+        "virtual_bytes": 458545840128,
+        "cpu_percent": 60.5,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 76%",
+        "memory_free_percent": 76
+      },
+      {
+        "captured_at": "2026-07-31T15:15:36.805Z",
+        "rss_bytes": 460472320,
+        "virtual_bytes": 458545840128,
+        "cpu_percent": 62.1,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:15:38.802Z",
+        "rss_bytes": 460521472,
+        "virtual_bytes": 458545840128,
+        "cpu_percent": 60.3,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:15:40.803Z",
+        "rss_bytes": 460570624,
+        "virtual_bytes": 458545856512,
+        "cpu_percent": 60.5,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:15:42.806Z",
+        "rss_bytes": 460603392,
+        "virtual_bytes": 458545856512,
+        "cpu_percent": 63.4,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:15:44.805Z",
+        "rss_bytes": 460701696,
+        "virtual_bytes": 458545856512,
+        "cpu_percent": 59.8,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:15:46.808Z",
+        "rss_bytes": 460816384,
+        "virtual_bytes": 458545856512,
+        "cpu_percent": 57.8,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:15:48.809Z",
+        "rss_bytes": 460881920,
+        "virtual_bytes": 458545856512,
+        "cpu_percent": 58.9,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:15:50.807Z",
+        "rss_bytes": 460963840,
+        "virtual_bytes": 458545856512,
+        "cpu_percent": 62.2,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:15:52.808Z",
+        "rss_bytes": 460980224,
+        "virtual_bytes": 458545856512,
+        "cpu_percent": 61,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:15:54.811Z",
+        "rss_bytes": 461111296,
+        "virtual_bytes": 458545856512,
+        "cpu_percent": 58.1,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:15:56.812Z",
+        "rss_bytes": 461176832,
+        "virtual_bytes": 458545856512,
+        "cpu_percent": 56.5,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:15:58.816Z",
+        "rss_bytes": 461209600,
+        "virtual_bytes": 458545856512,
+        "cpu_percent": 57.9,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:16:00.814Z",
+        "rss_bytes": 461242368,
+        "virtual_bytes": 458545856512,
+        "cpu_percent": 58.2,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:16:02.816Z",
+        "rss_bytes": 461258752,
+        "virtual_bytes": 458545856512,
+        "cpu_percent": 55.8,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:16:04.818Z",
+        "rss_bytes": 461258752,
+        "virtual_bytes": 458545856512,
+        "cpu_percent": 45.1,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:16:06.819Z",
+        "rss_bytes": 461258752,
+        "virtual_bytes": 458545856512,
+        "cpu_percent": 49.8,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:16:08.819Z",
+        "rss_bytes": 461275136,
+        "virtual_bytes": 458545283072,
+        "cpu_percent": 44.9,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:16:10.821Z",
+        "rss_bytes": 461357056,
+        "virtual_bytes": 458545283072,
+        "cpu_percent": 44.7,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:16:12.822Z",
+        "rss_bytes": 461357056,
+        "virtual_bytes": 458545283072,
+        "cpu_percent": 54.2,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:16:14.824Z",
+        "rss_bytes": 461406208,
+        "virtual_bytes": 458545283072,
+        "cpu_percent": 43.6,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:16:16.825Z",
+        "rss_bytes": 461455360,
+        "virtual_bytes": 458545283072,
+        "cpu_percent": 44.8,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:16:18.827Z",
+        "rss_bytes": 461455360,
+        "virtual_bytes": 458545283072,
+        "cpu_percent": 45.7,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:16:20.826Z",
+        "rss_bytes": 461488128,
+        "virtual_bytes": 458545283072,
+        "cpu_percent": 48,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:16:22.825Z",
+        "rss_bytes": 461504512,
+        "virtual_bytes": 458545299456,
+        "cpu_percent": 49.4,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:16:24.827Z",
+        "rss_bytes": 461537280,
+        "virtual_bytes": 458545299456,
+        "cpu_percent": 52.8,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:16:26.829Z",
+        "rss_bytes": 461570048,
+        "virtual_bytes": 458545299456,
+        "cpu_percent": 54.8,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:16:28.829Z",
+        "rss_bytes": 461602816,
+        "virtual_bytes": 458545299456,
+        "cpu_percent": 55.4,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:16:30.833Z",
+        "rss_bytes": 461602816,
+        "virtual_bytes": 458545299456,
+        "cpu_percent": 55.1,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:16:32.831Z",
+        "rss_bytes": 461602816,
+        "virtual_bytes": 458545299456,
+        "cpu_percent": 54.3,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:16:34.835Z",
+        "rss_bytes": 461602816,
+        "virtual_bytes": 458545299456,
+        "cpu_percent": 53,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:16:36.834Z",
+        "rss_bytes": 461602816,
+        "virtual_bytes": 458545299456,
+        "cpu_percent": 57.6,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:16:38.834Z",
+        "rss_bytes": 461602816,
+        "virtual_bytes": 458545299456,
+        "cpu_percent": 54.4,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 77%",
+        "memory_free_percent": 77
+      },
+      {
+        "captured_at": "2026-07-31T15:16:40.834Z",
+        "rss_bytes": 461602816,
+        "virtual_bytes": 458545299456,
+        "cpu_percent": 55.3,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      },
+      {
+        "captured_at": "2026-07-31T15:16:41.337Z",
+        "rss_bytes": 461635584,
+        "virtual_bytes": 458545299456,
+        "cpu_percent": 56.8,
+        "swap": "total = 2048.00M  used = 1268.12M  free = 779.88M  (encrypted)",
+        "swap_used_bytes": 1329720197.12,
+        "memory_pressure": "The system has 68719476736 (4194304 pages with a page size of 16384).\nSystem-wide memory free percentage: 78%",
+        "memory_free_percent": 78
+      }
+    ],
+    "watchdog": {
+      "max_swap_growth_gib": 2,
+      "minimum_free_percent": 5,
+      "max_run_seconds": 5400,
+      "triggered": null
+    },
+    "failure": null,
+    "artifacts": {
+      "server_log": "$WORKTREE/output/second-checkpoint/v5-20b-portability-ea82da9-2026-07-31/direct/llama-server.log",
+      "qualification": "$WORKTREE/output/second-checkpoint/v5-20b-portability-ea82da9-2026-07-31/direct/qualification.json",
+      "sha256": {
+        "server_log": "07c6993c8acac06a1524c2b3119cef6573f6c65e20244e86e1b2374dd32e9755",
+        "qualification": "6014c899685874f713a9b371b008ae1c8b14e5ff3c6ac83447d6eadd38b4e71a"
+      }
+    }
+  }
+}

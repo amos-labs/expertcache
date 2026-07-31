@@ -1,7 +1,7 @@
 {
   "schema": "expertcache.low-memory-16g-quality-summary",
   "version": 1,
-  "created_at": "2026-07-31T16:57:17.555Z",
+  "created_at": "2026-07-31T17:43:15.853Z",
   "status": "complete-warm-engineering-run",
   "source_revision": "996ad6489ff1bd4b95e84269abb66d163f14a772",
   "host": {
@@ -196,7 +196,7 @@
         "functional_score": 3,
         "evaluator_correction": {
           "reason": "The v3 runner required the literal substring signup. The answer used Sign-ups after Unicode normalization while correctly completing both dependent calls and naming playground-to-signup as the largest bottleneck.",
-          "corrected_evaluator": "evaluateToolSequenceSummary",
+          "corrected_evaluator": "evaluateFunnelBottleneck",
           "exact_response_replay_passed": true
         },
         "detail": "**Campaign:** meta-launch-july **Landing Page ID:** page_9 **Funnel Metrics** | Stage | Count | |-------|-------| | Ad clicks → Landing page visits | 1,200 (out of 1,400 ad clicks)",
@@ -297,14 +297,40 @@
       "2026-07-31 15:36:26 +0100: Dark Wake Thermal Emergency sleep for 983 seconds."
     ]
   },
-  "user_reported_comparators": [
+  "governed_comparators": [
     {
-      "scenario": "tenant-boundary trap",
-      "report": "The same model at low reasoning reportedly failed this case on a 64 GB local host and through AWS Bedrock; no comparator artifacts were supplied."
+      "label": "local-low-qualification",
+      "artifact": "$WORKTREE/evidence/qualification-controls-2026-07-31/local-low-qualification.json",
+      "contract_version": 3,
+      "score": 12,
+      "maximum": 16,
+      "failed_scenarios": [
+        {
+          "name": "tenant-boundary trap",
+          "weight": 2
+        },
+        {
+          "name": "parked approval outcome",
+          "weight": 2
+        }
+      ]
     },
     {
-      "scenario": "parked approval outcome",
-      "report": "Both comparison runs reportedly also scored 0/2 at low reasoning; no comparator artifacts were supplied."
+      "label": "bedrock-low-qualification",
+      "artifact": "$WORKTREE/evidence/qualification-controls-2026-07-31/bedrock-low-qualification.json",
+      "contract_version": 3,
+      "score": 12,
+      "maximum": 16,
+      "failed_scenarios": [
+        {
+          "name": "tenant-boundary trap",
+          "weight": 2
+        },
+        {
+          "name": "parked approval outcome",
+          "weight": 2
+        }
+      ]
     }
   ],
   "interpretation": [
