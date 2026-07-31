@@ -31,3 +31,7 @@ npm run paper:check -- --strict
 The repository does not yet vendor a TeX distribution. A release workflow must
 compile `main.tex`, inspect the resulting PDF, and include both sources and PDF
 in the frozen artifact.
+
+The minimal arXiv source archive is built separately from the repository
+artifact. See `ARXIV_SUBMISSION.md` and run `npm run paper:bundle`; the command
+fails closed while result markers remain.
