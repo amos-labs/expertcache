@@ -121,7 +121,9 @@ published evidence remains compatible with the original artifact.
 
 ## License and attribution
 
-ExpertCache-authored code is Apache-2.0. The runtime patch applies to the
+ExpertCache-authored code is Apache-2.0. The manuscript source and compiled
+paper are separately licensed CC BY 4.0; see
+[`paper/LICENSE.md`](paper/LICENSE.md). The runtime patch applies to the
 MIT-licensed `llama.cpp`; its license is preserved in
 [`third_party/llama.cpp-LICENSE.txt`](third_party/llama.cpp-LICENSE.txt).
 See [`NOTICE`](NOTICE) and [`PROVENANCE.md`](PROVENANCE.md).

@@ -47,6 +47,12 @@ export async function validatePublicationArtifact(root, { strict = false } = {})
   if (!["provisional", "release-candidate", "release"].includes(manifest.state)) {
     errors.push(`Unsupported artifact state: ${manifest.state}`);
   }
+  if (
+    manifest.licenses?.software !== "Apache-2.0" ||
+    manifest.licenses?.paper !== "CC-BY-4.0"
+  ) {
+    errors.push("Publication manifest must declare Apache-2.0 software and CC-BY-4.0 paper licenses");
+  }
 
   checkUniqueIds(manifest.claims, "claim", errors);
   checkUniqueIds(manifest.gates, "gate", errors);

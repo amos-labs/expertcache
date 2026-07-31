@@ -5,6 +5,10 @@
   "state": "provisional",
   "title": "ExpertCache: Page-Aware Direct Expert Views for Oversized Sparse Models on Apple Silicon",
   "repository": "https://github.com/amos-labs/expertcache",
+  "licenses": {
+    "software": "Apache-2.0",
+    "paper": "CC-BY-4.0"
+  },
   "primary_model": {
     "id": "gpt-oss-120b-mxfp4",
     "repository": "ggml-org/gpt-oss-120b-GGUF",

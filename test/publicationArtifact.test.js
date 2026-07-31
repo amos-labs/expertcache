@@ -11,6 +11,8 @@ test("provisional publication artifact is internally valid and explicitly incomp
   const result = await validatePublicationArtifact(root);
   assert.equal(result.valid, true, result.errors.join("\n"));
   assert.equal(result.manifest.state, "provisional");
+  assert.equal(result.manifest.licenses.software, "Apache-2.0");
+  assert.equal(result.manifest.licenses.paper, "CC-BY-4.0");
   assert.ok(result.incomplete_gates.includes("clean-64g-matrix"));
   assert.equal(result.manifest.secondary_models[0].id, "gpt-oss-20b-mxfp4");
   assert.ok(result.warnings.some((warning) => warning.includes("incomplete gates")));

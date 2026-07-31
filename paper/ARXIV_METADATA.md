@@ -47,8 +47,10 @@ Suggested structure:
 
 ## License
 
-Author decision required during submission. The Apache-2.0 repository license
-covers software and does not automatically choose the paper's arXiv license.
+Select **CC BY 4.0 (Creative Commons Attribution)**. The human author approved
+this choice on 2026-07-31. The manuscript/PDF are CC BY 4.0; software remains
+Apache-2.0. The selected arXiv license is irrevocable, so verify the form one
+last time before submitting.
 
 ## Journal reference, DOI, report number
 

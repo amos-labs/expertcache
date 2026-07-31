@@ -10,6 +10,7 @@
     "state",
     "title",
     "repository",
+    "licenses",
     "primary_model",
     "secondary_models",
     "claims",
@@ -23,6 +24,15 @@
     "state": {"enum": ["provisional", "release-candidate", "release"]},
     "title": {"type": "string", "minLength": 1},
     "repository": {"type": "string", "format": "uri"},
+    "licenses": {
+      "type": "object",
+      "required": ["software", "paper"],
+      "properties": {
+        "software": {"const": "Apache-2.0"},
+        "paper": {"const": "CC-BY-4.0"}
+      },
+      "additionalProperties": false
+    },
     "primary_model": {
       "type": "object",
       "required": ["id", "repository", "revision", "filename", "size_bytes"],
