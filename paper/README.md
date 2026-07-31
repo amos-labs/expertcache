@@ -35,3 +35,6 @@ in the frozen artifact.
 The minimal arXiv source archive is built separately from the repository
 artifact. See `ARXIV_SUBMISSION.md` and run `npm run paper:bundle`; the command
 fails closed while result markers remain.
+
+`ARXIV_METADATA.md` holds the provisional title, author, category rationale,
+comments format, and license decision point for the submission form.
