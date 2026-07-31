@@ -1,4 +1,4 @@
-import { execFileSync, spawnSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { hostname, totalmem } from "node:os";
 
@@ -6,7 +6,9 @@ export function captureHostSnapshot({ hostId = "unregistered" } = {}) {
   const swap = runText("/usr/sbin/sysctl", ["-n", "vm.swapusage"]);
   const vmStat = runText("/usr/bin/vm_stat", []);
   const hardware = readHardwareProfile();
-  const gitRevision = runText("git", ["rev-parse", "HEAD"]);
+  const gitRevision = normalizeGitRevision(
+    runText("git", ["rev-parse", "HEAD"])
+  );
   return {
     schema: "expertcache.host-snapshot",
     version: 1,
@@ -68,6 +70,11 @@ export function parseSwapUsedBytes(value) {
   return Number(match[1]) * multiplier;
 }
 
+export function normalizeGitRevision(value) {
+  const revision = String(value || "").trim();
+  return /^[0-9a-f]{7,64}$/i.test(revision) ? revision : null;
+}
+
 function parseVmStat(value) {
   const pageSizeMatch = String(value || "").match(/page size of (\d+) bytes/);
   const pageSize = pageSizeMatch ? Number(pageSizeMatch[1]) : 16_384;
@@ -82,18 +89,11 @@ function parseVmStat(value) {
 }
 
 function runText(command, args) {
-  try {
-    return execFileSync(command, args, {
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "pipe"],
-      timeout: 30_000
-    }).trim();
-  } catch (error) {
-    const result = spawnSync(command, args, {
-      encoding: "utf8",
-      timeout: 30_000
-    });
-    return String(result.stdout || result.stderr || error?.message || "").trim();
-  }
+  const result = spawnSync(command, args, {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    timeout: 30_000
+  });
+  if (result.status !== 0) return "";
+  return String(result.stdout || "").trim();
 }
-

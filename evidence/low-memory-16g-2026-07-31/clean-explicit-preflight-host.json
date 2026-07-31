@@ -1,0 +1,55 @@
+{
+  "schema": "expertcache.host-snapshot",
+  "version": 1,
+  "captured_at": "2026-07-31T12:46:38.608Z",
+  "host_id": "apple-silicon-16g-clean-explicit",
+  "host_fingerprint": "redacted",
+  "source_revision": null,
+  "os": {
+    "product_name": "macOS",
+    "product_version": "26.5",
+    "build_version": "25F71"
+  },
+  "hardware": {
+    "model_name": "MacBook Pro",
+    "model_identifier": "MacBookPro18,3",
+    "chip": "Apple M1 Pro",
+    "physical_memory": "16 GB",
+    "total_memory_bytes": 17179869184
+  },
+  "memory": {
+    "swap": "total = 0.00M  used = 0.00M  free = 0.00M  (encrypted)",
+    "swap_used_bytes": 0,
+    "pressure": "The system has 17179869184 (1048576 pages with a page size of 16384).\nSystem-wide memory free percentage: 61%",
+    "vm_stat": "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                                     3587.\nPages active:                                 306309.\nPages inactive:                               302052.\nPages speculative:                              3225.\nPages throttled:                                   0.\nPages wired down:                             147040.\nPages purgeable:                                 737.\n\"Translation faults\":                       10538418.\nPages copy-on-write:                          820597.\nPages zero filled:                           6986646.\nPages reactivated:                            985894.\nPages purged:                                  59925.\nFile-backed pages:                            446429.\nAnonymous pages:                              165157.\nPages stored in compressor:                   593578.\nPages occupied by compressor:                 233063.\nDecompressions:                               524044.\nCompressions:                                1343547.\nPageins:                                     8144317.\nPageouts:                                       9490.\nSwapins:                                           0.\nSwapouts:                                          0.",
+    "vm_counters": {
+      "page_size_bytes": 16384,
+      "pages_free": 3587,
+      "pages_active": 306309,
+      "pages_inactive": 302052,
+      "pages_speculative": 3225,
+      "pages_throttled": 0,
+      "pages_wired_down": 147040,
+      "pages_purgeable": 737,
+      "_translation_faults_": 10538418,
+      "pages_copy_on_write": 820597,
+      "pages_zero_filled": 6986646,
+      "pages_reactivated": 985894,
+      "pages_purged": 59925,
+      "file_backed_pages": 446429,
+      "anonymous_pages": 165157,
+      "pages_stored_in_compressor": 593578,
+      "pages_occupied_by_compressor": 233063,
+      "decompressions": 524044,
+      "compressions": 1343547,
+      "pageins": 8144317,
+      "pageouts": 9490,
+      "swapins": 0,
+      "swapouts": 0
+    }
+  },
+  "power": {
+    "source_and_battery": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=redacted)\t97%; charging; 0:52 remaining present: true",
+    "thermal_state": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\nNote: No CPU power status has been recorded"
+  }
+}

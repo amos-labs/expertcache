@@ -1655,3 +1655,33 @@ index f14ee079..90ceeb0c 100644
  kernel void kernel_pool_2d_max_f32(
          constant    ggml_metal_kargs_pool_2d & args,
          device  const float * src0,
+diff --git a/src/llama-model.cpp b/src/llama-model.cpp
+index be0a0df55..2a84e69e0 100644
+--- a/src/llama-model.cpp
++++ b/src/llama-model.cpp
+@@ -25,6 +25,7 @@
+ #include <algorithm>
+ #include <cassert>
+ #include <cfloat>
++#include <cstdlib>
+ #include <cstdint>
+ #include <cstring>
+ #include <cmath>
+@@ -1525,7 +1526,16 @@ bool llama_model_base::load_tensors(llama_model_loader & ml) {
+         }
+     }
+ 
+-    ml.init_mappings(true, use_mlock ? &pimpl->mlock_mmaps : nullptr);
++    const bool expert_cache_lazy_tensor_map =
++        std::getenv("GGML_METAL_LAZY_TENSOR_MAP") != nullptr;
++    if (expert_cache_lazy_tensor_map) {
++        LLAMA_LOG_INFO(
++            "%s: disabling whole-file mmap prefetch for lazy ExpertCache tensor mapping\n",
++            __func__);
++    }
++    ml.init_mappings(
++        !expert_cache_lazy_tensor_map,
++        use_mlock ? &pimpl->mlock_mmaps : nullptr);
+     pimpl->mappings.reserve(ml.mappings.size());
+ 
+     // create the backend buffers

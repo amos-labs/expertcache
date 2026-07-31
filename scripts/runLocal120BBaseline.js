@@ -2,8 +2,8 @@
 import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { createReadStream, createWriteStream } from "node:fs";
-import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
+import { basename, dirname, resolve } from "node:path";
 import { performance } from "node:perf_hooks";
 import { fileURLToPath } from "node:url";
 import { captureHostSnapshot, parseSwapUsedBytes } from "../src/hostSnapshot.js";
@@ -29,6 +29,7 @@ const fitTarget = boundedInteger(
 );
 const gpuLayers = readOption(args, "--gpu-layers");
 const cpuMoe = args.includes("--cpu-moe");
+const noFit = args.includes("--no-fit");
 const noWarmup = args.includes("--no-warmup");
 const skipProbe = args.includes("--skip-probe");
 const probeOnly = args.includes("--probe-only");
@@ -38,7 +39,7 @@ if (skipProbe && probeOnly) {
 const probeMaxTokens = boundedInteger(
   readOption(args, "--probe-max-tokens"),
   1,
-  32,
+  128,
   32
 );
 const serverVerbose = args.includes("--server-verbose");
@@ -157,6 +158,12 @@ if (modelStat.size !== modelArtifact.size_bytes) {
     `got ${modelStat.size}`
   );
 }
+const serverStat = await stat(server);
+if (!serverStat.isFile()) {
+  throw new Error(`Runtime is not a file: ${server}`);
+}
+const runtimeBinarySha256 = await sha256File(server);
+const runtimeBundle = await hashRuntimeBundle(server);
 
 await mkdir(outputDir, { recursive: true });
 const serverLogPath = resolve(outputDir, "llama-server.log");
@@ -165,6 +172,14 @@ const reportPath = resolve(outputDir, "baseline.json");
 const publicationRunId = process.env.EXPERTCACHE_PUBLICATION_RUN_ID || null;
 const hostId = process.env.EXPERTCACHE_HOST_ID || "unregistered";
 const before = captureHostSnapshot({ hostId });
+if (
+  maxSwapGrowthGiB !== null &&
+  !Number.isFinite(before.memory.swap_used_bytes)
+) {
+  throw new Error(
+    "Swap telemetry is unavailable; refusing to run with a swap-growth watchdog"
+  );
+}
 const startedAt = new Date().toISOString();
 const started = performance.now();
 const log = createWriteStream(serverLogPath, { flags: "w" });
@@ -181,6 +196,7 @@ const serverArgs = [
   "--metrics",
   "--jinja"
 ];
+if (noFit) serverArgs.push("--fit", "off");
 if (gpuLayers) serverArgs.push("--gpu-layers", gpuLayers);
 if (cpuMoe) serverArgs.push("--cpu-moe");
 if (noWarmup) serverArgs.push("--no-warmup");
@@ -328,6 +344,9 @@ const llamaTimings = parseLlamaTimingLog(await readFile(serverLogPath, "utf8"));
 const configuration = {
   runtime_revision: manifest.runtime.revision,
   runtime_patch_sha256: manifest.runtime_patch.sha256,
+  runtime_binary_sha256: runtimeBinarySha256,
+  runtime_binary_size_bytes: serverStat.size,
+  runtime_bundle_sha256: runtimeBundle.sha256,
   model_artifact_id: modelArtifact.id,
   model_repository: modelArtifact.repository,
   model_revision: modelArtifact.revision,
@@ -340,6 +359,7 @@ const configuration = {
   fit_target_mib: fitTarget,
   gpu_layers: gpuLayers || "auto",
   cpu_moe: cpuMoe,
+  automatic_fit: !noFit,
   warmup: !noWarmup,
   expert_cache_slots: expertCacheSlots,
   expert_cache_cpu_fill: expertCacheSlots > 0 && expertCacheCpuFill,
@@ -373,7 +393,7 @@ for (const [name, path] of Object.entries({
 }
 const report = {
   schema: "amos.local-120b-live-baseline",
-  version: 2,
+  version: 3,
   publication_run_id: publicationRunId,
   started_at: startedAt,
   completed_at: new Date().toISOString(),
@@ -384,6 +404,10 @@ const report = {
   served_model: servedModel,
   runtime: server,
   runtime_revision: manifest.runtime.revision,
+  runtime_binary_sha256: runtimeBinarySha256,
+  runtime_binary_size_bytes: serverStat.size,
+  runtime_bundle_sha256: runtimeBundle.sha256,
+  runtime_artifacts: runtimeBundle.artifacts,
   model_artifact_id: modelArtifact.id,
   model_repository: modelArtifact.repository,
   model_revision: modelArtifact.revision,
@@ -396,6 +420,7 @@ const report = {
   fit_target_mib: fitTarget,
   gpu_layers: gpuLayers || "auto",
   cpu_moe: cpuMoe,
+  automatic_fit: !noFit,
   warmup: !noWarmup,
   server_verbose: serverVerbose,
   skip_chat_parsing: skipChatParsing,
@@ -530,6 +555,9 @@ async function streamingProbe(url, model, completionLimit) {
   let firstCompletionEventMs = null;
   let completionTokens = 0;
   let text = "";
+  let contentCharacters = 0;
+  let reasoningCharacters = 0;
+  let firstTokenChannel = null;
   const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
   let buffer = "";
   while (true) {
@@ -545,20 +573,30 @@ async function streamingProbe(url, model, completionLimit) {
       if (payload?.choices?.length > 0 && firstCompletionEventMs === null) {
         firstCompletionEventMs = performance.now() - started;
       }
-      const tokenText = delta.content || delta.reasoning_content ||
-        delta.reasoning || delta.analysis || "";
-      if (tokenText && firstTokenMs === null) firstTokenMs = performance.now() - started;
-      text += delta.content || "";
+      const contentText = delta.content || "";
+      const reasoningText = delta.reasoning_content || delta.reasoning ||
+        delta.analysis || "";
+      const tokenText = contentText || reasoningText;
+      if (tokenText && firstTokenMs === null) {
+        firstTokenMs = performance.now() - started;
+        firstTokenChannel = contentText ? "content" : "reasoning";
+      }
+      text += contentText;
+      contentCharacters += contentText.length;
+      reasoningCharacters += reasoningText.length;
       completionTokens = payload?.usage?.completion_tokens || completionTokens;
     }
   }
   const elapsedMs = performance.now() - started;
   return {
     first_token_ms: firstTokenMs,
+    first_token_channel: firstTokenChannel,
     first_completion_event_ms: firstCompletionEventMs,
     elapsed_ms: elapsedMs,
     completion_tokens: completionTokens,
     tokens_per_second: completionTokens > 0 ? completionTokens / (elapsedMs / 1_000) : null,
+    content_characters: contentCharacters,
+    reasoning_characters: reasoningCharacters,
     text: text.trim()
   };
 }
@@ -701,7 +739,7 @@ function requiredOption(values, name) {
       "--model MODEL.gguf --server LLAMA_SERVER " +
       "[--model-spec ARTIFACT.json] " +
       "[--context TOKENS] [--batch TOKENS] [--ubatch TOKENS] " +
-      "[--fit-target-mib MiB] [--gpu-layers N|auto|all] [--cpu-moe] " +
+      "[--fit-target-mib MiB] [--gpu-layers N|auto|all] [--cpu-moe] [--no-fit] " +
       "[--no-warmup] [--skip-probe] [--probe-only] " +
       "[--probe-max-tokens N] [--server-verbose] " +
       "[--expert-cache-slots N] [--expert-cache-cpu-fill] " +
@@ -749,6 +787,7 @@ async function readModelArtifact(path) {
 }
 
 function boundedInteger(value, minimum, maximum, fallback) {
+  if (value === undefined || value === null || value === "") return fallback;
   const parsed = Number(value);
   if (!Number.isInteger(parsed)) return fallback;
   return Math.min(maximum, Math.max(minimum, parsed));
@@ -788,6 +827,31 @@ function closeWritable(stream) {
 
 function sha256Json(value) {
   return createHash("sha256").update(JSON.stringify(value)).digest("hex");
+}
+
+async function hashRuntimeBundle(serverPath) {
+  const directory = dirname(serverPath);
+  const serverName = basename(serverPath);
+  const entries = await readdir(directory, { withFileTypes: true });
+  const names = entries
+    .filter((entry) => entry.isFile() && (
+      entry.name === serverName || entry.name.endsWith(".dylib")
+    ))
+    .map((entry) => entry.name)
+    .sort();
+  const artifacts = {};
+  for (const name of names) {
+    const path = resolve(directory, name);
+    const info = await stat(path);
+    artifacts[name] = {
+      size_bytes: info.size,
+      sha256: await sha256File(path)
+    };
+  }
+  return {
+    sha256: sha256Json(artifacts),
+    artifacts
+  };
 }
 
 function sha256File(path) {

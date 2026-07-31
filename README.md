@@ -80,6 +80,13 @@ memory-pressure, or wall-time limits and must not be used as a 32 GiB claim.
 Follow the [physical 16 GiB M1 Pro runbook](docs/LOW_MEMORY_16G_RUNBOOK.md)
 without skipping directly to quality or throughput testing.
 
+The 2026-07-31 single-host experimental arm passed protected one-token,
+eight-token, and natural 50-token completion gates after disabling automatic
+fit and selecting all GPU layers explicitly. Peak session swap was 256 KiB.
+This is a combined experimental-configuration result, not a stock-runtime or
+multi-boot reproducibility claim; see the
+[16 GB results and evidence boundary](docs/LOW_MEMORY_16G_RESULTS.md).
+
 ## Quick validation
 
 Requirements: Node.js 22 or newer and Python 3.11. The deterministic Node tests

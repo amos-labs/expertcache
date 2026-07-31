@@ -1,6 +1,6 @@
 {
   "schema": "amos.expert-cache-runtime",
-  "version": 4,
+  "version": 5,
   "runtime": {
     "repository": "https://github.com/ggml-org/llama.cpp.git",
     "revision": "7e1e28cae36d41fe7bbe9dae7c9625de6565c063",
@@ -8,8 +8,8 @@
   },
   "runtime_patch": {
     "filename": "llama-expert-cache-runtime.patch",
-    "sha256": "0181578f465cb188ab4f34ba8a859b704a99cca5caa5bdec2d502ba3e48571b0",
-    "purpose": "Bound routed MXFP4 experts, group same-layer projections, and expose selected experts through direct no-copy Metal views."
+    "sha256": "6bb978ab189ded46b131edea81fbe0740d7d527797be553f91312e4704f76a63",
+    "purpose": "Bound routed MXFP4 experts, group same-layer projections, expose selected experts through direct no-copy Metal views, and skip whole-file mmap prefetch when lazy tensor mapping is active."
   },
   "model_artifact": {
     "repository": "ggml-org/gpt-oss-120b-GGUF",

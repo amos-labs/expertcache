@@ -21,7 +21,7 @@ Status: **done**, **active**, **planned**, **scoped out**, **external gate**, or
 | P1 | Second oversized architecture | scoped out | Not a release gate for this paper; add only after a compatible artifact executes through a separately qualified kernel path. |
 | P0 | Frozen artifact release | planned | Checksummed bundle, tagged source, compiled paper, and archived raw results. |
 | P1 | Upstreamable runtime boundary | planned | Patch is reduced to a reviewable backend extension with tests and no AMOS dependency. |
-| P1 | 16 GiB M1 Pro feasibility probe | external gate | Protected direct-view first-token test on physical hardware; a clean no-go is also a valid result. |
+| P1 | 16 GiB M1 Pro feasibility probe | done | Combined explicit-placement arm passed one-token, eight-token, and natural 50-token gates on one clean boot; a second clean boot remains required for reproducibility. |
 
 The final paper is blocked by every unfinished P0 row. The 32 GiB replication
 is not a release gate because the primary claim is explicitly scoped to the
