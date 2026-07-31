@@ -108,6 +108,12 @@ const maxTokens = boundedInteger(
 const reasoningEffort = normalizeReasoningEffort(
   readOption(args, "--reasoning-effort")
 );
+const seed = boundedInteger(
+  readOption(args, "--seed"),
+  0,
+  2_147_483_647,
+  42
+);
 const modelAlias = readOption(args, "--model-alias") || "gpt-oss-120b";
 const sampleEveryMs = boundedInteger(
   readOption(args, "--sample-every-ms"),
@@ -296,7 +302,8 @@ try {
       only,
       requestTimeoutSeconds,
       maxTokens,
-      reasoningEffort
+      reasoningEffort,
+      seed
     });
   }
   serverMetrics = await readEndpointText(`${baseUrl}/metrics`);
@@ -350,7 +357,8 @@ const configuration = {
   only_scenarios: only || null,
   request_timeout_seconds: requestTimeoutSeconds,
   max_tokens: maxTokens,
-  reasoning_effort: reasoningEffort
+  reasoning_effort: reasoningEffort,
+  seed
 };
 const artifactHashes = {};
 for (const [name, path] of Object.entries({
@@ -407,6 +415,7 @@ const report = {
   request_timeout_seconds: requestTimeoutSeconds,
   max_tokens: maxTokens,
   reasoning_effort: reasoningEffort,
+  seed,
   readiness_seconds: readinessSeconds,
   streaming_probe: probe,
   llama_timings: llamaTimings,
@@ -563,7 +572,8 @@ function runQualification({
   only: selectedScenarios,
   requestTimeoutSeconds: timeoutSeconds,
   maxTokens: completionTokens,
-  reasoningEffort: selectedReasoningEffort
+  reasoningEffort: selectedReasoningEffort,
+  seed: selectedSeed
 }) {
   return new Promise((resolveRun) => {
     const qualificationArgs = [
@@ -575,6 +585,7 @@ function runQualification({
       "--context", String(numCtx),
       "--request-timeout-seconds", String(timeoutSeconds),
       "--max-tokens", String(completionTokens),
+      "--seed", String(selectedSeed),
       "--output", output
     ];
     if (selectedScenarios) qualificationArgs.push("--only", selectedScenarios);
@@ -702,6 +713,7 @@ function requiredOption(values, name) {
       "[--request-timeout-seconds SECONDS] " +
       "[--max-tokens TOKENS] " +
       "[--reasoning-effort low|medium|high] " +
+      "[--seed INTEGER] " +
       "[--max-swap-growth-gib GiB] [--minimum-free-percent PERCENT] " +
       "[--max-run-seconds SECONDS] " +
       "[--output-dir DIR]"

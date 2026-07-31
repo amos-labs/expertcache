@@ -34,6 +34,8 @@ const commandArgs = [
   "--skip-probe",
   "--suite", "qualification",
   "--max-tokens", "1536",
+  "--reasoning-effort", "low",
+  "--seed", "42",
   "--request-timeout-seconds", "7200",
   "--sample-every-ms", "2000",
   "--max-swap-growth-gib", "8",
@@ -81,7 +83,7 @@ const result = spawnSync(process.execPath, commandArgs, {
   cwd: root,
   env: {
     ...process.env,
-    EXPERTCACHE_PUBLICATION_RUN_ID: "64g-final-quality-prefetch-6",
+    EXPERTCACHE_PUBLICATION_RUN_ID: "64g-final-quality-v3-prefetch-6",
     EXPERTCACHE_HOST_ID: "m1-max-64-primary"
   },
   stdio: "inherit"
