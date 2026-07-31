@@ -15,3 +15,9 @@ a host with accumulated page-cache or swap state; the adjacent README files and
 the main result documents identify those limitations. A final arXiv artifact
 must add repeated, counterbalanced, clean-host measurements rather than
 silently promoting these runs.
+
+The [2026-07-31 qualification control bundle](qualification-controls-2026-07-31/)
+adds complete synthetic response capture for local low/medium diagnostics,
+matched Bedrock controls, a versioned evaluator audit, and a clean-source
+targeted coding follow-up. Its README defines why raw-model, evaluator-audit,
+and governed-system results remain separate.

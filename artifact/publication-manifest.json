@@ -32,7 +32,10 @@
     {
       "id": "C2",
       "grade": "targeted-quality-validated",
-      "evidence": ["docs/EXPERT_CACHE_ZERO_COPY_RESULTS.md"]
+      "evidence": [
+        "docs/EXPERT_CACHE_ZERO_COPY_RESULTS.md",
+        "evidence/qualification-controls-2026-07-31/"
+      ]
     },
     {
       "id": "C3",

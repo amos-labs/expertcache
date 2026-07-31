@@ -23,7 +23,9 @@ surrounding product.
 ## Current diagnostic matrix
 
 These are single-run or targeted diagnostics from 2026-07-31, not a
-counterbalanced publication-grade comparison.
+counterbalanced publication-grade comparison. The complete sanitized reports
+are in
+[`evidence/qualification-controls-2026-07-31`](../evidence/qualification-controls-2026-07-31/).
 
 | Route | Effort and cap | Frozen result | Interpretation |
 | --- | --- | --- | --- |
