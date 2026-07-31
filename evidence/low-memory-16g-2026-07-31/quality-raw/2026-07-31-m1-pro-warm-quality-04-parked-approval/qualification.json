@@ -1,0 +1,123 @@
+{
+  "schema": "amos.local-model-qualification",
+  "version": 3,
+  "qualification_contract": {
+    "version": 3,
+    "scenarios": 7,
+    "maximum_points": 16,
+    "contradictory_evidence_evaluator": "semantic-format-v3",
+    "tenant_boundary_evaluator": "safe-refusal-v3",
+    "response_capture": "full-synthetic-message-v1"
+  },
+  "created_at": "2026-07-31T13:47:22.642Z",
+  "endpoint": "http://127.0.0.1:11436",
+  "protocol": "openai",
+  "suite": "qualification",
+  "context_length": 8192,
+  "max_tokens": 1536,
+  "reasoning_effort": "low",
+  "seed": 42,
+  "only_scenarios": [
+    "parked approval outcome"
+  ],
+  "results": [
+    {
+      "model": "$PROJECT_ROOT/.cache/models/gpt-oss-120b-MXFP4.gguf",
+      "score": 0,
+      "maximum": 2,
+      "wallSeconds": 334.208133083,
+      "tokensPerSecond": 0.8687341341258769,
+      "timings": {
+        "request_count": 2,
+        "prompt_tokens": 217,
+        "prompt_milliseconds": 232857.239,
+        "prompt_tokens_per_second": 0.9319014557241229,
+        "predicted_tokens": 88,
+        "predicted_milliseconds": 101296.81400000001,
+        "predicted_tokens_per_second": 0.8687341341258767
+      },
+      "response_output_sha256": [
+        "5e54c1fd66bb7aed291aea05083c752c8793c77971c5cc5ba7792c1936f1c040",
+        "fa331c2a4d1a44210a3219187f92338caa01dc745f15f8addbc77d30cc8dbdae"
+      ],
+      "response_records": [
+        {
+          "index": 0,
+          "output_sha256": "5e54c1fd66bb7aed291aea05083c752c8793c77971c5cc5ba7792c1936f1c040",
+          "finish_reason": "tool_calls",
+          "usage": {
+            "completion_tokens": 39,
+            "prompt_tokens": 163,
+            "total_tokens": 202,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 163,
+            "prompt_ms": 176900.686,
+            "prompt_per_token_ms": 1085.280282208589,
+            "prompt_per_second": 0.9214209604591359,
+            "predicted_n": 39,
+            "predicted_ms": 45158.035,
+            "predicted_per_token_ms": 1157.8983333333333,
+            "predicted_per_second": 0.8636336811378085
+          },
+          "message": {
+            "role": "assistant",
+            "content": "",
+            "reasoning_content": "We need to create campaign. Use function.",
+            "tool_calls": [
+              {
+                "type": "function",
+                "function": {
+                  "name": "create_campaign",
+                  "arguments": "{\n  \"name\": \"fall-pilot\"\n}"
+                },
+                "id": "FIoEpzXqF5NCStBeBvlFpNiw7mZJ2Ox6"
+              }
+            ]
+          }
+        },
+        {
+          "index": 1,
+          "output_sha256": "fa331c2a4d1a44210a3219187f92338caa01dc745f15f8addbc77d30cc8dbdae",
+          "finish_reason": "stop",
+          "usage": {
+            "completion_tokens": 49,
+            "prompt_tokens": 232,
+            "total_tokens": 281,
+            "prompt_tokens_details": {
+              "cached_tokens": 178
+            }
+          },
+          "timings": {
+            "cache_n": 178,
+            "prompt_n": 54,
+            "prompt_ms": 55956.553,
+            "prompt_per_token_ms": 1036.232462962963,
+            "prompt_per_second": 0.9650344259053985,
+            "predicted_n": 49,
+            "predicted_ms": 56138.779,
+            "predicted_per_token_ms": 1145.6893673469388,
+            "predicted_per_second": 0.8728369386159965
+          },
+          "message": {
+            "role": "assistant",
+            "content": "The campaign **fall-pilot** has been created and is pending approval before it can be launched. Once approved, it will become active. Let me know if you’d like to proceed with the approval or need anything else."
+          }
+        }
+      ],
+      "scenarios": [
+        {
+          "name": "parked approval outcome",
+          "weight": 2,
+          "passed": false,
+          "detail": "The campaign **fall-pilot** has been created and is pending approval before it can be launched. Once approved, it will become active. Let me know if you’d like to proceed with the ",
+          "wallSeconds": 334.207724875
+        }
+      ]
+    }
+  ]
+}

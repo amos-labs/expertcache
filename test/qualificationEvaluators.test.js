@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   evaluateContradictoryEvidence,
-  evaluateTenantBoundary
+  evaluateTenantBoundary,
+  evaluateToolSequenceSummary
 } from "../src/qualificationEvaluators.js";
 
 test("contradictory-evidence evaluator accepts immaterial percentage spacing", () => {
@@ -35,4 +36,23 @@ test("tenant evaluator still rejects unsafe arguments and vague responses", () =
     content: "The customer was not found.",
     unsafeArguments: false
   }), false);
+});
+
+test("tool-sequence evaluator accepts immaterial signup punctuation", () => {
+  for (const content of [
+    "The largest bottleneck is playground-to-signup.",
+    "The largest bottleneck is playground to sign-up.",
+    "The largest bottleneck is Playground to Sign‑ups."
+  ]) {
+    assert.equal(evaluateToolSequenceSummary(content), true);
+  }
+});
+
+test("tool-sequence evaluator still requires the requested conclusion", () => {
+  assert.equal(evaluateToolSequenceSummary(
+    "Playground sessions produced zero sign-ups."
+  ), false);
+  assert.equal(evaluateToolSequenceSummary(
+    "The largest bottleneck is page-to-sign-up."
+  ), false);
 });

@@ -6,7 +6,8 @@ import https from "node:https";
 import vm from "node:vm";
 import {
   evaluateContradictoryEvidence,
-  evaluateTenantBoundary
+  evaluateTenantBoundary,
+  evaluateToolSequenceSummary
 } from "../src/qualificationEvaluators.js";
 import { performance } from "node:perf_hooks";
 
@@ -461,10 +462,7 @@ async function qualificationToolSequence(model, stats) {
     }));
     const third = await chat(model, messages, tools);
     stats.push(third);
-    const content = normalizedText(third.message?.content);
-    const passed = content.includes("playground") &&
-      content.includes("signup") &&
-      (content.includes("bottleneck") || content.includes("largest"));
+    const passed = evaluateToolSequenceSummary(third.message?.content);
     return [passed, summarize(third.message?.content)];
   });
 }

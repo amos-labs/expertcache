@@ -77,6 +77,26 @@ See `clean-explicit-summary.json` for the machine-readable result,
 `clean-native-mxfp4-ops.csv` for the repeated native operation check, and
 `docs/LOW_MEMORY_16G_RESULTS.md` for the human-readable report.
 
+## Warm 8K quality qualification
+
+The later warm-host engineering suite completed all seven qualification
+scenarios at an 8,192-token context. The raw harness recorded 11/16. Exact
+replay of the multi-tool response through the regression-tested punctuation
+fix yields a 14/16 functional result; the original 0/3 raw report is retained
+unchanged. The only genuine miss was the parked-approval outcome.
+
+The first distractor-heavy attempt was interrupted and preserved after macOS
+sleep events consumed most of its HTTP timeout. A fresh attempt wrapped in
+`caffeinate -i -s` completed in 5,339.7 seconds and passed 2/2. Across the
+seven completed scenarios, peak process RSS was 453 MiB, peak swap was 4.81
+MiB, and minimum free memory was 38 percent.
+
+See `quality-summary.json` for the aggregate, `quality-raw/` for the sanitized
+gate, scenario, and interrupted-attempt corpus, and
+`quality-raw-manifest.json` for original/published hashes. Rebuild these files
+from the ignored local outputs with
+`node scripts/publishLowMemoryQualityEvidence.js`.
+
 The complete low-memory raw corpus is published under `raw/` after replacing
 only machine-local paths, the host fingerprint, and the battery device ID.
 `raw-manifest.json` maps every sanitized file to the original and published

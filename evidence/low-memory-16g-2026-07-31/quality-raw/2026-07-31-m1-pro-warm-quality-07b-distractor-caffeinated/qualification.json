@@ -1,0 +1,84 @@
+{
+  "schema": "amos.local-model-qualification",
+  "version": 3,
+  "qualification_contract": {
+    "version": 3,
+    "scenarios": 7,
+    "maximum_points": 16,
+    "contradictory_evidence_evaluator": "semantic-format-v3",
+    "tenant_boundary_evaluator": "safe-refusal-v3",
+    "response_capture": "full-synthetic-message-v1"
+  },
+  "created_at": "2026-07-31T16:54:15.993Z",
+  "endpoint": "http://127.0.0.1:11436",
+  "protocol": "openai",
+  "suite": "qualification",
+  "context_length": 8192,
+  "max_tokens": 1536,
+  "reasoning_effort": "low",
+  "seed": 42,
+  "only_scenarios": [
+    "distractor-heavy evidence retrieval"
+  ],
+  "results": [
+    {
+      "model": "$PROJECT_ROOT/.cache/models/gpt-oss-120b-MXFP4.gguf",
+      "score": 2,
+      "maximum": 2,
+      "wallSeconds": 5339.666696583,
+      "tokensPerSecond": 0.6527223646123974,
+      "timings": {
+        "request_count": 1,
+        "prompt_tokens": 4118,
+        "prompt_milliseconds": 5197117.416,
+        "prompt_tokens_per_second": 0.7923623174881912,
+        "predicted_tokens": 93,
+        "predicted_milliseconds": 142480.18,
+        "predicted_tokens_per_second": 0.6527223646123974
+      },
+      "response_output_sha256": [
+        "f33ea660d117a81f2ecf3528e1809eda2bafd90c14dce9be568185cd7f9e7c7a"
+      ],
+      "response_records": [
+        {
+          "index": 0,
+          "output_sha256": "f33ea660d117a81f2ecf3528e1809eda2bafd90c14dce9be568185cd7f9e7c7a",
+          "finish_reason": "stop",
+          "usage": {
+            "completion_tokens": 93,
+            "prompt_tokens": 4118,
+            "total_tokens": 4211,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 4118,
+            "prompt_ms": 5197117.416,
+            "prompt_per_token_ms": 1262.048911121904,
+            "prompt_per_second": 0.7923623174881912,
+            "predicted_n": 93,
+            "predicted_ms": 142480.18,
+            "predicted_per_token_ms": 1532.044946236559,
+            "predicted_per_second": 0.6527223646123974
+          },
+          "message": {
+            "role": "assistant",
+            "content": "Project Heron’s current gross monthly churn target is 3.2%, controlled by Record 128 dated 2026‑07‑26, which supersedes the prior 4.5% value from Record 032.",
+            "reasoning_content": "Need current target 3.2%, controlling record 128, date 2026-07-26, superseded value 4.5% from Record 032. One sentence."
+          }
+        }
+      ],
+      "scenarios": [
+        {
+          "name": "distractor-heavy evidence retrieval",
+          "weight": 2,
+          "passed": true,
+          "detail": "Project Heron’s current gross monthly churn target is 3.2%, controlled by Record 128 dated 2026‑07‑26, which supersedes the prior 4.5% value from Record 032.",
+          "wallSeconds": 5339.666347124999
+        }
+      ]
+    }
+  ]
+}
