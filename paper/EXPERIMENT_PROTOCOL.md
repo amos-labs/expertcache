@@ -208,6 +208,13 @@ quantization or tensor layout is a separate kernel experiment. The paper must
 distinguish “second checkpoint” from both “second oversized checkpoint” and
 “second architecture.”
 
+The 2026-07-31 run completed all four arms. Under the version-5 evaluator audit
+all scored 7/7, and direct/grouped/prefetch-6 were canonical-response
+equivalent. Stock differed from all custom paths at three of six records, so
+the registered stock-equivalence exit condition remains open. The frozen
+version-4 reports and failed summary are retained; the audit did not rerun or
+edit model output.
+
 ## Exclusion policy
 
 Valid exclusions are: corrupted/incomplete artifact, runtime digest mismatch,

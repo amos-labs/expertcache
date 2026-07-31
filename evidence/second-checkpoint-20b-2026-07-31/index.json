@@ -1,0 +1,103 @@
+{
+  "schema": "expertcache.sanitized-evidence-index",
+  "version": 1,
+  "created_at": "2026-07-31T15:38:06.609Z",
+  "sanitation": {
+    "worktree_paths": "$WORKTREE",
+    "home_paths": "$HOME",
+    "host_fingerprint": "redacted",
+    "battery_identifier": "redacted",
+    "numerical_measurements_changed": false,
+    "synthetic_messages_changed": false
+  },
+  "files": [
+    {
+      "label": "contract-v5-audit",
+      "filename": "contract-v5-audit.json",
+      "source_sha256": "d4025dabc0de2c46e9d2068c4b8524e07e556d33ba483d1591ea1c4774e18235",
+      "sanitized_sha256": "186c7b23d7c1b7ad5d242b355dbdd8923fa7d98fc1b6f3bc40687d6465c83706",
+      "schema": "expertcache.second-checkpoint-audit",
+      "report_version": 1
+    },
+    {
+      "label": "direct-baseline",
+      "filename": "direct-baseline.json",
+      "source_sha256": "ae69226d086be3937fcbc3383fca017e5c45f8476ed9e5598f56896cff07ad1f",
+      "sanitized_sha256": "669743e19c12ca1a31e8281b2990adf95d6ef5827c597a6221c02a1b60e699f9",
+      "schema": "amos.local-120b-live-baseline",
+      "report_version": 3
+    },
+    {
+      "label": "direct-qualification",
+      "filename": "direct-qualification.json",
+      "source_sha256": "6014c899685874f713a9b371b008ae1c8b14e5ff3c6ac83447d6eadd38b4e71a",
+      "sanitized_sha256": "fccc4271f3637bed1535ca43be4bb8ec1c23cb62ccebc856edba71f7e934c357",
+      "schema": "amos.local-model-qualification",
+      "report_version": 4
+    },
+    {
+      "label": "frozen-summary",
+      "filename": "frozen-summary.json",
+      "source_sha256": "07da1047326fbdf451ed1e535d1ab184c48d36a8684b14f1121a41ba1ad40855",
+      "sanitized_sha256": "791f80a29e761d07b79bc7784a8a3efdddc7598b2ca63838927fd9b531179231",
+      "schema": "expertcache.second-checkpoint-summary",
+      "report_version": 1
+    },
+    {
+      "label": "gate-state",
+      "filename": "gate-state.json",
+      "source_sha256": "46ed516cc0342b6ab3ccfa7d46673703c24fb420b903f6d012593b20eacb56d2",
+      "sanitized_sha256": "55223152afa9b0ff98afcc90a8be78690b6a08f7f62a8502356945da257f7b78",
+      "schema": "expertcache.second-checkpoint-gate",
+      "report_version": 1
+    },
+    {
+      "label": "grouped-baseline",
+      "filename": "grouped-baseline.json",
+      "source_sha256": "ea6856b72191d260437f40e342dcf5e602637f43aeff5312d9125de1880a1cc3",
+      "sanitized_sha256": "78eb9f9e7ce72ee68d183713b9ab73781f19a768159583185ec5a5f33355f9f2",
+      "schema": "amos.local-120b-live-baseline",
+      "report_version": 3
+    },
+    {
+      "label": "grouped-qualification",
+      "filename": "grouped-qualification.json",
+      "source_sha256": "e3cb0069b9800c423cff05947b1b8ac60ea97488cc66ddfd1ea239778819196c",
+      "sanitized_sha256": "278bc1ecefc9a8f75d2a128515afdafdd694339404d698988e3126a772a12459",
+      "schema": "amos.local-model-qualification",
+      "report_version": 4
+    },
+    {
+      "label": "prefetch-6-baseline",
+      "filename": "prefetch-6-baseline.json",
+      "source_sha256": "496f50149a26331ac5d5c557e4dfca97d4399de0f35ae630171cf11bd3007e2d",
+      "sanitized_sha256": "203f40c09db6dd28e2cd3abcb09ead6f0112e79a13643893fb14cb768803b8ca",
+      "schema": "amos.local-120b-live-baseline",
+      "report_version": 3
+    },
+    {
+      "label": "prefetch-6-qualification",
+      "filename": "prefetch-6-qualification.json",
+      "source_sha256": "cd615730088708bfb9b19b847fa37ed902a13f3d0fee713000d450a861ceeb98",
+      "sanitized_sha256": "8345a545e9613a2b5b606764e64feff7c49ce54d2fa4dcfaeca936a60e901d47",
+      "schema": "amos.local-model-qualification",
+      "report_version": 4
+    },
+    {
+      "label": "stock-baseline",
+      "filename": "stock-baseline.json",
+      "source_sha256": "d70a961e8d6dba93704c62abc7af4e873dde063065c369711372cb5c34764def",
+      "sanitized_sha256": "9e2d62396ed4549106f913f5e483583cadf5d1aa89fc43f2b4681581df33c010",
+      "schema": "amos.local-120b-live-baseline",
+      "report_version": 3
+    },
+    {
+      "label": "stock-qualification",
+      "filename": "stock-qualification.json",
+      "source_sha256": "ac4ad795cd0ce093a0254c77dc46fc64007a0049cfb383e454acd5da38e0dcb7",
+      "sanitized_sha256": "1f9faae5ab96a9775b7a6e53e68720c579232b2daf42cc6d5cdecbb927c03e09",
+      "schema": "amos.local-model-qualification",
+      "report_version": 4
+    }
+  ]
+}

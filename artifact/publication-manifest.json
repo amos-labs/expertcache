@@ -42,7 +42,8 @@
       "grade": "deterministic-equivalence-validated",
       "evidence": [
         "docs/EXPERT_CACHE_CEILING_RESULTS.md",
-        "evidence/prefetch-2026-07-29/full-gate-qualification.json"
+        "evidence/prefetch-2026-07-29/full-gate-qualification.json",
+        "evidence/second-checkpoint-20b-2026-07-31/"
       ]
     },
     {

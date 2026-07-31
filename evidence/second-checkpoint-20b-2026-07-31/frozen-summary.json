@@ -1,0 +1,91 @@
+{
+  "schema": "expertcache.sanitized-evidence",
+  "version": 1,
+  "label": "frozen-summary",
+  "source": {
+    "filename": "second-checkpoint-summary.json",
+    "sha256": "07da1047326fbdf451ed1e535d1ab184c48d36a8684b14f1121a41ba1ad40855"
+  },
+  "report": {
+    "schema": "expertcache.second-checkpoint-summary",
+    "version": 1,
+    "completed_at": "2026-07-31T15:27:57.318Z",
+    "status": "incomplete",
+    "checkpoint": {
+      "id": "gpt-oss-20b-mxfp4",
+      "repository": "ggml-org/gpt-oss-20b-GGUF",
+      "revision": "ef9b12f2ff56c69cf32153a02784e7a3c88bf524",
+      "filename": "gpt-oss-20b-MXFP4.gguf",
+      "size_bytes": 12109566624,
+      "sha256": "27cd6c432c7672cb812a92f611cf3ba7bbc35928262bb1e1253ff4ee6ae35901"
+    },
+    "scope": {
+      "proves": "same-family GPT-OSS MXFP4 checkpoint portability across stock, direct, grouped, and prefetch paths",
+      "does_not_prove": [
+        "second oversized checkpoint",
+        "second model architecture"
+      ]
+    },
+    "suite": "public deterministic smoke suite",
+    "equivalence": [
+      {
+        "arm": "stock",
+        "response_count": 6,
+        "exact_output_hash_match": true,
+        "mismatch_indices": []
+      },
+      {
+        "arm": "direct",
+        "response_count": 6,
+        "exact_output_hash_match": false,
+        "mismatch_indices": [
+          1,
+          3,
+          4
+        ]
+      },
+      {
+        "arm": "grouped",
+        "response_count": 6,
+        "exact_output_hash_match": false,
+        "mismatch_indices": [
+          1,
+          3,
+          4
+        ]
+      },
+      {
+        "arm": "prefetch-6",
+        "response_count": 6,
+        "exact_output_hash_match": false,
+        "mismatch_indices": [
+          1,
+          3,
+          4
+        ]
+      }
+    ],
+    "scores": [
+      {
+        "arm": "stock",
+        "score": 6,
+        "maximum": 7
+      },
+      {
+        "arm": "direct",
+        "score": 6,
+        "maximum": 7
+      },
+      {
+        "arm": "grouped",
+        "score": 6,
+        "maximum": 7
+      },
+      {
+        "arm": "prefetch-6",
+        "score": 6,
+        "maximum": 7
+      }
+    ]
+  }
+}

@@ -17,7 +17,7 @@ Status: **done**, **active**, **planned**, **scoped out**, **external gate**, or
 | P0 | Full frozen quality suite | active | Version-5 seven-scenario, 16-point suite with complete synthetic response records, finish reasons, token usage, strict and opaque-ID-canonical hashes, and public deterministic evaluators on the final runtime. |
 | P0 | Complete host telemetry | planned | TTFT, prefill/decode, RSS, compressed memory, swap, page faults, bytes touched, energy and thermal state. |
 | P2 | 32 GiB Apple Silicon replication | scoped out | Supplemental only: run the pinned protocol on physical hardware before making any 32 GiB claim. |
-| P0 | Second official sparse checkpoint | active | The pinned GPT-OSS 20B MXFP4 control produces identical application-output hashes across stock, direct, grouped, and prefetch paths. |
+| P0 | Second official sparse checkpoint | active | All GPT-OSS 20B arms execute and score 7/7 under the v5 audit; direct/grouped/prefetch are canonical-equivalent, but stock-to-custom output equivalence remains unresolved. |
 | P1 | Second oversized architecture | scoped out | Not a release gate for this paper; add only after a compatible artifact executes through a separately qualified kernel path. |
 | P0 | Frozen artifact release | planned | Checksummed bundle, tagged source, compiled paper, and archived raw results. |
 | P1 | Upstreamable runtime boundary | planned | Patch is reduced to a reviewable backend extension with tests and no AMOS dependency. |

@@ -52,6 +52,8 @@ the work.
 - `docs/GOVERNED_MODEL_HARNESS.md` — raw-model, evaluator-audit, and
   product-harness result boundaries.
 - `docs/HOSTED_CONTROL.md` — matched Bedrock GPT-OSS qualification control.
+- `docs/SECOND_CHECKPOINT_20B_RESULTS.md` — partial same-family portability
+  result and unresolved stock/direct boundary.
 - `paper/` — manuscript, claim ledger, registered protocol, and result macros.
 - `artifact/` — machine-readable experiment matrix and publication manifest.
 - `ROADMAP.md` — publication gates, production architecture, and retained
@@ -79,6 +81,11 @@ live block requires explicit execution and clean-boot confirmations; see
 [`paper/EXPERIMENT_PROTOCOL.md`](paper/EXPERIMENT_PROTOCOL.md). A 32 GiB Mac is
 an optional physical-hardware replication, not something this 64 GiB host can
 legitimately emulate for a hardware claim.
+
+The 2026-07-31 20B gate completed all four arms. Direct, grouped, and
+prefetch-6 are canonical-response equivalent, but stock differs from the
+custom path; the gate therefore remains active. See the
+[20B result boundary](docs/SECOND_CHECKPOINT_20B_RESULTS.md).
 
 For a physical 16 GiB Apple Silicon host, `experiment:low-memory` provides a
 separate, protected one-token feasibility gate. It aborts on bounded swap,

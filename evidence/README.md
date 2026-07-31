@@ -21,3 +21,8 @@ adds complete synthetic response capture for local low/medium diagnostics,
 matched Bedrock controls, a versioned evaluator audit, and a clean-source
 targeted coding follow-up. Its README defines why raw-model, evaluator-audit,
 and governed-system results remain separate.
+
+The [GPT-OSS 20B second-checkpoint bundle](second-checkpoint-20b-2026-07-31/)
+preserves the clean four-arm gate, the failed stock-equivalence summary, and a
+contract-v5 audit showing 7/7 semantic outcomes plus canonical equivalence
+inside the direct/grouped/prefetch family.

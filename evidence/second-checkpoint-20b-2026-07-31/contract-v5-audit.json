@@ -1,0 +1,378 @@
+{
+  "schema": "expertcache.sanitized-evidence",
+  "version": 1,
+  "label": "contract-v5-audit",
+  "source": {
+    "filename": "contract-v5-audit.json",
+    "sha256": "d4025dabc0de2c46e9d2068c4b8524e07e556d33ba483d1591ea1c4774e18235"
+  },
+  "report": {
+    "schema": "expertcache.second-checkpoint-audit",
+    "version": 1,
+    "created_at": "2026-07-31T15:37:56.497Z",
+    "auditor_source_revision": "7aa19e8b90f3c66ea4cc3a246091d646ac5114be",
+    "source": {
+      "directory_label": "v5-20b-portability-ea82da9-2026-07-31",
+      "gate_state_sha256": "46ed516cc0342b6ab3ccfa7d46673703c24fb420b903f6d012593b20eacb56d2",
+      "summary_sha256": "07da1047326fbdf451ed1e535d1ab184c48d36a8684b14f1121a41ba1ad40855",
+      "frozen_status": "incomplete",
+      "frozen_gate_schema": "expertcache.second-checkpoint-gate",
+      "checkpoint": {
+        "id": "gpt-oss-20b-mxfp4",
+        "repository": "ggml-org/gpt-oss-20b-GGUF",
+        "revision": "ef9b12f2ff56c69cf32153a02784e7a3c88bf524",
+        "filename": "gpt-oss-20b-MXFP4.gguf",
+        "size_bytes": 12109566624,
+        "sha256": "27cd6c432c7672cb812a92f611cf3ba7bbc35928262bb1e1253ff4ee6ae35901"
+      }
+    },
+    "audit_contract": {
+      "qualification_version": 5,
+      "smoke_funnel_evaluator": "semantic-signup-format-v5",
+      "canonical_response_hash": "opaque-tool-call-id-v1",
+      "model_rerun": false,
+      "responses_changed": false
+    },
+    "established": {
+      "all_arms_complete": true,
+      "all_arms_score_7_of_7_under_v5_audit": true,
+      "direct_grouped_prefetch_canonical_equivalence": true,
+      "stock_to_custom_canonical_equivalence": false
+    },
+    "claim_boundary": {
+      "supports": [
+        "same-family 20B checkpoint execution in all four registered arms",
+        "identical scenario outcomes in all four arms under the v5 evaluator audit",
+        "canonical response equivalence across direct, grouped, and prefetch-6"
+      ],
+      "does_not_support": [
+        "stock-to-custom output equivalence",
+        "second oversized checkpoint",
+        "second model architecture",
+        "publication-grade timing comparison"
+      ]
+    },
+    "stock_reference_equivalence": [
+      {
+        "reference": "stock",
+        "arm": "stock",
+        "strict_response_hash_match": true,
+        "strict_mismatch_indices": [],
+        "canonical_response_hash_match": true,
+        "canonical_mismatch_indices": []
+      },
+      {
+        "reference": "stock",
+        "arm": "direct",
+        "strict_response_hash_match": false,
+        "strict_mismatch_indices": [
+          1,
+          3,
+          4
+        ],
+        "canonical_response_hash_match": false,
+        "canonical_mismatch_indices": [
+          1,
+          3,
+          4
+        ]
+      },
+      {
+        "reference": "stock",
+        "arm": "grouped",
+        "strict_response_hash_match": false,
+        "strict_mismatch_indices": [
+          1,
+          3,
+          4
+        ],
+        "canonical_response_hash_match": false,
+        "canonical_mismatch_indices": [
+          1,
+          3,
+          4
+        ]
+      },
+      {
+        "reference": "stock",
+        "arm": "prefetch-6",
+        "strict_response_hash_match": false,
+        "strict_mismatch_indices": [
+          1,
+          3,
+          4
+        ],
+        "canonical_response_hash_match": false,
+        "canonical_mismatch_indices": [
+          1,
+          3,
+          4
+        ]
+      }
+    ],
+    "custom_path_equivalence": [
+      {
+        "reference": "direct",
+        "arm": "direct",
+        "strict_response_hash_match": true,
+        "strict_mismatch_indices": [],
+        "canonical_response_hash_match": true,
+        "canonical_mismatch_indices": []
+      },
+      {
+        "reference": "direct",
+        "arm": "grouped",
+        "strict_response_hash_match": false,
+        "strict_mismatch_indices": [
+          3
+        ],
+        "canonical_response_hash_match": true,
+        "canonical_mismatch_indices": []
+      },
+      {
+        "reference": "direct",
+        "arm": "prefetch-6",
+        "strict_response_hash_match": false,
+        "strict_mismatch_indices": [
+          3
+        ],
+        "canonical_response_hash_match": true,
+        "canonical_mismatch_indices": []
+      }
+    ],
+    "arms": [
+      {
+        "arm": "stock",
+        "frozen": {
+          "contract_version": 4,
+          "score": 6,
+          "maximum": 7,
+          "response_output_sha256": [
+            "5c2294175f3075b2086af9b14008d2338e4e8358b6321c950f6bce8ca97dcb62",
+            "e8af40520c244f9e3c03881cef9ed73a8f1cd67a8649fc154a694488d8013c98",
+            "8808ea5e6f77168fca1d054f2fa9ac6a51c52abf0359b693aa0a0556b7ffb154",
+            "996c06f98678d9c486d93500edd9bc9c9986e5b828af94f3aaa730e4ace76e73",
+            "a7380a01d9a088f5fc8bef4f2643544cc34774fcadc4875d0f696946dd163d3e",
+            "67066271ba8a18bc78c88d4b2319653e1b4f782f6512ce369df62fe2df24973d"
+          ],
+          "qualification_sha256": "ac4ad795cd0ce093a0254c77dc46fc64007a0049cfb383e454acd5da38e0dcb7",
+          "baseline_sha256": "d70a961e8d6dba93704c62abc7af4e873dde063065c369711372cb5c34764def"
+        },
+        "version_5_audit": {
+          "score": 7,
+          "maximum": 7,
+          "changed_scenarios": [
+            {
+              "name": "business diagnosis",
+              "weight": 1,
+              "response_record_index": 1,
+              "response_output_sha256": "e8af40520c244f9e3c03881cef9ed73a8f1cd67a8649fc154a694488d8013c98",
+              "reason": "The answer identifies the Playground-to-Sign-up bottleneck; contract v5 accepts equivalent signup punctuation."
+            }
+          ]
+        },
+        "canonical_response_output_sha256": [
+          "5c2294175f3075b2086af9b14008d2338e4e8358b6321c950f6bce8ca97dcb62",
+          "e8af40520c244f9e3c03881cef9ed73a8f1cd67a8649fc154a694488d8013c98",
+          "8808ea5e6f77168fca1d054f2fa9ac6a51c52abf0359b693aa0a0556b7ffb154",
+          "4fd6ed77d1262c8da8b72eed5f1a02daba135bd312ca505d0231a6fb2f124189",
+          "a7380a01d9a088f5fc8bef4f2643544cc34774fcadc4875d0f696946dd163d3e",
+          "67066271ba8a18bc78c88d4b2319653e1b4f782f6512ce369df62fe2df24973d"
+        ],
+        "source": {
+          "before_revision": "ea82da9a91283673b224840d53b29a28f2987399",
+          "before_dirty": false,
+          "before_state_sha256": "6455fdac34e26308151fc8a7082e5c41bd79227cb3d479cf39460a80f8651294",
+          "after_revision": "ea82da9a91283673b224840d53b29a28f2987399",
+          "after_dirty": false,
+          "after_state_sha256": "6455fdac34e26308151fc8a7082e5c41bd79227cb3d479cf39460a80f8651294"
+        },
+        "resources": {
+          "peak_rss_bytes": 12552011776,
+          "peak_swap_used_bytes": 1329720197.12,
+          "swap_growth_bytes": 0,
+          "minimum_memory_free_percent": 58
+        },
+        "diagnostic_timing": {
+          "qualification_wall_seconds": 40.655272792,
+          "prompt_tokens_per_second": 82.9677171851261,
+          "predicted_tokens_per_second": 30.230232688212528
+        }
+      },
+      {
+        "arm": "direct",
+        "frozen": {
+          "contract_version": 4,
+          "score": 6,
+          "maximum": 7,
+          "response_output_sha256": [
+            "5c2294175f3075b2086af9b14008d2338e4e8358b6321c950f6bce8ca97dcb62",
+            "5079a1c8ec369b3ee573ea59db63ca2a4de274fef13537768deb0529e45cd87d",
+            "8808ea5e6f77168fca1d054f2fa9ac6a51c52abf0359b693aa0a0556b7ffb154",
+            "cad1130f5d90e03c7c1489c8bc2622ae5f8056ae2ab305a329200b7887eb876f",
+            "cc1c5a7ad59f56c1749b653ba2e903aef4e56ffa0f2e30bfa208f09532537d20",
+            "67066271ba8a18bc78c88d4b2319653e1b4f782f6512ce369df62fe2df24973d"
+          ],
+          "qualification_sha256": "6014c899685874f713a9b371b008ae1c8b14e5ff3c6ac83447d6eadd38b4e71a",
+          "baseline_sha256": "ae69226d086be3937fcbc3383fca017e5c45f8476ed9e5598f56896cff07ad1f"
+        },
+        "version_5_audit": {
+          "score": 7,
+          "maximum": 7,
+          "changed_scenarios": [
+            {
+              "name": "business diagnosis",
+              "weight": 1,
+              "response_record_index": 1,
+              "response_output_sha256": "5079a1c8ec369b3ee573ea59db63ca2a4de274fef13537768deb0529e45cd87d",
+              "reason": "The answer identifies the Playground-to-Sign-up bottleneck; contract v5 accepts equivalent signup punctuation."
+            }
+          ]
+        },
+        "canonical_response_output_sha256": [
+          "5c2294175f3075b2086af9b14008d2338e4e8358b6321c950f6bce8ca97dcb62",
+          "5079a1c8ec369b3ee573ea59db63ca2a4de274fef13537768deb0529e45cd87d",
+          "8808ea5e6f77168fca1d054f2fa9ac6a51c52abf0359b693aa0a0556b7ffb154",
+          "c47e7511e6476e94b7140d9cd30d3620ea45b54c468608c552f71a08713590bc",
+          "cc1c5a7ad59f56c1749b653ba2e903aef4e56ffa0f2e30bfa208f09532537d20",
+          "67066271ba8a18bc78c88d4b2319653e1b4f782f6512ce369df62fe2df24973d"
+        ],
+        "source": {
+          "before_revision": "ea82da9a91283673b224840d53b29a28f2987399",
+          "before_dirty": false,
+          "before_state_sha256": "6455fdac34e26308151fc8a7082e5c41bd79227cb3d479cf39460a80f8651294",
+          "after_revision": "ea82da9a91283673b224840d53b29a28f2987399",
+          "after_dirty": false,
+          "after_state_sha256": "6455fdac34e26308151fc8a7082e5c41bd79227cb3d479cf39460a80f8651294"
+        },
+        "resources": {
+          "peak_rss_bytes": 461635584,
+          "peak_swap_used_bytes": 1329720197.12,
+          "swap_growth_bytes": 0,
+          "minimum_memory_free_percent": 74
+        },
+        "diagnostic_timing": {
+          "qualification_wall_seconds": 200.86612870899998,
+          "prompt_tokens_per_second": 23.39847459118858,
+          "predicted_tokens_per_second": 6.138875022304268
+        }
+      },
+      {
+        "arm": "grouped",
+        "frozen": {
+          "contract_version": 4,
+          "score": 6,
+          "maximum": 7,
+          "response_output_sha256": [
+            "5c2294175f3075b2086af9b14008d2338e4e8358b6321c950f6bce8ca97dcb62",
+            "5079a1c8ec369b3ee573ea59db63ca2a4de274fef13537768deb0529e45cd87d",
+            "8808ea5e6f77168fca1d054f2fa9ac6a51c52abf0359b693aa0a0556b7ffb154",
+            "7b0ae37f7372fef2af7d862a89841272a095920e2a7da7a2023b691b6ea497d4",
+            "cc1c5a7ad59f56c1749b653ba2e903aef4e56ffa0f2e30bfa208f09532537d20",
+            "67066271ba8a18bc78c88d4b2319653e1b4f782f6512ce369df62fe2df24973d"
+          ],
+          "qualification_sha256": "e3cb0069b9800c423cff05947b1b8ac60ea97488cc66ddfd1ea239778819196c",
+          "baseline_sha256": "ea6856b72191d260437f40e342dcf5e602637f43aeff5312d9125de1880a1cc3"
+        },
+        "version_5_audit": {
+          "score": 7,
+          "maximum": 7,
+          "changed_scenarios": [
+            {
+              "name": "business diagnosis",
+              "weight": 1,
+              "response_record_index": 1,
+              "response_output_sha256": "5079a1c8ec369b3ee573ea59db63ca2a4de274fef13537768deb0529e45cd87d",
+              "reason": "The answer identifies the Playground-to-Sign-up bottleneck; contract v5 accepts equivalent signup punctuation."
+            }
+          ]
+        },
+        "canonical_response_output_sha256": [
+          "5c2294175f3075b2086af9b14008d2338e4e8358b6321c950f6bce8ca97dcb62",
+          "5079a1c8ec369b3ee573ea59db63ca2a4de274fef13537768deb0529e45cd87d",
+          "8808ea5e6f77168fca1d054f2fa9ac6a51c52abf0359b693aa0a0556b7ffb154",
+          "c47e7511e6476e94b7140d9cd30d3620ea45b54c468608c552f71a08713590bc",
+          "cc1c5a7ad59f56c1749b653ba2e903aef4e56ffa0f2e30bfa208f09532537d20",
+          "67066271ba8a18bc78c88d4b2319653e1b4f782f6512ce369df62fe2df24973d"
+        ],
+        "source": {
+          "before_revision": "ea82da9a91283673b224840d53b29a28f2987399",
+          "before_dirty": false,
+          "before_state_sha256": "6455fdac34e26308151fc8a7082e5c41bd79227cb3d479cf39460a80f8651294",
+          "after_revision": "ea82da9a91283673b224840d53b29a28f2987399",
+          "after_dirty": false,
+          "after_state_sha256": "6455fdac34e26308151fc8a7082e5c41bd79227cb3d479cf39460a80f8651294"
+        },
+        "resources": {
+          "peak_rss_bytes": 461684736,
+          "peak_swap_used_bytes": 1329720197.12,
+          "swap_growth_bytes": 0,
+          "minimum_memory_free_percent": 75
+        },
+        "diagnostic_timing": {
+          "qualification_wall_seconds": 394.53176962500004,
+          "prompt_tokens_per_second": 32.1290222932183,
+          "predicted_tokens_per_second": 2.9847779085048627
+        }
+      },
+      {
+        "arm": "prefetch-6",
+        "frozen": {
+          "contract_version": 4,
+          "score": 6,
+          "maximum": 7,
+          "response_output_sha256": [
+            "5c2294175f3075b2086af9b14008d2338e4e8358b6321c950f6bce8ca97dcb62",
+            "5079a1c8ec369b3ee573ea59db63ca2a4de274fef13537768deb0529e45cd87d",
+            "8808ea5e6f77168fca1d054f2fa9ac6a51c52abf0359b693aa0a0556b7ffb154",
+            "efb067feae4fe79db7e9ef3839a274cb1a81a0cf347474c73fa3b012f62aa881",
+            "cc1c5a7ad59f56c1749b653ba2e903aef4e56ffa0f2e30bfa208f09532537d20",
+            "67066271ba8a18bc78c88d4b2319653e1b4f782f6512ce369df62fe2df24973d"
+          ],
+          "qualification_sha256": "cd615730088708bfb9b19b847fa37ed902a13f3d0fee713000d450a861ceeb98",
+          "baseline_sha256": "496f50149a26331ac5d5c557e4dfca97d4399de0f35ae630171cf11bd3007e2d"
+        },
+        "version_5_audit": {
+          "score": 7,
+          "maximum": 7,
+          "changed_scenarios": [
+            {
+              "name": "business diagnosis",
+              "weight": 1,
+              "response_record_index": 1,
+              "response_output_sha256": "5079a1c8ec369b3ee573ea59db63ca2a4de274fef13537768deb0529e45cd87d",
+              "reason": "The answer identifies the Playground-to-Sign-up bottleneck; contract v5 accepts equivalent signup punctuation."
+            }
+          ]
+        },
+        "canonical_response_output_sha256": [
+          "5c2294175f3075b2086af9b14008d2338e4e8358b6321c950f6bce8ca97dcb62",
+          "5079a1c8ec369b3ee573ea59db63ca2a4de274fef13537768deb0529e45cd87d",
+          "8808ea5e6f77168fca1d054f2fa9ac6a51c52abf0359b693aa0a0556b7ffb154",
+          "c47e7511e6476e94b7140d9cd30d3620ea45b54c468608c552f71a08713590bc",
+          "cc1c5a7ad59f56c1749b653ba2e903aef4e56ffa0f2e30bfa208f09532537d20",
+          "67066271ba8a18bc78c88d4b2319653e1b4f782f6512ce369df62fe2df24973d"
+        ],
+        "source": {
+          "before_revision": "ea82da9a91283673b224840d53b29a28f2987399",
+          "before_dirty": false,
+          "before_state_sha256": "6455fdac34e26308151fc8a7082e5c41bd79227cb3d479cf39460a80f8651294",
+          "after_revision": "ea82da9a91283673b224840d53b29a28f2987399",
+          "after_dirty": false,
+          "after_state_sha256": "6455fdac34e26308151fc8a7082e5c41bd79227cb3d479cf39460a80f8651294"
+        },
+        "resources": {
+          "peak_rss_bytes": 10471981056,
+          "peak_swap_used_bytes": 1329720197.12,
+          "swap_growth_bytes": 0,
+          "minimum_memory_free_percent": 77
+        },
+        "diagnostic_timing": {
+          "qualification_wall_seconds": 220.54553995799998,
+          "prompt_tokens_per_second": 34.715362163503826,
+          "predicted_tokens_per_second": 5.434011643746215
+        }
+      }
+    ]
+  }
+}
