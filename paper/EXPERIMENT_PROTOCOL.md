@@ -12,8 +12,9 @@ negative; exclusions require a machine-readable reason.
    within the practical Metal working-set limit while preserving output math?
 2. How much do grouped dispatch and routed-union prefetch change prefill,
    decode, page-in, memory, energy, and thermal behavior?
-3. Which results reproduce on a second oversized sparse checkpoint, and---as
-   an explicitly supplemental study---on 32 GiB Apple Silicon?
+3. Does the correctness-bearing path reproduce on a second official sparse
+   checkpoint in the same model family, and---as an explicitly supplemental
+   study---on lower-memory Apple Silicon?
 4. Is the remaining decode ceiling primarily routing/residency latency, and
    does batched draft verification provide a viable next path?
 
@@ -32,6 +33,13 @@ negative; exclusions require a machine-readable reason.
   16-point AMOS suite;
   hidden prompt/output text remains private, while scores and salted output
   digests are retained.
+
+The registered secondary checkpoint is `ggml-org/gpt-oss-20b-GGUF`, revision
+`ef9b12f2ff56c69cf32153a02784e7a3c88bf524`, file
+`gpt-oss-20b-MXFP4.gguf`, 12,109,566,624 bytes, SHA-256
+`27cd6c432c7672cb812a92f611cf3ba7bbc35928262bb1e1253ff4ee6ae35901`.
+It is a same-family, same-quantization portability control. It is not
+oversized on the primary host and is not a second model architecture.
 
 ## Arms
 
@@ -139,7 +147,7 @@ bug; it does not weaken the authenticated-tenant boundary. Historical 11/16
 and composite 14/16 evidence retain their original labels and are not
 rescored retroactively.
 
-## Supplemental 32 GiB replication and second-checkpoint gate
+## Supplemental lower-memory replication and second-checkpoint gate
 
 The primary paper is scoped to the measured 64 GiB host. A 32 GiB replication
 is supplemental and may be omitted without blocking release. If a physical
@@ -157,10 +165,14 @@ full quality suite are prohibited until that first-token gate closes. Success
 is not a 32 GiB result; failure is a documented lower-memory boundary, not an
 exclusion.
 
-The second checkpoint should first use a compatible MXFP4 MoE to isolate
-checkpoint portability. A different quantization or tensor layout is a
-separate kernel experiment. The paper must distinguish “second checkpoint”
-from “second architecture.”
+The second checkpoint gate runs the official GPT-OSS 20B MXFP4 artifact
+through stock, direct, grouped, and prefetch-6 arms on the pinned runtime. It
+uses the public deterministic smoke suite and compares every response-message
+SHA-256 against stock. This is a correctness/portability gate; timings are
+diagnostic and do not enter the primary performance estimate. A different
+quantization or tensor layout is a separate kernel experiment. The paper must
+distinguish “second checkpoint” from both “second oversized checkpoint” and
+“second architecture.”
 
 ## Exclusion policy
 

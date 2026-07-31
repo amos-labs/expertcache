@@ -50,6 +50,7 @@ export async function validatePublicationArtifact(root, { strict = false } = {})
 
   checkUniqueIds(manifest.claims, "claim", errors);
   checkUniqueIds(manifest.gates, "gate", errors);
+  await verifySecondaryModels(root, manifest.secondary_models || [], errors);
   for (const claim of manifest.claims || []) {
     if (!CLAIM_GRADES.has(claim.grade)) {
       errors.push(`Claim ${claim.id} has unsupported grade ${claim.grade}`);
@@ -181,6 +182,44 @@ async function verifyRuntimePatch(root, errors) {
     }
   } catch (error) {
     errors.push(`Could not verify runtime patch: ${error.message}`);
+  }
+}
+
+async function verifySecondaryModels(root, models, errors) {
+  const seen = new Set();
+  for (const model of models) {
+    if (!model?.id || seen.has(model.id)) {
+      errors.push(`Secondary model has a missing or duplicate id: ${model?.id || "<missing>"}`);
+      continue;
+    }
+    seen.add(model.id);
+    if (!model.spec) {
+      errors.push(`Secondary model ${model.id} has no artifact spec`);
+      continue;
+    }
+    try {
+      const spec = JSON.parse(await readFile(resolve(root, model.spec), "utf8"));
+      if (spec.schema !== "expertcache.model-artifact" || spec.version !== 1) {
+        errors.push(`Secondary model ${model.id} has an unsupported artifact spec`);
+      }
+      if (spec.id !== model.id) {
+        errors.push(`Secondary model id mismatch: ${model.id} != ${spec.id}`);
+      }
+      if (!/^[0-9a-f]{40}$/.test(spec.revision || "")) {
+        errors.push(`Secondary model ${model.id} has an invalid revision`);
+      }
+      if (!Number.isInteger(spec.size_bytes) || spec.size_bytes <= 0) {
+        errors.push(`Secondary model ${model.id} has an invalid size`);
+      }
+      if (!/^[0-9a-f]{64}$/.test(spec.sha256 || "")) {
+        errors.push(`Secondary model ${model.id} has an invalid SHA-256`);
+      }
+      if (!spec.repository || !spec.filename || !spec.claim_boundary) {
+        errors.push(`Secondary model ${model.id} has incomplete provenance`);
+      }
+    } catch (error) {
+      errors.push(`Could not verify secondary model ${model.id}: ${error.message}`);
+    }
   }
 }
 

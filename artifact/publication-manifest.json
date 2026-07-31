@@ -12,6 +12,13 @@
     "filename": "gpt-oss-120b-MXFP4.gguf",
     "size_bytes": 63387346208
   },
+  "secondary_models": [
+    {
+      "id": "gpt-oss-20b-mxfp4",
+      "spec": "artifact/model-specs/gpt-oss-20b-mxfp4.json",
+      "purpose": "same-family sparse-checkpoint portability control"
+    }
+  ],
   "claims": [
     {
       "id": "C1",
@@ -51,7 +58,8 @@
     {"id": "full-quality-suite", "status": "pending"},
     {"id": "complete-resource-telemetry", "status": "pending"},
     {"id": "apple-silicon-32g", "status": "scoped-out"},
-    {"id": "second-sparse-checkpoint", "status": "pending"},
+    {"id": "second-sparse-checkpoint", "status": "active"},
+    {"id": "second-oversized-architecture", "status": "scoped-out"},
     {"id": "tagged-source-release", "status": "pending"}
   ],
   "bundle_include": [

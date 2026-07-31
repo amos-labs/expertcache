@@ -17,7 +17,8 @@ Status: **done**, **active**, **planned**, **scoped out**, **external gate**, or
 | P0 | Full frozen quality suite | active | Version-2 seven-scenario, 16-point suite plus response hashes and public deterministic equivalence artifacts on the final runtime. |
 | P0 | Complete host telemetry | planned | TTFT, prefill/decode, RSS, compressed memory, swap, page faults, bytes touched, energy and thermal state. |
 | P2 | 32 GiB Apple Silicon replication | scoped out | Supplemental only: run the pinned protocol on physical hardware before making any 32 GiB claim. |
-| P0 | Second oversized sparse checkpoint | planned | A second checkpoint executes through a declared compatible path; unsupported kernels are reported, not hidden. |
+| P0 | Second official sparse checkpoint | active | The pinned GPT-OSS 20B MXFP4 control produces identical application-output hashes across stock, direct, grouped, and prefetch paths. |
+| P1 | Second oversized architecture | scoped out | Not a release gate for this paper; add only after a compatible artifact executes through a separately qualified kernel path. |
 | P0 | Frozen artifact release | planned | Checksummed bundle, tagged source, compiled paper, and archived raw results. |
 | P1 | Upstreamable runtime boundary | planned | Patch is reduced to a reviewable backend extension with tests and no AMOS dependency. |
 | P1 | 16 GiB M1 Pro feasibility probe | external gate | Protected direct-view first-token test on physical hardware; a clean no-go is also a valid result. |
@@ -117,9 +118,13 @@ hot ceiling is motivation, not a predicted production number.
   ordering so prefetch reads fewer, larger ranges.
 - **Mixed-bit resident experts:** qualify a 2–3 bit expert-only variant while
   protecting shared tensors; compare quality and total residency.
-- **Second MXFP4 MoE checkpoint:** immediate portability test for the existing
-  kernel; a different quantization requires a separate correctness-bearing
-  kernel rather than a compatibility claim.
+- **Second MXFP4 MoE checkpoint:** the official 12,109,566,624-byte GPT-OSS
+  20B MXFP4 artifact is the immediate same-family portability control. It can
+  validate stock/direct/grouped/prefetch output equivalence, but cannot support
+  an oversized-memory or second-architecture claim.
+- **Second oversized architecture:** retain as a separate follow-on. A
+  different quantization or tensor layout requires a new correctness-bearing
+  kernel and must not be folded into the 20B portability result.
 - **Long context and long session stability:** 8K is the current controlled
   baseline; 32K/128K, cancellation, repeated sessions, and thermal saturation
   remain open.

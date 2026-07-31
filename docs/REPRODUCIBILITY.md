@@ -111,6 +111,18 @@ Run the same workflow corpus against GPT-OSS 20B. The 120B path must beat that
 control on the hard qualification floors and reduce managed-frontier
 escalations; a larger model name or a higher easy-task score is not sufficient.
 
+For the publication portability gate, use the separately pinned official
+GPT-OSS 20B MXFP4 GGUF and compare stock, direct, grouped, and prefetch output
+hashes:
+
+```bash
+npm run experiment:second-checkpoint
+```
+
+The command is dry-run by default and prints the exact artifact download. The
+20B result is same-family checkpoint evidence only; it is not an oversized-host
+or second-architecture result.
+
 When the Phase 1 llama.cpp/Metal tracer is available, compare it with the
 greedy Transformers trace before trusting cache-locality results:
 

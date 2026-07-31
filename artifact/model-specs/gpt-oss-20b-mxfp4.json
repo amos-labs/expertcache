@@ -1,0 +1,13 @@
+{
+  "schema": "expertcache.model-artifact",
+  "version": 1,
+  "id": "gpt-oss-20b-mxfp4",
+  "repository": "ggml-org/gpt-oss-20b-GGUF",
+  "revision": "ef9b12f2ff56c69cf32153a02784e7a3c88bf524",
+  "filename": "gpt-oss-20b-MXFP4.gguf",
+  "size_bytes": 12109566624,
+  "sha256": "27cd6c432c7672cb812a92f611cf3ba7bbc35928262bb1e1253ff4ee6ae35901",
+  "license": "Apache-2.0",
+  "role": "same-family sparse-checkpoint portability control",
+  "claim_boundary": "This checkpoint tests portability across official GPT-OSS MXFP4 checkpoint sizes. It is not oversized on the primary host and is not evidence for a second model architecture."
+}

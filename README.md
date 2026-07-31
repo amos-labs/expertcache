@@ -62,9 +62,13 @@ second-checkpoint portability study close.
 npm run paper:check
 npm run artifact:validate
 npm run experiment:publication
+npm run experiment:second-checkpoint
 ```
 
-The last command prints the registered blocks without starting inference. A
+The publication command prints the registered blocks without starting
+inference. The second-checkpoint command prints the pinned official GPT-OSS
+20B MXFP4 artifact, download command, four correctness arms, and explicit
+claim boundary without downloading or running anything. A
 live block requires explicit execution and clean-boot confirmations; see
 [`paper/EXPERIMENT_PROTOCOL.md`](paper/EXPERIMENT_PROTOCOL.md). A 32 GiB Mac is
 an optional physical-hardware replication, not something this 64 GiB host can

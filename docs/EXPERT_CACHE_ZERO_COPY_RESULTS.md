@@ -164,15 +164,17 @@ Before an arXiv submission:
 
 1. reproduce cold and warm runs at least three times;
 2. publish median and dispersion, not a single best run;
-3. test both 32 GB and 64 GB Apple Silicon;
-4. include a second oversized MoE checkpoint;
-5. run the frozen full quality suite and output-equivalence checks;
-6. measure time to first token, prompt and decode throughput, RSS, compressed
+3. keep 16/32 GiB physical-host studies supplemental unless their claims are
+   added to the paper;
+4. pass the pinned official GPT-OSS 20B MXFP4 same-family portability gate;
+5. leave a second oversized architecture as a separately qualified follow-on;
+6. run the frozen full quality suite and output-equivalence checks;
+7. measure time to first token, prompt and decode throughput, RSS, compressed
    memory, swap, page faults, bytes touched, and energy/thermal behavior;
-7. compare stock failure, copied slots, grouped copies, persistent cache,
+8. compare stock failure, copied slots, grouped copies, persistent cache,
    parallel staging, and direct views;
-8. document all unsuccessful designs and evaluator limitations; and
-9. package scripts, pins, and raw machine-readable measurements as an
+9. document all unsuccessful designs and evaluator limitations; and
+10. package scripts, pins, and raw machine-readable measurements as an
    artifact.
 
 The defensible claim today is:

@@ -3,14 +3,19 @@ import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { createReadStream, createWriteStream } from "node:fs";
 import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { performance } from "node:perf_hooks";
+import { fileURLToPath } from "node:url";
 import { captureHostSnapshot, parseSwapUsedBytes } from "../src/hostSnapshot.js";
 import { parseLlamaTimingLog } from "../src/llamaTimings.js";
 
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
 const model = resolve(requiredOption(args, "--model"));
 const server = resolve(requiredOption(args, "--server"));
+const modelSpecPath = readOption(args, "--model-spec")
+  ? resolve(readOption(args, "--model-spec"))
+  : null;
 const outputDir = resolve(readOption(args, "--output-dir") ||
   "output/live-baseline");
 const context = boundedInteger(readOption(args, "--context"), 4_096, 131_072, 8_192);
@@ -127,13 +132,22 @@ const maxRunSeconds = optionalNumber(
 );
 const baseUrl = `http://127.0.0.1:${port}`;
 const manifest = JSON.parse(await readFile(
-  resolve("runtime/runtime-manifest.json"),
+  resolve(root, "runtime/runtime-manifest.json"),
   "utf8"
 ));
+const modelArtifact = modelSpecPath
+  ? await readModelArtifact(modelSpecPath)
+  : {
+      schema: "expertcache.primary-model-artifact",
+      version: 1,
+      id: "gpt-oss-120b-mxfp4",
+      sha256: manifest.model_artifact.x_linked_etag,
+      ...manifest.model_artifact
+    };
 const modelStat = await stat(model);
-if (modelStat.size !== manifest.model_artifact.size_bytes) {
+if (modelStat.size !== modelArtifact.size_bytes) {
   throw new Error(
-    `Pinned model size mismatch: expected ${manifest.model_artifact.size_bytes}, ` +
+    `Pinned model size mismatch: expected ${modelArtifact.size_bytes}, ` +
     `got ${modelStat.size}`
   );
 }
@@ -307,7 +321,11 @@ const llamaTimings = parseLlamaTimingLog(await readFile(serverLogPath, "utf8"));
 const configuration = {
   runtime_revision: manifest.runtime.revision,
   runtime_patch_sha256: manifest.runtime_patch.sha256,
-  model_revision: manifest.model_artifact.revision,
+  model_artifact_id: modelArtifact.id,
+  model_repository: modelArtifact.repository,
+  model_revision: modelArtifact.revision,
+  model_filename: modelArtifact.filename,
+  model_expected_sha256: modelArtifact.sha256 || null,
   model_size_bytes: modelStat.size,
   context_length: context,
   batch_size: batch,
@@ -358,7 +376,11 @@ const report = {
   served_model: servedModel,
   runtime: server,
   runtime_revision: manifest.runtime.revision,
-  model_revision: manifest.model_artifact.revision,
+  model_artifact_id: modelArtifact.id,
+  model_repository: modelArtifact.repository,
+  model_revision: modelArtifact.revision,
+  model_filename: modelArtifact.filename,
+  model_expected_sha256: modelArtifact.sha256 || null,
   model_size_bytes: modelStat.size,
   context_length: context,
   batch_size: batch,
@@ -545,7 +567,7 @@ function runQualification({
 }) {
   return new Promise((resolveRun) => {
     const qualificationArgs = [
-      resolve("scripts/benchmarkLocalModels.js"),
+      resolve(root, "scripts/benchmarkLocalModels.js"),
       model,
       "--protocol", "openai",
       "--url", url,
@@ -666,6 +688,7 @@ function requiredOption(values, name) {
     console.error(
       "Usage: node scripts/runLocal120BBaseline.js " +
       "--model MODEL.gguf --server LLAMA_SERVER " +
+      "[--model-spec ARTIFACT.json] " +
       "[--context TOKENS] [--batch TOKENS] [--ubatch TOKENS] " +
       "[--fit-target-mib MiB] [--gpu-layers N|auto|all] [--cpu-moe] " +
       "[--no-warmup] [--skip-probe] [--probe-only] " +
@@ -691,6 +714,26 @@ function requiredOption(values, name) {
 function readOption(values, name) {
   const index = values.indexOf(name);
   return index >= 0 ? values[index + 1] : "";
+}
+
+async function readModelArtifact(path) {
+  const artifact = JSON.parse(await readFile(path, "utf8"));
+  if (artifact.schema !== "expertcache.model-artifact" || artifact.version !== 1) {
+    throw new Error(`Unsupported model artifact spec: ${path}`);
+  }
+  for (const field of ["id", "repository", "revision", "filename", "sha256"]) {
+    if (!artifact[field]) throw new Error(`Model artifact spec is missing ${field}`);
+  }
+  if (!Number.isInteger(artifact.size_bytes) || artifact.size_bytes <= 0) {
+    throw new Error("Model artifact spec has an invalid size_bytes");
+  }
+  if (!/^[0-9a-f]{40}$/.test(artifact.revision)) {
+    throw new Error("Model artifact spec has an invalid revision");
+  }
+  if (!/^[0-9a-f]{64}$/.test(artifact.sha256)) {
+    throw new Error("Model artifact spec has an invalid SHA-256");
+  }
+  return artifact;
 }
 
 function boundedInteger(value, minimum, maximum, fallback) {

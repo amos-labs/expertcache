@@ -16,6 +16,7 @@ estimate.
 | C7 | Stock placement produced no first token and entered Metal OOM; one run grew swap from 9.6 to 42.1 GiB. | observed negative control | `docs/LOCAL_120B_LIVE_BASELINE.md` | Reproduce one bounded stock failure per host; do not repeatedly damage host state. |
 | C8 | Persistent copied slots and parallel projection copies lost to their contemporaneous controls. | decision-grade negative result | `docs/EXPERT_CACHE_ZERO_COPY_RESULTS.md` | Repeat as bounded ablations or retain as explicitly preliminary. |
 | C9 | The final prefetch gate showed no swap growth during the run. | single-run observation | `docs/EXPERT_CACHE_CEILING_RESULTS.md` | Replace with repeated host telemetry and absolute before/after values. |
+| C10 | The ExpertCache correctness path is portable to the official GPT-OSS 20B MXFP4 checkpoint. | registered; unmeasured | `artifact/model-specs/gpt-oss-20b-mxfp4.json` | Require exact stock/direct/grouped/prefetch response-hash equivalence; do not relabel it as second-architecture or oversized-checkpoint evidence. |
 
 ## Excluded or prohibited claims
 
@@ -30,3 +31,5 @@ estimate.
   expected real-routing throughput.
 - The current +70% prefill result is not a publication estimate until the
   registered repeated/counterbalanced matrix is complete.
+- The GPT-OSS 20B control is neither oversized on the primary host nor a
+  second architecture, regardless of whether its portability gate passes.

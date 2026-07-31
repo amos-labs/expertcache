@@ -238,7 +238,12 @@ payloads that contain prompts or model activations.
 The primary model is the official GPT-OSS 120B MXFP4 GGUF at revision
 \texttt{238abdd290bb874b90a5da1b4549881b7d05c091}.  The exact artifact is
 63,387,346,208 bytes.  The primary host is a 64~GiB Apple M1 Max MacBook Pro.
-The controlled context length is 8,192 tokens.
+The controlled context length is 8,192 tokens.  A registered secondary
+same-family control uses the official 12,109,566,624-byte GPT-OSS 20B MXFP4
+GGUF at revision
+\texttt{ef9b12f2ff56c69cf32153a02784e7a3c88bf524}.  This control tests
+checkpoint-size portability; it is neither oversized on the primary host nor
+a second model architecture.
 
 \subsection{Registered run design}
 
@@ -335,7 +340,7 @@ Prefetch cold prompt & decision-grade only & pending & \PublishedColdPrefetchPre
 Prefetch effect & \CurrentPrefetchGain{} single A/B & decision-grade & \PublishedPrefetchEffect \\
 Full quality & composite 14/16 points across runs & incomplete & \PublishedFullQuality \\
 32~GiB physical host & not run & scoped out unless obtained & \PublishedThirtyTwoGiB \\
-Second checkpoint & not run & pending & \PublishedSecondCheckpoint \\
+Second checkpoint & GPT-OSS 20B gate active & pending & \PublishedSecondCheckpoint \\
 Energy/thermal & incomplete & pending & \PublishedEnergy \\
 \bottomrule
 \end{tabular}
@@ -377,14 +382,17 @@ exit and kill criteria for each path.
 \section{Limitations}
 
 The current complete live result covers one 64~GiB M1 Max and one primary
-checkpoint.  A real 32~GiB host has not been measured and cannot be replaced by
-a memory-reservation claim.  The existing performance evidence was collected
+oversized checkpoint.  The registered 20B control is from the same GPT-OSS
+architecture and therefore cannot establish cross-architecture portability.
+A real 32~GiB host has not been measured and cannot be replaced by a
+memory-reservation claim.  The existing performance evidence was collected
 during an iterative engineering sequence with varying page-cache, swap, and
 background host state.  The final repeated/counterbalanced matrix is still in
 progress.
 
 The targeted 3/3 coding gate is not a general quality evaluation.  The frozen
-full suite, public equivalence corpus, second checkpoint, energy, thermal,
+full suite, public equivalence corpus, second-checkpoint gate, second
+oversized architecture, energy, thermal,
 long-session, cancellation, and concurrency experiments remain open.  Decode
 near three tokens/s is not interactive production performance.  The patch is
 experimental, MXFP4-specific in its grouped correctness-bearing kernel, and

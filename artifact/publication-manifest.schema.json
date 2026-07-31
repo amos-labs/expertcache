@@ -11,6 +11,7 @@
     "title",
     "repository",
     "primary_model",
+    "secondary_models",
     "claims",
     "gates",
     "bundle_include"
@@ -33,6 +34,19 @@
         "size_bytes": {"type": "integer", "minimum": 1}
       },
       "additionalProperties": false
+    },
+    "secondary_models": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "spec", "purpose"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "spec": {"type": "string", "minLength": 1},
+          "purpose": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": false
+      }
     },
     "claims": {
       "type": "array",
