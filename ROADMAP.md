@@ -7,6 +7,23 @@ automatically a shipping commitment.
 Status: **done**, **active**, **planned**, **scoped out**, **external gate**, or
 **rejected**.
 
+## Research north star
+
+ExpertCache is the capacity and systems half of the broader
+[local frontier intelligence program](https://github.com/amos-labs/amos-agent/blob/main/docs/LOCAL_FRONTIER_INTELLIGENCE_ROADMAP.md).
+The ultimate comparative target is GPT-OSS 120B executing locally through this
+runtime, combined with a separately measured knowledge-integration system,
+reaching pinned GPT-5.6-Sol-level verified outcomes across an expanding frozen
+suite of agentic tasks.
+
+That target does not change the present claim boundary. Today the 64 GiB result
+is feasibility with useful prefill and slow serial decode, and the 16 GiB result
+is a bounded protected gate. Quality parity, effective workflow speed, and each
+physical device class must pass separate controls before any combined claim.
+The primary runtime path toward performance is resident-model drafting with
+120B batched verification, followed by adaptive speculation and measured
+residency improvements; raw serial decode is not assumed to be the only path.
+
 ## 1. Publication program
 
 | Priority | Milestone | Status | Exit condition |
