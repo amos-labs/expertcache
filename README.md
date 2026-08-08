@@ -9,7 +9,27 @@ The current artifact targets the official GPT-OSS 120B MXFP4 GGUF and a pinned
 `llama.cpp` revision. It is research software, not a production inference
 runtime and not an AMOS Desktop dependency.
 
-## What has been demonstrated
+## Results at a glance
+
+Both hardware results use the same pinned 63,387,346,208-byte GPT-OSS 120B
+MXFP4 checkpoint. The 16 GiB path does not substitute a smaller model, remote
+inference, or a more aggressively quantized derivative.
+
+| Physical host | What completed | Functional result | Measured speed | Evidence boundary |
+| --- | --- | --- | --- | --- |
+| 64 GiB M1 Max | Full checkpoint, direct selected-expert views, grouped dispatch, and routed-union prefetch | Targeted 3/3 coding gate and a bit-exact 1,128-token trajectory in the cited arms | Real-prompt prefill 5.75 → 9.80 tok/s (+70%); final decode near 3 tok/s | One-host decision-grade A/B, not a counterbalanced production estimate |
+| 16 GiB M1 Pro | Full checkpoint, protected natural completion, and a later seven-scenario 8K qualification | 14/16 functional points; the comparable local and hosted 120B diagnostics each scored 12/16 | Clean completion: 0.75 prompt / 0.72 decode tok/s; warm qualification: 8,249 s total | One clean-boot feasibility session plus one warm engineering qualification; not speed parity or a multi-host reproduction |
+
+The 16 GiB result is evidence of **functional capability retention**, not a
+claim of strict quality superiority. The 14/16 functional score includes an
+audited evaluator correction for `Sign-ups` versus `signup`; the original raw
+score remains 11/16. The local and hosted controls were single diagnostics,
+not a counterbalanced comparison, and their response bytes were not identical.
+The practical conclusion is narrower and still significant: the oversized
+checkpoint remained useful when executed through the 16 GiB path, but it was
+far too slow for interactive production use.
+
+## 64 GiB performance result
 
 On one 64 GiB Apple M1 Max system, the pinned artifact:
 
@@ -38,6 +58,32 @@ Read [the direct-view result](docs/EXPERT_CACHE_ZERO_COPY_RESULTS.md),
 and [the failed mapped-page design](docs/PHASE_ONE_RESULTS.md) before quoting
 the work.
 
+## 16 GiB capability result
+
+On one physical 16 GiB M1 Pro, an experimental explicit-placement
+configuration:
+
+- executed the complete pinned 63.4 GB checkpoint and stopped naturally after
+  the requested 50-token completion;
+- kept peak swap to 256 KiB during the clean-session feasibility sequence;
+- later completed the seven-scenario, 16-point qualification contract at an
+  8,192-token context;
+- earned 14/16 functional points, with one genuine miss on the
+  parked-approval outcome; and
+- stayed below 4.81 MiB peak swap with at least 38 percent free memory during
+  that later warm qualification.
+
+The qualification took 8,249 seconds, including a 5,339.7-second
+distractor-heavy long-context scenario. This is not a stock-runtime result, a
+power-normalized speed comparison, or a reproducibility claim. Automatic fit
+remained a protected no-go; the successful path disabled it, explicitly
+selected all GPU layers, and disabled whole-file mmap prefetch. A second
+clean-boot repeat remains required before calling the result reproducible.
+
+Read the [complete 16 GiB result and qualification table](docs/LOW_MEMORY_16G_RESULTS.md)
+and the [protected runbook](docs/LOW_MEMORY_16G_RUNBOOK.md) before repeating or
+quoting the experiment.
+
 ## Repository map
 
 - `runtime/` — pinned runtime manifest, `llama.cpp` patch, and native Metal
@@ -54,17 +100,21 @@ the work.
 - `docs/HOSTED_CONTROL.md` — matched Bedrock GPT-OSS qualification control.
 - `docs/SECOND_CHECKPOINT_20B_RESULTS.md` — partial same-family portability
   result and unresolved stock/direct boundary.
-- `paper/` — manuscript, claim ledger, registered protocol, and result macros.
+- `paper/` — optional manuscript assets, claim ledger, registered protocol,
+  and result macros retained for rigor and provenance.
 - `artifact/` — machine-readable experiment matrix and publication manifest.
-- `ROADMAP.md` — publication gates, production architecture, and retained
+- `ROADMAP.md` — research gates, production architecture, and retained
   negative results.
 
-## Publication program
+## Reproducibility and ongoing experiments
 
-The manuscript is intentionally provisional while the registered experiment
-matrix is running. Existing measurements remain labeled decision-grade until
-the counterbalanced clean-host blocks, full quality gate, telemetry gate, and
-second-checkpoint portability study close.
+The repository is the primary way this work is shared. Development is not
+blocked on formal paper submission. The optional manuscript assets and
+registered experiment matrix remain in the tree because they keep claims tied
+to evidence, preserve negative results, and make later replication easier.
+Existing measurements remain labeled decision-grade until counterbalanced
+clean-host blocks, the full quality gate, telemetry gate, and second-checkpoint
+portability study close.
 
 ```bash
 npm run paper:check
@@ -73,7 +123,7 @@ npm run experiment:publication
 npm run experiment:second-checkpoint
 ```
 
-The publication command prints the registered blocks without starting
+The experiment-matrix command prints the registered blocks without starting
 inference. The second-checkpoint command prints the pinned official GPT-OSS
 20B MXFP4 artifact, download command, four correctness arms, and explicit
 claim boundary without downloading or running anything. A
@@ -96,8 +146,9 @@ without skipping directly to quality or throughput testing.
 The 2026-07-31 single-host experimental arm passed protected one-token,
 eight-token, and natural 50-token completion gates after disabling automatic
 fit and selecting all GPU layers explicitly. Peak session swap was 256 KiB.
-This is a combined experimental-configuration result, not a stock-runtime or
-multi-boot reproducibility claim; see the
+The later warm 8K qualification earned 14/16 functional points while taking
+8,249 seconds. This is a combined experimental-configuration result, not a
+stock-runtime, speed-parity, or multi-boot reproducibility claim; see the
 [16 GB results and evidence boundary](docs/LOW_MEMORY_16G_RESULTS.md).
 
 ## Quick validation
@@ -153,5 +204,6 @@ as authors.
 
 ## Citation
 
-Use [`CITATION.cff`](CITATION.cff) for the software artifact. The arXiv paper
-metadata will replace the provisional software citation after submission.
+Use [`CITATION.cff`](CITATION.cff) to cite the software artifact. Optional
+manuscript and arXiv metadata remain under `paper/`; no paper submission is
+required to use, reproduce, challenge, or contribute to the repository.
